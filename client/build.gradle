@@ -31,3 +31,8 @@ dependencies {
 }
 
 mainClassName = 'Client'
+
+// This is necessary to make System.in work correctly
+run{
+    standardInput = System.in
+}

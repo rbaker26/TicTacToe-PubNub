@@ -1,8 +1,6 @@
-
-import java.io.IOException;
-import java.util.Scanner;
-import com.google.gson.*;
-import com.pubnub.api.*;
+import com.google.gson.JsonObject;
+import com.pubnub.api.PNConfiguration;
+import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.enums.PNStatusCategory;
@@ -10,41 +8,23 @@ import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
-import java.util.concurrent.TimeUnit;
 
 import java.util.Arrays;
 
-public class Client {
+public class Engine {
+
 
 
     public static void main(String[] args) {
-
-        Scanner consoleInput = new Scanner(System.in);
-        System.out.println("Are you A or B?");
-        String name = "";
-
-        do {
-            name = consoleInput.next();
-
-            if(name.length() > 0) {
-                name = name.substring(0, 1);
-            }
-
-        } while(!name.equals("A") && !name.equals("B"));
-        System.out.println("Alright, you are " + name + "! Connecting...");
-        final String finalName = name;   // @#$!@#@ JAVA Y U WANT FINALS????
-
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.setSubscribeKey("sub-c-89b1d65a-4f40-11e9-bc3e-aabf89950afa");
         pnConfiguration.setPublishKey("pub-c-79140f4c-8b9e-49ed-992f-cf6322c68d04");
-        //pnConfiguration.setUuid("User-A::Java");
 
         PubNub pubnub = new PubNub(pnConfiguration);
 
         String updateChannelName = "Game_Update::A_B";
         String connectedChannelName = "System";
         String moveChannelName = "Move";
-
 
         // create message payload using Gson
         /*
@@ -53,14 +33,13 @@ public class Client {
         data.row = 30;
         data.sender = "Rad dude";
         data.eVal = MoveData.TestEnum.Value2;
-         */
-        /*
+        */
         JsonObject data = new JsonObject();
         data.addProperty("type", "move");
         data.addProperty("row", 2);
         data.addProperty("column", 0);
-        */
 
+        System.out.println("Message to send: " + data.toString());
         //System.out.println("Message to send: " + data.toString());
 
         pubnub.addListener(new SubscribeCallback() {
@@ -74,31 +53,6 @@ public class Client {
 
                 else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
 
-                    // Connect event. You can do stuff like publish, and know you'll get it.
-                    // Or just use the connected event to confirm you are subscribed for
-                    // UI / internal notifications, etc
-
-                    JsonObject data = new JsonObject();
-                    data.addProperty("name", finalName);
-
-                    pubnub.publish().channel(connectedChannelName).message(data).async(new PNCallback<PNPublishResult>() {
-                        @Override
-                        public void onResponse(PNPublishResult result, PNStatus status) {
-                            // Check whether request successfully completed or not.
-                            if (!status.isError()) {
-
-                                // Message successfully published to specified channel.
-                            }
-                            // Request processing failed.
-                            else {
-
-                                // Handle message publish error. Check 'category' property to find out possible issue
-                                // because of which request did fail.
-                                //
-                                // Request can be resent using: [status retry];
-                            }
-                        }
-                    });
                 }
                 else if (status.getCategory() == PNStatusCategory.PNReconnectedCategory) {
 
@@ -133,6 +87,7 @@ public class Client {
                 GsonBuilder builder = new GsonBuilder();
                 Gson gson = builder.create();
                 MoveData origMove = gson.fromJson(message.getMessage(), MoveData.class);
+                System.out.println(MoveData.class.getSimpleName());
 
                 System.out.println( "Move class: " + origMove.toString() );
                 */
@@ -173,6 +128,6 @@ public class Client {
             }
         });
 
-        pubnub.subscribe().channels(Arrays.asList(updateChannelName)).execute();
+        pubnub.subscribe().channels(Arrays.asList(connectedChannelName, moveChannelName)).execute();
     }
 }
