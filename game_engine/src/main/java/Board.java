@@ -1,4 +1,3 @@
-package cs4b.proj1;
 
 import java.io.Serializable;
 import java.util.*;
