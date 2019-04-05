@@ -15,7 +15,7 @@ public class PlayerCallback extends SubscribeCallback {
 
     public PlayerCallback(String name, String roomChannel) {
         this.name = name;
-        this.roomChannel = roomChannel;
+        this.outgoingChannel = roomChannel;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class PlayerCallback extends SubscribeCallback {
             JsonObject data = new JsonObject();
             data.addProperty("name", name);
 
-            pubnub.publish().channel(roomRequestChannel).message(data).async(new PNCallback<PNPublishResult>() {
+            pubnub.publish().channel(outgoingChannel).message(data).async(new PNCallback<PNPublishResult>() {
                 @Override
                 public void onResponse(PNPublishResult result, PNStatus status) {
                     // Check whether request successfully completed or not.
