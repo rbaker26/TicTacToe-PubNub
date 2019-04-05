@@ -1,14 +1,17 @@
 import com.google.gson.JsonObject;
 import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.enums.PNStatusCategory;
+import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 public class RoomCreatorCallback extends SubscribeCallback {
 
-    // TODO Make this not a single instance
+    // TODO Make this not a single instance of GameInfo; should
+    //      an ArrayList or something.
     GameInfo game;
     String roomRequestChannel;
     String roomUpdateChannel;
@@ -48,18 +51,44 @@ public class RoomCreatorCallback extends SubscribeCallback {
         if (message.getChannel() != null) {
             // Message has been received on channel group stored in
             // message.getChannel()
-        }
-        else {
-            // Message has been received on channel stored in
-            // message.getSubscription()
-            JsonObject json = message.getMessage().getAsJsonObject();
-            if(message.getSubscription().equals(roomRequestChannel)) {
+
+            if(message.getChannel().equals(roomRequestChannel)) {
+                JsonObject json = message.getMessage().getAsJsonObject();
                 String name = json.get("name").getAsString();
 
                 game.setXPlayer(name);
 
                 System.out.println(name);
+
+                JsonObject data = new JsonObject();
+                data.addProperty("ID", game.getRoomID());
+                data.addProperty("Channel", "Rooms::" + game.getRoomID());
+                data.addProperty("Creator", name);
+
+                pubnub.publish().channel(roomUpdateChannel).message(data).async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        // Check whether request successfully completed or not.
+                        if (!status.isError()) {
+
+                            // Message successfully published to specified channel.
+                        }
+                        // Request processing failed.
+                        else {
+
+                            // Handle message publish error. Check 'category' property to find out possible issue
+                            // because of which request did fail.
+                            //
+                            // Request can be resent using: [status retry];
+                        }
+                    }
+                });
             }
+        }
+        else {
+
+            // Message has been received on channel stored in
+            // message.getSubscription()
         }
 
 
@@ -67,43 +96,6 @@ public class RoomCreatorCallback extends SubscribeCallback {
         System.out.println("msg content: " + message.getMessage());
         System.out.println("msg publisher: " + message.getPublisher());
 
-                /*
-                GsonBuilder builder = new GsonBuilder();
-                Gson gson = builder.create();
-                MoveData origMove = gson.fromJson(message.getMessage(), MoveData.class);
-                System.out.println(MoveData.class.getSimpleName());
-
-                System.out.println( "Move class: " + origMove.toString() );
-                */
-
-                /*
-                // We want to wait a bit after getting a message.
-                // Otherwise, we could burn up all of our messages and make pubnub unhappy.
-                try {
-                    TimeUnit.SECONDS.sleep(3);
-                }
-                catch(InterruptedException ex) {
-
-                }
-
-                MoveData responseMove = new MoveData();
-                responseMove.column = origMove.column + 1;
-                responseMove.row = origMove.row - 1;
-
-                pubnub.publish().channel(channelName).message(responseMove).async(new PNCallback<PNPublishResult>() {
-                    @Override
-                    public void onResponse(PNPublishResult result, PNStatus status) {
-                    }
-                });
-                */
-
-
-            /*
-                log the following items with your favorite logger
-                    - message.getMessage()
-                    - message.getSubscription()
-                    - message.getTimetoken()
-            */
     }
 
     @Override

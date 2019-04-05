@@ -38,7 +38,9 @@ public class Engine {
         //System.out.println("Message to send: " + data.toString());
         //System.out.println("Message to send: " + data.toString());
 
-        GameInfo game = new GameInfo();
+        // TODO This should get created inside RoomCreatorCallback, but
+        //      at the time we just have one.
+        GameInfo game = new GameInfo(1);
 
         PubNub pubnub = new PubNub(pnConfiguration);
         pubnub.addListener(new RoomCreatorCallback(game, roomRequestChannelName, roomUpdateChannelName));

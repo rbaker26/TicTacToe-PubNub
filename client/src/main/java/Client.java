@@ -14,8 +14,8 @@ public class Client {
         System.out.println("Are you A or B?");
         String name = "";
 
-        name = consoleInput.next();
         do {
+            name = consoleInput.next();
 
             if(name.length() > 0) {
                 name = name.substring(0, 1);

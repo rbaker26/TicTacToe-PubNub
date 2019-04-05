@@ -8,24 +8,18 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
-import java.util.Arrays;
-
-public class RoomRequesterCallback extends SubscribeCallback {
+public class PlayerCallback extends SubscribeCallback {
 
     private String name;
-    private String roomRequestChannel;
-    private String roomUpdateChannel;
+    private String outgoingChannel;
 
-    public RoomRequesterCallback(String name, String roomRequestChannel, String roomUpdateChannel) {
+    public PlayerCallback(String name, String roomChannel) {
         this.name = name;
-        this.roomRequestChannel = roomRequestChannel;
-        this.roomUpdateChannel = roomUpdateChannel;
+        this.roomChannel = roomChannel;
     }
 
     @Override
     public void status(PubNub pubnub, PNStatus status) {
-
-
         if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
             // This event happens when radio / connectivity is lost
         }
@@ -63,31 +57,6 @@ public class RoomRequesterCallback extends SubscribeCallback {
     @Override
     public void message(PubNub pubnub, PNMessageResult message) {
 
-        String sourceChannel = ( message.getChannel() != null
-                ? message.getChannel()
-                : message.getSubscription()
-        );
-
-
-        System.out.println();
-        System.out.println("msg content: " + message.getMessage());
-        System.out.println("source channel: " + sourceChannel);
-
-        if(sourceChannel.equals(roomUpdateChannel)) {
-            JsonObject json = message.getMessage().getAsJsonObject();
-            String creator = json.get("Creator").getAsString();
-
-            if (creator.equals(name)) {
-
-                String channel = json.get("Channel").getAsString();
-
-                pubnub.addListener(new PlayerCallback(name, channel));
-                pubnub.removeListener(this);
-
-                pubnub.subscribe().channels(Arrays.asList(channel)).execute();
-                pubnub.unsubscribe().channels(Arrays.asList(sourceChannel)).execute();
-            }
-        }
     }
 
     @Override
