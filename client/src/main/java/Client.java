@@ -10,6 +10,7 @@ public class Client {
 
     public static void main(String[] args) {
 
+
         Scanner consoleInput = new Scanner(System.in);
         System.out.println("Are you A or B?");
         String name = "";
