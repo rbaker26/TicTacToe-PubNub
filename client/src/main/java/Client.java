@@ -23,6 +23,14 @@ public class Client extends Application {
     public static String roomUpdateChannel = "Rooms::Update";
 
     public static void main(String[] args) {
+
+        if(args.length > 0) {
+            //System.out.println(args[0]);
+
+            NetworkManager.setUuidModifier(args[0]);
+            NetworkManager.getPubNub();
+        }
+
         launch(args);
 
         /*
@@ -69,7 +77,7 @@ public class Client extends Application {
         openButton.setOnAction(value ->  {
             System.out.println("Opening");
 
-            NetworkManager.forceUUID(nameField.getText());
+            //NetworkManager.forceUUID(nameField.getText());
         });
 
         VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);

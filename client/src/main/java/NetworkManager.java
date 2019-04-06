@@ -4,7 +4,11 @@ import com.pubnub.api.PubNub;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class NetworkManager {
+public final class NetworkManager {
+
+    private static final String subKey = "sub-c-89b1d65a-4f40-11e9-bc3e-aabf89950afa";
+    private static final String pubKey = "pub-c-79140f4c-8b9e-49ed-992f-cf6322c68d04";
+    private static String uuidModifier = "";
 
     private static NetworkManager _instance;
     private static NetworkManager getInstance() {
@@ -19,9 +23,8 @@ public class NetworkManager {
         return getInstance().pn;
     }
 
-    @Deprecated
-    public static void forceUUID(String uuid) {
-        _instance = new NetworkManager(uuid);
+    public static void setUuidModifier(String uuidModifier) {
+        NetworkManager.uuidModifier = uuidModifier;
     }
 
     private PubNub pn;
@@ -29,14 +32,15 @@ public class NetworkManager {
     private NetworkManager() {
         this(getDefaultUUID());
     }
-
     private NetworkManager(String uuid) {
         PNConfiguration pnConfiguration = new PNConfiguration();
-        pnConfiguration.setSubscribeKey("sub-c-89b1d65a-4f40-11e9-bc3e-aabf89950afa");
-        pnConfiguration.setPublishKey("pub-c-79140f4c-8b9e-49ed-992f-cf6322c68d04");
-        pnConfiguration.setUuid(uuid + "Client");
+        pnConfiguration.setSubscribeKey(subKey);
+        pnConfiguration.setPublishKey(pubKey);
+        pnConfiguration.setUuid(uuid + "Client" + uuidModifier);
 
-        pn = new PubNub(pnConfiguration);
+        System.out.println(uuid + "Client" + uuidModifier);
+
+        //pn = new PubNub(pnConfiguration);
     }
 
     private static String getDefaultUUID() {
