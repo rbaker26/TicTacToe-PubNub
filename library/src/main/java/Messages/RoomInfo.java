@@ -19,7 +19,7 @@ public class RoomInfo {
 
     }
 
-    //<editor-fold desc="Getters and setters">
+    //region Getters and setters
 
     /**
      * Sets the player ID and channel. Neither string can be null.
@@ -97,7 +97,7 @@ public class RoomInfo {
     public boolean hasPlayer2() {
         return player2ID != null;
     }
-    //</editor-fold>
+    //endregion
 
     @Override
     public boolean equals(Object o) {

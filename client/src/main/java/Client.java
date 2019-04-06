@@ -67,6 +67,9 @@ public class Client extends Application {
 
     @Override
     public void stop() throws Exception {
-        //NetworkManager.getInstance().dieHorribly();
+        NetworkManager.getInstance().dieHorribly();
+
+        // TODO We shouldn't be forcing an exit, but... we have no other choice
+        System.exit(0);
     }
 }
