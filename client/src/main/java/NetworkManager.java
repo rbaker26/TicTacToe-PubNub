@@ -1,3 +1,4 @@
+import Messages.Channels;
 import Messages.NewRoomInfo;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
@@ -7,19 +8,15 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.List;
 
 public final class NetworkManager {
 
     //region Channel stuff
-    private static final String roomChannelSet = "Rooms::";
-    private static final String privateChannelSet = "Private::";
 
-    private static final String roomRequestChannel = roomChannelSet + "Requests";
     //endregion
 
     //region Instance setup
-    private static final String subKey = "sub-c-89b1d65a-4f40-11e9-bc3e-aabf89950afa";
-    private static final String pubKey = "pub-c-79140f4c-8b9e-49ed-992f-cf6322c68d04";
     private static String uuidModifier = "";
 
     private static NetworkManager _instance;
@@ -54,8 +51,8 @@ public final class NetworkManager {
     }
     private NetworkManager(String uuid) {
         PNConfiguration pnConfiguration = new PNConfiguration();
-        pnConfiguration.setSubscribeKey(subKey);
-        pnConfiguration.setPublishKey(pubKey);
+        pnConfiguration.setSubscribeKey(Messages.Keys.subKey);
+        pnConfiguration.setPublishKey(Messages.Keys.pubKey);
         pnConfiguration.setUuid(uuid + "Client" + uuidModifier);
 
         pn = new PubNub(pnConfiguration);
@@ -64,43 +61,65 @@ public final class NetworkManager {
 
     private PubNub pn;
     private SubscribeCallback currentListener = null;
+    private List<String> currentChannels = null;
 
-    private void clearCurrentListener() {
-        // We have this mainly so that we can use it in a lambda expression.
+    private void changeListener(SubscribeCallback newListener, List<String> newChannels) {
+        // To reduce slowdown, we'll swap in our new listener,
+        // subscribe to the new channel, and then unsubscribe
+        // from the old channel.
+
+        // Do listeners
+        if(newListener != null) {
+            pn.addListener(newListener);
+        }
+
         if(currentListener != null) {
             pn.removeListener(currentListener);
-            currentListener = null;
         }
+
+        // Now do channels
+        if(newChannels != null) {
+            pn.subscribe().channels(newChannels).execute();
+        }
+
+        if(currentChannels != null) {
+            pn.unsubscribe().channels(currentChannels).execute();
+        }
+
+        // Aaaaand we can finally save stuff.
+        currentListener = newListener;
+        currentChannels = newChannels;
     }
 
     public void requestNewRoom(String userID, boolean goingFirst) {
 
         //clearCurrentListener();
 
-        String incomingChannel = privateChannelSet + userID;
-        System.out.println(incomingChannel);
+        String incomingChannel = Channels.privateChannelSet + userID;
+        String outgoingChannel = Channels.roomRequestChannel;
 
         NewRoomInfo roomInfo = new NewRoomInfo();
         roomInfo.setPlayer(userID, incomingChannel, goingFirst);
 
-//        RoomRequesterCallback callback = new RoomRequesterCallback(
-//                userID, roomRequestChannel, incomingChannel, roomInfo
-//        );
-//
-//        pn.addListener(callback);
-//        pn.subscribe().channels(Arrays.asList(incomingChannel)).execute();
-
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 userID, incomingChannel, incomingChannel, roomInfo
+                //userID, outgoingChannel, incomingChannel, roomInfo
         );
 
         callback.setSuccessResponse(responseRoomInfo -> {
+            /*
             pn.removeListener(callback);
-            pn.unsubscribeAll();
+            pn.unsubscribe().channels(Arrays.asList(incomingChannel)).execute();
+             */
+            changeListener(null, null);
         });
 
+        /*
         pn.addListener(callback);
         pn.subscribe().channels(Arrays.asList(incomingChannel)).execute();
+         */
+
+        changeListener(callback, Arrays.asList(incomingChannel));
     }
 
     /**
