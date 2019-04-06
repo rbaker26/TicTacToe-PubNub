@@ -1,6 +1,5 @@
 import Messages.Converter;
-import Messages.NewRoomInfo;
-import com.google.gson.JsonObject;
+import Messages.RoomInfo;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
@@ -10,7 +9,6 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
@@ -23,11 +21,11 @@ public class RoomRequesterCallback extends SubscribeCallback {
     private String userID;
     private String outgoingChannel;
     private String incomingChannel;
-    private NewRoomInfo roomInfo;
-    private Consumer<NewRoomInfo> successResponse;
-    private Consumer<NewRoomInfo> failureResponse;
+    private RoomInfo roomInfo;
+    private Consumer<RoomInfo> successResponse;
+    private Consumer<RoomInfo> failureResponse;
 
-    public RoomRequesterCallback(String userID, String outgoingChannel, String incomingChannel, NewRoomInfo roomInfo) {
+    public RoomRequesterCallback(String userID, String outgoingChannel, String incomingChannel, RoomInfo roomInfo) {
         this.userID = userID;
         this.outgoingChannel = outgoingChannel;
         this.incomingChannel = incomingChannel;
@@ -40,17 +38,17 @@ public class RoomRequesterCallback extends SubscribeCallback {
      * may join.
      * @param successResponse Response to use. May be null, and overrides old callbacks.
      */
-    public void setSuccessResponse(Consumer<NewRoomInfo> successResponse) {
+    public void setSuccessResponse(Consumer<RoomInfo> successResponse) {
         this.successResponse = successResponse;
     }
 
     /**
      * Sets the callback to use when we've failed to get a room which we
      * may join. This can occur for several reasons, and might be able
-     * to be deduced based on the NewRoomInfo object.
+     * to be deduced based on the RoomInfo object.
      * @param failureResponse Response to use. May be null, and overrides old callbacks.
      */
-    public void setFailureResponse(Consumer<NewRoomInfo> failureResponse) {
+    public void setFailureResponse(Consumer<RoomInfo> failureResponse) {
         this.failureResponse = failureResponse;
     }
 
@@ -104,7 +102,7 @@ public class RoomRequesterCallback extends SubscribeCallback {
         if(sourceChannel.equals(incomingChannel)) {
             //JsonObject json = message.getMessage().getAsJsonObject();
             //String creator = json.get("Creator").getAsString();
-            NewRoomInfo responseRoomInfo = Converter.fromJson(message.getMessage(), NewRoomInfo.class);
+            RoomInfo responseRoomInfo = Converter.fromJson(message.getMessage(), RoomInfo.class);
 
             System.out.println(responseRoomInfo.toString());
 

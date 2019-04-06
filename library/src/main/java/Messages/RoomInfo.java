@@ -2,7 +2,7 @@ package Messages;
 
 import java.util.Objects;
 
-public class NewRoomInfo {
+public class RoomInfo {
     public static final int defaultRoomID = -1;
 
     private String player1ID = null;
@@ -15,7 +15,7 @@ public class NewRoomInfo {
     private String roomChannel = null;
 
 
-    public NewRoomInfo() {
+    public RoomInfo() {
 
     }
 
@@ -103,7 +103,7 @@ public class NewRoomInfo {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NewRoomInfo that = (NewRoomInfo) o;
+        RoomInfo that = (RoomInfo) o;
         return getRoomID() == that.getRoomID() &&
                 isOpen() == that.isOpen() &&
                 Objects.equals(getPlayer1ID(), that.getPlayer1ID()) &&
@@ -120,7 +120,7 @@ public class NewRoomInfo {
 
     @Override
     public String toString() {
-        return "NewRoomInfo{" +
+        return "RoomInfo{" +
                 "player1ID='" + player1ID + '\'' +
                 ", player1Channel='" + player1Channel + '\'' +
                 ", player2ID='" + player2ID + '\'' +

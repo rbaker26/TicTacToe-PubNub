@@ -1,5 +1,5 @@
 import Messages.Channels;
-import Messages.NewRoomInfo;
+import Messages.RoomInfo;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.SubscribeCallback;
@@ -11,10 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class NetworkManager {
-
-    //region Channel stuff
-
-    //endregion
 
     //region Instance setup
     private static String uuidModifier = "";
@@ -98,7 +94,7 @@ public final class NetworkManager {
         String incomingChannel = Channels.privateChannelSet + userID;
         String outgoingChannel = Channels.roomRequestChannel;
 
-        NewRoomInfo roomInfo = new NewRoomInfo();
+        RoomInfo roomInfo = new RoomInfo();
         roomInfo.setPlayer(userID, incomingChannel, goingFirst);
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
@@ -126,7 +122,16 @@ public final class NetworkManager {
      * Joins a room which has been created via request requestNewRoom.
      * @param roomInfo
      */
-    public void joinLobby(NewRoomInfo roomInfo) {
+    public void joinLobby(RoomInfo roomInfo) {
         throw new NotImplementedException();
+    }
+
+    public void dieHorribly() {
+        System.out.println("Going down");
+        pn.unsubscribeAll();
+        pn.disconnect();
+        pn.destroy();
+        pn = null;
+        System.out.println("The pain won't stop");
     }
 }

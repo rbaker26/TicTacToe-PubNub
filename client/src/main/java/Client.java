@@ -63,7 +63,10 @@ public class Client extends Application {
         Scene scene = new Scene(vbox, 200, 200);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
 
-
+    @Override
+    public void stop() throws Exception {
+        //NetworkManager.getInstance().dieHorribly();
     }
 }
