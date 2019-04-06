@@ -1,3 +1,5 @@
+package Messages;
+
 public class Lobby {
     private int roomId;
     private int p1Id;

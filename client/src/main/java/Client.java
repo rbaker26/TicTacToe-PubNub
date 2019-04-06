@@ -2,7 +2,6 @@
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 import com.pubnub.api.*;
 import javafx.application.Application;
@@ -25,7 +24,6 @@ public class Client extends Application {
 
     public static PubNub pubNub;
     public static String roomRequestChannel = "Rooms::Requests";    // We need to sync this with the engine
-    public static String roomUpdateChannel = "Rooms::Update";       // We aren't using this?
 
     public static void main(String[] args) {
 
@@ -37,10 +35,8 @@ public class Client extends Application {
 
         launch(args);
 
-        /*
-        pubnub.addListener(new RoomRequesterCallback(name, roomRequestChannel, roomRequestChannel));
-        pubnub.subscribe().channels(Arrays.asList(roomUpdateChannel)).execute();
-        */
+//        pubnub.addListener(new RoomRequesterCallback(name, roomRequestChannel, roomRequestChannel));
+//        pubnub.subscribe().channels(Arrays.asList(roomUpdateChannel)).execute();
     }
 
     @Override
@@ -56,10 +52,6 @@ public class Client extends Application {
 
         Button openButton = new Button("Open");
         Button joinButton = new Button("Join");
-
-        // TODO We need a text field. Since I'm running multiple instances
-        //      on a single computer, we cannot decide UUID until we have
-        //      the name.
 
         openButton.setOnAction(value ->  {
             System.out.println("Opening");

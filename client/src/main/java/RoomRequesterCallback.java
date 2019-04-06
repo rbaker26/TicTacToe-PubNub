@@ -68,6 +68,8 @@ public class RoomRequesterCallback extends SubscribeCallback {
                 : message.getSubscription()
         );
 
+        //message.get
+
 
         System.out.println();
         System.out.println("msg content: " + message.getMessage());
