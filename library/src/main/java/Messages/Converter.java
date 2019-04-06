@@ -3,7 +3,6 @@ package Messages;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 final public class Converter {
     static private Gson gson;

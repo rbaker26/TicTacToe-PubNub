@@ -22,8 +22,7 @@ import java.util.Arrays;
 
 public class Client extends Application {
 
-    public static PubNub pubNub;
-    public static String roomRequestChannel = "Rooms::Requests";    // We need to sync this with the engine
+
 
     public static void main(String[] args) {
 
@@ -35,8 +34,7 @@ public class Client extends Application {
 
         launch(args);
 
-//        pubnub.addListener(new RoomRequesterCallback(name, roomRequestChannel, roomRequestChannel));
-//        pubnub.subscribe().channels(Arrays.asList(roomUpdateChannel)).execute();
+
     }
 
     @Override
@@ -57,6 +55,7 @@ public class Client extends Application {
             System.out.println("Opening");
 
             //NetworkManager.forceUUID(nameField.getText());
+            NetworkManager.getInstance().requestNewRoom(nameField.getText(), true);
         });
 
         VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);

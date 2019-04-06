@@ -22,45 +22,31 @@ public class NewRoomInfo {
     //<editor-fold desc="Getters and setters">
 
     /**
-     * Sets the player 1 ID and channel. Neither string can be null.
-     * This also cannot be called if player 1 is already present.
-     * @param player1ID Player 1's ID.
-     * @param player1Channel Player 1's channel.
+     * Sets the player ID and channel. Neither string can be null.
+     * This also cannot be called if player is already present.
+     * @param playerID Player's ID.
+     * @param playerChannel Player's channel.
      * @throws NullPointerException If a parameter is null.
-     * @throws IllegalStateException If player 1 is already present.
+     * @throws IllegalStateException If player is already present.
      */
-    public void setPlayer1(String player1ID, String player1Channel) {
-        if(player1ID == null || player1Channel == null) {
+    public void setPlayer(String playerID, String playerChannel, boolean isFirstPlayer) {
+
+        if(playerID == null || playerChannel == null) {
             throw new NullPointerException("Null ID or channel");
         }
-        else if(hasPlayer1()) {
+        else if((isFirstPlayer && hasPlayer1()) || hasPlayer2()) {
             throw new IllegalStateException("Already have player 1");
         }
 
-        this.player1ID = player1ID;
-        this.player1Channel = player1Channel;
-    }
-
-    /**
-     * Sets the player 2 ID and channel. Neither string can be null.
-     * This also cannot be called if player 2 is already present.
-     * @param player2ID Player 2's ID.
-     * @param player2Channel Player 2's channel.
-     * @throws NullPointerException If a parameter is null.
-     * @throws IllegalStateException If player 2 is already present.
-     */
-    public void setPlayer2(String player2ID, String player2Channel) {
-        if(player2ID == null || player2Channel == null) {
-            throw new NullPointerException("Null ID or channel");
+        if(isFirstPlayer) {
+            this.player1ID = playerID;
+            this.player1Channel = playerChannel;
         }
-        else if(hasPlayer2()) {
-            throw new IllegalStateException("Already have player 2");
+        else {
+            this.player2ID = playerID;
+            this.player2Channel = playerChannel;
         }
-
-        this.player2ID = player2ID;
-        this.player2Channel = player2Channel;
     }
-
 
 
     public String getPlayer1ID() {
