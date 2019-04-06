@@ -52,23 +52,27 @@ public class Client extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("HBox Experiment 1");
 
-        Label label = new Label("Not clicked");
-        Button button = new Button("Click");
-        TextField textField = new TextField();
+
+        Label nameLabel = new Label("Name");
+        TextField nameField = new TextField();
+
+        Label roomLabel = new Label("Room");
+        TextField roomField = new TextField();
+
+        Button openButton = new Button("Open");
+        Button joinButton = new Button("Join");
 
         // TODO We need a text field. Since I'm running multiple instances
         //      on a single computer, we cannot decide UUID until we have
         //      the name.
 
-        button.setOnAction(value ->  {
-            label.setText("Clicked!");
+        openButton.setOnAction(value ->  {
+            System.out.println("Opening");
+
+            NetworkManager.forceUUID(nameField.getText());
         });
 
-        textField.setOnAction(value -> {
-            label.setText(textField.getText());
-        });
-
-        VBox vbox = new VBox(button, label, textField);
+        VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
 
         Scene scene = new Scene(vbox, 200, 100);
         primaryStage.setScene(scene);

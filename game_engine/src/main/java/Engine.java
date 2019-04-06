@@ -9,6 +9,8 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 
 public class Engine {
@@ -16,9 +18,24 @@ public class Engine {
     public static GameInfo game;
 
     public static void main(String[] args) {
+
+        // For the UUID, we need to pick something that we can ALWAYS regenerate.
+        // So we'll pick the host-name.
+        String hostname = "Unknown";
+
+        try {
+            InetAddress addr;
+            addr = InetAddress.getLocalHost();
+            hostname = addr.getHostName();
+
+        } catch (UnknownHostException ex) {
+            System.out.println("Hostname can not be resolved");
+        }
+
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.setSubscribeKey("sub-c-89b1d65a-4f40-11e9-bc3e-aabf89950afa");
         pnConfiguration.setPublishKey("pub-c-79140f4c-8b9e-49ed-992f-cf6322c68d04");
+        pnConfiguration.setUuid(hostname + "Engine");
 
 
         String roomRequestChannelName = "Rooms::Request";
