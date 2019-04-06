@@ -1,4 +1,5 @@
 
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -16,11 +17,15 @@ import javafx.stage.Stage;
 
 import java.util.Arrays;
 
+// NOTE: To change the uuid, go to the launch configurations and add this to the "Arguments" field
+//   -Pargs=Something
+// This will tack on "Something" to the UUID. Make several launch configs if you want.
+
 public class Client extends Application {
 
     public static PubNub pubNub;
-    public static String roomRequestChannel = "Rooms::Request";
-    public static String roomUpdateChannel = "Rooms::Update";
+    public static String roomRequestChannel = "Rooms::Requests";    // We need to sync this with the engine
+    public static String roomUpdateChannel = "Rooms::Update";       // We aren't using this?
 
     public static void main(String[] args) {
 
@@ -28,29 +33,11 @@ public class Client extends Application {
             //System.out.println(args[0]);
 
             NetworkManager.setUuidModifier(args[0]);
-            NetworkManager.getPubNub();
         }
 
         launch(args);
 
         /*
-        Scanner consoleInput = new Scanner(System.in);
-        System.out.println("Are you A or B?");
-        String name = "";
-
-        do {
-            name = consoleInput.next();
-
-            if(name.length() > 0) {
-                name = name.substring(0, 1);
-            }
-
-        } while(!name.equals("A") && !name.equals("B"));
-        System.out.println("Alright, you are " + name + "! Connecting...");
-
-        //pnConfiguration.setUuid("User-A::Java");
-
-
         pubnub.addListener(new RoomRequesterCallback(name, roomRequestChannel, roomRequestChannel));
         pubnub.subscribe().channels(Arrays.asList(roomUpdateChannel)).execute();
         */
@@ -82,7 +69,7 @@ public class Client extends Application {
 
         VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
 
-        Scene scene = new Scene(vbox, 200, 100);
+        Scene scene = new Scene(vbox, 200, 200);
         primaryStage.setScene(scene);
         primaryStage.show();
 

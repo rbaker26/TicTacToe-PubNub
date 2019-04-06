@@ -38,9 +38,7 @@ public final class NetworkManager {
         pnConfiguration.setPublishKey(pubKey);
         pnConfiguration.setUuid(uuid + "Client" + uuidModifier);
 
-        System.out.println(uuid + "Client" + uuidModifier);
-
-        //pn = new PubNub(pnConfiguration);
+        pn = new PubNub(pnConfiguration);
     }
 
     private static String getDefaultUUID() {
