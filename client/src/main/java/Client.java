@@ -39,7 +39,7 @@ public class Client extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("HBox Experiment 1");
+        primaryStage.setTitle("SABRCATST TicTacToe");
 
 
         Label nameLabel = new Label("Name");
@@ -56,6 +56,15 @@ public class Client extends Application {
 
             //NetworkManager.forceUUID(nameField.getText());
             NetworkManager.getInstance().requestNewRoom(nameField.getText(), true);
+        });
+
+        joinButton.setOnAction(value -> {
+            System.out.println("Joining " + roomField.getText());
+
+            // TODO This should we where we plug the room from the other player.
+            Messages.RoomInfo roomInfo = new Messages.RoomInfo();
+            roomInfo.setRoomID(Integer.parseInt(roomField.getText()));
+            NetworkManager.getInstance().joinRoom(nameField.getText(), roomInfo);
         });
 
         VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);

@@ -92,38 +92,53 @@ public final class NetworkManager {
         //clearCurrentListener();
 
         String incomingChannel = Channels.privateChannelSet + userID;
-        String outgoingChannel = Channels.roomRequestChannel;
+        String outgoingChannel = Channels.privateChannelSet + userID;
+        //String outgoingChannel = Channels.roomRequestChannel;
 
         RoomInfo roomInfo = new RoomInfo();
         roomInfo.setPlayer(userID, incomingChannel, goingFirst);
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
-                userID, incomingChannel, incomingChannel, roomInfo
-                //userID, outgoingChannel, incomingChannel, roomInfo
+                userID, outgoingChannel, incomingChannel, roomInfo
         );
 
         callback.setSuccessResponse(responseRoomInfo -> {
-            /*
-            pn.removeListener(callback);
-            pn.unsubscribe().channels(Arrays.asList(incomingChannel)).execute();
-             */
             changeListener(null, null);
         });
-
-        /*
-        pn.addListener(callback);
-        pn.subscribe().channels(Arrays.asList(incomingChannel)).execute();
-         */
+        callback.setFailureResponse(responseRoomInfo -> {
+            changeListener(null, null);
+        });
 
         changeListener(callback, Arrays.asList(incomingChannel));
     }
 
     /**
      * Joins a room which has been created via request requestNewRoom.
+     * @param userID
      * @param roomInfo
      */
-    public void joinLobby(RoomInfo roomInfo) {
-        throw new NotImplementedException();
+    public void joinRoom(String userID, RoomInfo roomInfo) {
+        String incomingChannel = Channels.privateChannelSet + userID;
+        String outgoingChannel = Channels.privateChannelSet + userID;
+        //String outgoingChannel = Channels.roomRequestChannel;
+
+        // If player2 is already around, then we'll be going first.
+        // Otherwise, we'll go second.
+        boolean goingFirst = roomInfo.hasPlayer2();
+        roomInfo.setPlayer(userID, incomingChannel, goingFirst);
+
+        RoomRequesterCallback callback = new RoomRequesterCallback(
+                userID, outgoingChannel, incomingChannel, roomInfo
+        );
+
+        callback.setSuccessResponse(responseRoomInfo -> {
+            changeListener(null, null);
+        });
+        callback.setFailureResponse(responseRoomInfo -> {
+            changeListener(null, null);
+        });
+
+        changeListener(callback, Arrays.asList(incomingChannel));
     }
 
     public void dieHorribly() {
