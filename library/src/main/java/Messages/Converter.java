@@ -30,7 +30,9 @@ final public class Converter {
      * Pubnub's functions will typically do it for you.
      * @param obj Object to convert.
      * @return The converted object.
+     * @deprecated You can send objects directly and Pubnub will turn them into JSON.
      */
+    @Deprecated
     public static JsonElement toJson(Object obj) {
         return gson.toJsonTree(obj);
     }
