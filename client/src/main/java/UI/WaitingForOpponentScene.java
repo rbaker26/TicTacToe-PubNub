@@ -10,13 +10,14 @@ public class WaitingForOpponentScene extends AbstractSceneController {
 
     Button cancelButton;
 
-    public WaitingForOpponentScene(int width, int height) {
+    public WaitingForOpponentScene() {
         Label waitingLabel = new Label("Waiting for an opponent...");
         Label waitingLabel2 = new Label("Patience");
 
         VBox box = new VBox(waitingLabel, waitingLabel2);
         box.setAlignment(Pos.CENTER);
 
-        setMasterScene(new Scene(box, width, height));
+        //setMasterScene(new Scene(box));
+        setRoot(box);
     }
 }

@@ -26,8 +26,11 @@ import java.util.Arrays;
 
 public class Client extends Application {
 
-    ISceneController lobbyController;
-    ISceneController waitingController;
+    private static final double initWidth = 200;
+    private static final double initHeight = 200;
+
+    private ISceneController lobbyController;
+    private ISceneController waitingController;
 
     public static void main(String[] args) {
 
@@ -49,7 +52,7 @@ public class Client extends Application {
         LobbySceneController lobby = new LobbySceneController();
         lobbyController = lobby;
 
-        waitingController = new WaitingForOpponentScene(200, 200);
+        waitingController = new WaitingForOpponentScene();
 
 
         lobby.getOpenButton().setOnAction(value ->  {
@@ -84,6 +87,8 @@ public class Client extends Application {
         });
 
         lobby.applyScene(primaryStage);
+        primaryStage.setWidth(initWidth);
+        primaryStage.setHeight(initHeight);
         primaryStage.show();
     }
 

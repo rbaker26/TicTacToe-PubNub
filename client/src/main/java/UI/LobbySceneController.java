@@ -27,7 +27,8 @@ public class LobbySceneController extends AbstractSceneController {
 
         VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
 
-        setMasterScene(new Scene(vbox, 200, 200));
+        //setMasterScene(new Scene(vbox, 200, 200));
+        setRoot(vbox);
     }
 
     //region Getters

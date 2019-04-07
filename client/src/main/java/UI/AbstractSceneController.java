@@ -1,6 +1,7 @@
 package UI;
 
 import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -13,7 +14,8 @@ import java.util.Objects;
  */
 abstract public class AbstractSceneController implements ISceneController {
 
-    private Scene masterScene;
+    //private Scene masterScene;
+    private Parent root;
 
     @Override
     public void applySceneAsync(Stage targetStage) {
@@ -33,20 +35,38 @@ abstract public class AbstractSceneController implements ISceneController {
 
     @Override
     public void applyScene(Stage targetStage) {
+        /*
+        double width = targetStage.getWidth();
+        double height = targetStage.getHeight();
+
         targetStage.setScene(getMasterScene());
+
+        targetStage.setWidth(width);
+        targetStage.setHeight(height);
+         */
+
+        Scene oldScene = targetStage.getScene();
+        double width =  oldScene != null ? oldScene.getWidth()  : targetStage.getMinWidth();
+        double heigth = oldScene != null ? oldScene.getHeight() : targetStage.getMinHeight();
+
+        /*
+        Scene newScene = oldScene == null
+                ? new Scene(getRoot(), targetStage.getMinWidth(), targetStage.getMinHeight())
+                : new Scene(getRoot(), oldScene.getWidth(), oldScene.getHeight());
+         */
+        Scene newScene = new Scene(getRoot(), width, heigth);
+        targetStage.setScene(newScene);
+
+        getRoot().resize(width, heigth);    // This is needed so that layouts update correctly
     }
 
-    /**
-     * Gets the scene to be applied using applyScene and
-     * applySceneAsync.
-     * @return The scene which may be staged.
-     */
-    public Scene getMasterScene() {
-        return masterScene;
+
+    public Parent getRoot() {
+        return root;
     }
 
-    protected void setMasterScene(Scene masterScene) {
-        this.masterScene = masterScene;
+    public void setRoot(Parent root) {
+        this.root = root;
     }
 
     //region Object overrides
@@ -55,18 +75,18 @@ abstract public class AbstractSceneController implements ISceneController {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AbstractSceneController that = (AbstractSceneController) o;
-        return Objects.equals(getMasterScene(), that.getMasterScene());
+        return Objects.equals(getRoot(), that.getRoot());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getMasterScene());
+        return Objects.hash(getRoot());
     }
 
     @Override
     public String toString() {
         return "AbstractSceneController{" +
-                "masterScene=" + masterScene +
+                "masterScene=" + root +
                 '}';
     }
     //endregion
