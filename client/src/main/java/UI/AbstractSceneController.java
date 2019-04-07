@@ -9,8 +9,8 @@ import java.util.Objects;
 
 /**
  * This is a slightly more concrete version of ISceneController, providing
- * both functions. The only requirement is that masterScene is initialized
- * by calling setMasterScene.
+ * both functions. Inheritors should call setRoot before applyScene gets
+ * called.
  */
 abstract public class AbstractSceneController implements ISceneController {
 
@@ -35,25 +35,20 @@ abstract public class AbstractSceneController implements ISceneController {
 
     @Override
     public void applyScene(Stage targetStage) {
-        /*
-        double width = targetStage.getWidth();
-        double height = targetStage.getHeight();
-
-        targetStage.setScene(getMasterScene());
-
-        targetStage.setWidth(width);
-        targetStage.setHeight(height);
-         */
 
         Scene oldScene = targetStage.getScene();
-        double width =  oldScene != null ? oldScene.getWidth()  : targetStage.getMinWidth();
-        double heigth = oldScene != null ? oldScene.getHeight() : targetStage.getMinHeight();
+        double width;
+        double heigth;
 
-        /*
-        Scene newScene = oldScene == null
-                ? new Scene(getRoot(), targetStage.getMinWidth(), targetStage.getMinHeight())
-                : new Scene(getRoot(), oldScene.getWidth(), oldScene.getHeight());
-         */
+        if(oldScene != null) {
+            width = oldScene.getWidth();
+            heigth = oldScene.getHeight();
+        }
+        else {
+            width = targetStage.getMinWidth();
+            heigth = targetStage.getMinHeight();
+        }
+
         Scene newScene = new Scene(getRoot(), width, heigth);
         targetStage.setScene(newScene);
 
