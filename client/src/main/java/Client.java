@@ -3,6 +3,8 @@
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import UI.ISceneController;
+import UI.LobbySceneController;
 import com.pubnub.api.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -23,7 +25,7 @@ import java.util.Arrays;
 
 public class Client extends Application {
 
-
+    ISceneController lobbyController;
 
     public static void main(String[] args) {
 
@@ -42,22 +44,15 @@ public class Client extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("SABRCATST TicTacToe");
 
+        LobbySceneController lobby = new LobbySceneController();
+        lobbyController = lobby;
 
-        Label nameLabel = new Label("Name");
-        TextField nameField = new TextField();
-
-        Label roomLabel = new Label("Room");
-        TextField roomField = new TextField();
-
-        Button openButton = new Button("Open");
-        Button joinButton = new Button("Join");
-
-        openButton.setOnAction(value ->  {
+        lobby.getOpenButton().setOnAction(value ->  {
             System.out.println("Opening");
 
             //NetworkManager.forceUUID(nameField.getText());
             NetworkManager.getInstance().requestNewRoom(
-                    nameField.getText(),
+                    lobby.getName(),
                     true,
                     responseRoomInfo -> {
                         System.out.println("Hi");
@@ -70,19 +65,16 @@ public class Client extends Application {
             );
         });
 
-        joinButton.setOnAction(value -> {
-            System.out.println("Joining " + roomField.getText());
+        lobby.getJoinButton().setOnAction(value -> {
+            System.out.println("Joining " + lobby.getRoomID());
 
             // TODO This should we where we plug the room from the other player.
             Messages.RoomInfo roomInfo = new Messages.RoomInfo();
-            roomInfo.setRoomID(Integer.parseInt(roomField.getText()));
-            NetworkManager.getInstance().joinRoom(nameField.getText(), roomInfo);
+            roomInfo.setRoomID(lobby.getRoomID());
+            NetworkManager.getInstance().joinRoom(lobby.getName(), roomInfo);
         });
 
-        VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
-
-        Scene scene = new Scene(vbox, 200, 200);
-        primaryStage.setScene(scene);
+        lobby.applyScene(primaryStage);
         primaryStage.show();
     }
 
