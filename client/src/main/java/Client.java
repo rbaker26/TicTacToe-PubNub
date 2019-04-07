@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 import com.pubnub.api.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -55,7 +56,18 @@ public class Client extends Application {
             System.out.println("Opening");
 
             //NetworkManager.forceUUID(nameField.getText());
-            NetworkManager.getInstance().requestNewRoom(nameField.getText(), true);
+            NetworkManager.getInstance().requestNewRoom(
+                    nameField.getText(),
+                    true,
+                    responseRoomInfo -> {
+                        System.out.println("Hi");
+
+                        Platform.runLater(() ->
+                            primaryStage.setScene(new Scene(new HBox(), 100, 100))
+                        );
+                    },
+                    null
+            );
         });
 
         joinButton.setOnAction(value -> {

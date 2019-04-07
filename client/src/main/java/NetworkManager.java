@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public final class NetworkManager {
 
@@ -87,7 +88,7 @@ public final class NetworkManager {
         currentChannels = newChannels;
     }
 
-    public void requestNewRoom(String userID, boolean goingFirst) {
+    public void requestNewRoom(String userID, boolean goingFirst, Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
 
         //clearCurrentListener();
 
@@ -103,9 +104,17 @@ public final class NetworkManager {
         );
 
         callback.setSuccessResponse(responseRoomInfo -> {
+            if(successResponse != null) {
+                successResponse.accept(responseRoomInfo);
+            }
+
             changeListener(null, null);
         });
         callback.setFailureResponse(responseRoomInfo -> {
+            if(failureResponse != null) {
+                failureResponse.accept(responseRoomInfo);
+            }
+
             changeListener(null, null);
         });
 
