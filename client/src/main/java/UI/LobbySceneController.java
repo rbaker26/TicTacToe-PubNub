@@ -10,7 +10,6 @@ import java.util.Objects;
 
 public class LobbySceneController extends AbstractSceneController {
 
-    private Scene masterScene;
     private TextField nameField;
     private TextField roomField;
     private Button openButton;
@@ -28,7 +27,7 @@ public class LobbySceneController extends AbstractSceneController {
 
         VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
 
-        masterScene = new Scene(vbox, 200, 200);
+        setMasterScene(new Scene(vbox, 200, 200));
     }
 
     //region Getters
@@ -84,33 +83,28 @@ public class LobbySceneController extends AbstractSceneController {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         LobbySceneController that = (LobbySceneController) o;
-        return getMasterScene().equals(that.getMasterScene()) &&
-                nameField.equals(that.nameField) &&
-                roomField.equals(that.roomField) &&
-                getOpenButton().equals(that.getOpenButton()) &&
-                getJoinButton().equals(that.getJoinButton());
+        return Objects.equals(getNameField(), that.getNameField()) &&
+                Objects.equals(getRoomField(), that.getRoomField()) &&
+                Objects.equals(getOpenButton(), that.getOpenButton()) &&
+                Objects.equals(getJoinButton(), that.getJoinButton());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getNameField(), getRoomField(), getOpenButton(), getJoinButton());
     }
 
     @Override
     public String toString() {
         return "LobbySceneController{" +
-                "masterScene=" + masterScene +
-                ", nameField=" + nameField +
+                "nameField=" + nameField +
                 ", roomField=" + roomField +
                 ", openButton=" + openButton +
                 ", joinButton=" + joinButton +
                 '}';
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getMasterScene(), nameField, roomField, getOpenButton(), getJoinButton());
-    }
     //endregion
 
-    @Override
-    protected Scene getMasterScene() {
-        return masterScene;
-    }
 }

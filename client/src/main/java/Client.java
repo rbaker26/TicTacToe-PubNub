@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 import UI.ISceneController;
 import UI.LobbySceneController;
+import UI.WaitingForOpponentScene;
 import com.pubnub.api.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 public class Client extends Application {
 
     ISceneController lobbyController;
+    ISceneController waitingController;
 
     public static void main(String[] args) {
 
@@ -47,19 +49,26 @@ public class Client extends Application {
         LobbySceneController lobby = new LobbySceneController();
         lobbyController = lobby;
 
+        waitingController = new WaitingForOpponentScene(200, 200);
+
+
         lobby.getOpenButton().setOnAction(value ->  {
             System.out.println("Opening");
+
+            waitingController.applyScene(primaryStage);
 
             //NetworkManager.forceUUID(nameField.getText());
             NetworkManager.getInstance().requestNewRoom(
                     lobby.getName(),
                     true,
                     responseRoomInfo -> {
+                        /*
                         System.out.println("Hi");
 
                         Platform.runLater(() ->
                             primaryStage.setScene(new Scene(new HBox(), 100, 100))
                         );
+                         */
                     },
                     null
             );
