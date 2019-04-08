@@ -13,11 +13,12 @@ public class GameInfo {
     private TurnControlMode currentTurn;
     private Board board;
 
-    public GameInfo() {
-        this("", "", TurnControlMode.NONE);
+    public GameInfo(int roomID) {
+        this(roomID, "", "", TurnControlMode.NONE);
     }
 
-    public GameInfo(String xPlayer, String oPlayer, TurnControlMode currentTurn) {
+    public GameInfo(int roomID, String xPlayer, String oPlayer, TurnControlMode currentTurn) {
+        this.roomID = roomID;
         this.xPlayer = xPlayer;
         this.oPlayer = oPlayer;
         this.currentTurn = currentTurn;

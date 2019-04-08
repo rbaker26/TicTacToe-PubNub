@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.7'
 }
 
 group 'tictactoe-pubnub'
@@ -12,9 +13,13 @@ repositories {
     mavenCentral()
 }
 
+javafx {
+    modules = [ 'javafx.controls', 'javafx.fxml','javafx.media' ]
+}
+
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-
     testImplementation 'junit:junit:4.12'
 
     compile group: 'com.pubnub', name: 'pubnub-gson', version: '4.22.0-beta'
@@ -22,6 +27,8 @@ dependencies {
     compile group: 'org.slf4j', name:'slf4j-api', version: '1.7.2'
     compile group: 'ch.qos.logback', name:'logback-classic', version: '1.0.9'
     compile group: 'ch.qos.logback', name:'logback-core', version: '1.0.9'
+
+    compile project(':library')
 }
 
 mainClassName = 'Engine'

@@ -2,4 +2,5 @@ rootProject.name = 'tictactoe-pubnub'
 include 'game_engine'
 include 'db_manager'
 include 'client'
+include 'library'
 
