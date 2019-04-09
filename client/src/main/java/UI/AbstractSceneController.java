@@ -37,22 +37,40 @@ abstract public class AbstractSceneController implements ISceneController {
     public void applyScene(Stage targetStage) {
 
         Scene oldScene = targetStage.getScene();
-        double width;
-        double heigth;
 
+        // Attempt to get the width of the old stage.
+        // This is our fallback values.
+        double stageWidth = targetStage.getMinWidth();
+        double stageHeight = targetStage.getMinHeight();
+
+        // However, it's preferable to use the old scene's
+        // width and height. So we'll try to get that.
+        // (Uh... why is it preferable?)
         if(oldScene != null) {
-            width = oldScene.getWidth();
-            heigth = oldScene.getHeight();
-        }
-        else {
-            width = targetStage.getMinWidth();
-            heigth = targetStage.getMinHeight();
+            stageWidth = oldScene.getWidth();
+            stageHeight = oldScene.getHeight();
         }
 
-        Scene newScene = new Scene(getRoot(), width, heigth);
+        Parent root = getRoot();
+
+        // We will need to make sure the window isn't smaller than the
+        // minimum values.
+        double targetWidth = Math.max(root.minWidth(stageHeight), stageWidth);
+        double targetHeight = Math.max(root.minHeight(stageWidth), stageHeight);
+
+        System.out.println("Width: " + root.minWidth(stageHeight) + ", " + stageWidth);
+        System.out.println("Height: " + root.minHeight(stageWidth) + ", " + stageHeight);
+
+        // Now we can finally apply the size stuff that we've figured out.
+
+        // This is needed and it is dumb...
+        targetStage.setWidth(targetWidth);
+        targetStage.setHeight(targetHeight);
+
+        Scene newScene = new Scene(root, targetWidth, targetHeight);
         targetStage.setScene(newScene);
 
-        getRoot().resize(width, heigth);    // This is needed so that layouts update correctly
+        root.resize(targetWidth, targetHeight);    // This is needed so that layouts update correctly
     }
 
 

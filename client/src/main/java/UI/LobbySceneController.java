@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.util.Objects;
 
@@ -25,7 +26,14 @@ public class LobbySceneController extends AbstractSceneController {
         openButton = new Button("Open");
         joinButton = new Button("Join");
 
-        VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
+        // TODO THIS IS JUST FOR TESTING
+        Button debugButton = new Button("Show board view");
+        debugButton.setOnAction(value -> {
+            GameViewController newView = new GameViewController();
+            newView.applyScene((Stage) getRoot().getScene().getWindow());
+        });
+
+        VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton, debugButton);
 
         //setMasterScene(new Scene(vbox, 200, 200));
         setRoot(vbox);
