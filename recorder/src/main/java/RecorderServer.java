@@ -16,7 +16,7 @@ public class RecorderServer {
 
             for(int i = 0; i < 3; i++) {
                 for(int j = 0; j < 3; j++) {
-                    db.WriteMove(10000, i, j, 4653);
+                 //   db.WriteMove(10000, i, j, 4653);
                  //   Thread.sleep(10);
                 }
             }
