@@ -1,76 +1,110 @@
-import com.google.gson.JsonObject;
+import Messages.Channels;
+import Messages.Converter;
+import Messages.Keys;
+import Messages.RoomInfo;
+import Engine.Lobby;
+import Engine.LobbyManager;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
-import com.pubnub.api.enums.PNStatusCategory;
 import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
 
 public class Engine {
-
-    public static GameInfo game;
-
+    private static List<RoomInfo> RoomList = new ArrayList<>();     // List of all rooms
+    private static int newRoomID = 100000;
+    private static HashMap<Integer, Lobby> Lobbies = new HashMap<>();
     public static void main(String[] args) {
-
-        // For the UUID, we need to pick something that we can ALWAYS regenerate.
-        // So we'll pick the host-name.
-        String hostname = "Unknown";
-
+        // Initialize pubnub stuffs
+        PNConfiguration pnConfiguration = new PNConfiguration();
+        pnConfiguration.setSubscribeKey(Keys.subKey);
+        pnConfiguration.setPublishKey(Keys.pubKey);
         try {
-            InetAddress addr;
-            addr = InetAddress.getLocalHost();
-            hostname = addr.getHostName();
+            String hostname = InetAddress.getLocalHost().getHostName() + "Engine";
+            pnConfiguration.setUuid(hostname);
 
-        } catch (UnknownHostException ex) {
-            System.out.println("Hostname can not be resolved");
+        }
+        catch(Exception ex) {
+            System.out.println("Cannot get local host...");
         }
 
-        PNConfiguration pnConfiguration = new PNConfiguration();
-        pnConfiguration.setSubscribeKey("sub-c-89b1d65a-4f40-11e9-bc3e-aabf89950afa");
-        pnConfiguration.setPublishKey("pub-c-79140f4c-8b9e-49ed-992f-cf6322c68d04");
-        pnConfiguration.setUuid(hostname + "Engine");
+        PubNub pb = new PubNub(pnConfiguration);
+        pb.addListener(new RoomsListCallback(pb, RoomList));
+        pb.addListener(new SubscribeCallback() {
+            @Override
+            public void status(PubNub pubnub, PNStatus status) {
+            }
 
+            @Override
+            public void message(PubNub pubnub, PNMessageResult message) {
+                System.out.println(message.getChannel() +": " + message.getMessage());
+                switch(message.getChannel()) {
+                    case Channels.roomRequestChannel:
+                        // The following code handles a room create/join request
+                        if (message.getPublisher() != pnConfiguration.getUuid()) {
+                            RoomInfo roomMsg = Converter.fromJson(message.getMessage(), RoomInfo.class);
+                            if(roomMsg.getRoomID() == RoomInfo.defaultRoomID) {
+                                // This handles a create room request
+                                // Only things grabbed are playerID and who goes first
+                                roomMsg.setRoomID(newRoomID);
+                                roomMsg.setRoomChannel(Channels.roomChannelSet + newRoomID);
+                                Lobbies.put(newRoomID, new Lobby(roomMsg));
+                                System.out.println("New room created: " + roomMsg);
+                                newRoomID++;
+                            } else {
+                                if (Lobbies.containsKey(roomMsg.getRoomID())) {
+                                    if (Lobbies.get(roomMsg.getRoomID()).getRoomInfo().isAvailable()) {
+                                        Lobbies.get(roomMsg.getRoomID()).getRoomInfo().addPlayer(roomMsg.getPlayer1ID());
+                                        pb.publish()
+                                                .message(Lobbies.get(roomMsg.getRoomID()).getRoomInfo())
+                                                .channel(Lobbies.get(roomMsg.getRoomID()).getRoomInfo().getPlayer1Channel())
+                                                .async(new PNCallback<PNPublishResult>() {
+                                                    @Override
+                                                    public void onResponse(PNPublishResult result, PNStatus status) {
+                                                        // handle publish result, status always present, result if successful
+                                                        // status.isError() to see if error happened
+                                                        if (!status.isError()) {
+                                                        }
+                                                    }
+                                                });
+                                        pb.publish()
+                                                .message(Lobbies.get(roomMsg.getRoomID()).getRoomInfo())
+                                                .channel(Lobbies.get(roomMsg.getRoomID()).getRoomInfo().getPlayer2Channel())
+                                                .async(new PNCallback<PNPublishResult>() {
+                                                    @Override
+                                                    public void onResponse(PNPublishResult result, PNStatus status) {
+                                                        // handle publish result, status always present, result if successful
+                                                        // status.isError() to see if error happened
+                                                        if (!status.isError()) {
+                                                        }
+                                                    }
+                                                });
+                                        pb.subscribe().channels(Arrays.asList(Lobbies.get(roomMsg.getRoomID()).getRoomInfo().getRoomChannel())).execute();
+                                        System.out.println("Lobby created, listening in on " + Lobbies.get(roomMsg.getRoomID()).getRoomInfo().getRoomChannel());
+                                        LobbyManager lm = new LobbyManager(pb, Lobbies.get(roomMsg.getRoomID()));
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
 
-        String roomRequestChannelName = "Rooms::Request";
-        String roomUpdateChannelName = "Rooms::Update";
-        //String moveChannelName = "Move";
+            @Override
+            public void presence(PubNub pubnub, PNPresenceEventResult presence) {
 
-        // create message payload using Gson
-        /*
-        MoveData data = new MoveData();
-        data.column = 1;
-        data.row = 30;
-        data.sender = "Rad dude";
-        data.eVal = MoveData.TestEnum.Value2;
-        */
-
-
-        //System.out.println("Message to send: " + data.toString());
-        //System.out.println("Message to send: " + data.toString());
-
-        // TODO This should get created inside RoomCreatorCallback, but
-        //      at the time we just have one.
-        GameInfo game = new GameInfo(1);
-
-        PubNub pubnub = new PubNub(pnConfiguration);
-        pubnub.addListener(new RoomCreatorCallback(game, roomRequestChannelName, roomUpdateChannelName));
-        pubnub.subscribe().channels(Arrays.asList(roomRequestChannelName)).execute();
-    }
-
-    public static void SendGameInfo(PubNub pubnub, GameInfo game, Integer previousRow, Integer previousCol) {
-        JsonObject data = new JsonObject();
-        data.addProperty("PreviousRow", previousRow);
-        data.addProperty("PreviousColumn", previousCol);
-        // IsGameOver
-        // Winner
-        // WinReason
-        //data.addProperty("PreviousPlayer", game.get)
+            }
+        });
+        pb.subscribe().channels(Arrays.asList(Channels.roomListChannel, Channels.roomRequestChannel)).execute();
     }
 }

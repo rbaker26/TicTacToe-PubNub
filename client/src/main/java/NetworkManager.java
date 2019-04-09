@@ -1,12 +1,16 @@
 import Messages.Channels;
+import Messages.MoveInfo;
 import Messages.RoomInfo;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import com.pubnub.api.models.consumer.PNPublishResult;
+import com.pubnub.api.models.consumer.PNStatus;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,6 +56,7 @@ public final class NetworkManager {
         pnConfiguration.setUuid(uuid + "Client" + uuidModifier);
 
         pn = new PubNub(pnConfiguration);
+
     }
     //endregion
 
@@ -98,8 +103,8 @@ public final class NetworkManager {
         roomInfo.setPlayer(userID, incomingChannel, goingFirst);
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
-                userID, incomingChannel, incomingChannel, roomInfo
-                //userID, outgoingChannel, incomingChannel, roomInfo
+                //userID, incomingChannel, incomingChannel, roomInfo
+                userID, outgoingChannel, incomingChannel, roomInfo
         );
 
         callback.setSuccessResponse(responseRoomInfo -> {
@@ -123,9 +128,37 @@ public final class NetworkManager {
      * @param roomInfo
      */
     public void joinLobby(RoomInfo roomInfo) {
-        throw new NotImplementedException();
+        String incomingChannel = Channels.privateChannelSet + roomInfo.getPlayer1ID();
+        String outgoingChannel = Channels.roomRequestChannel;
+
+
+        RoomRequesterCallback callback = new RoomRequesterCallback(
+                //userID, incomingChannel, incomingChannel, roomInfo
+                roomInfo.getPlayer1ID(), outgoingChannel, incomingChannel, roomInfo
+        );
+
+        callback.setSuccessResponse(responseRoomInfo -> {
+            /*
+            pn.removeListener(callback);
+            pn.unsubscribe().channels(Arrays.asList(incomingChannel)).execute();
+             */
+            changeListener(null, null);
+        });
+
+        /*
+        pn.addListener(callback);
+        pn.subscribe().channels(Arrays.asList(incomingChannel)).execute();
+         */
+
+        changeListener(callback, Arrays.asList(incomingChannel));
     }
 
+    /**
+     * Requests a room list from the engine
+     */
+    public void getRoomList() {
+        changeListener(new RoomsListCallback(), Arrays.asList(Channels.roomListChannel));
+    }
     public void dieHorribly() {
         System.out.println("Going down");
         pn.unsubscribeAll();
@@ -133,5 +166,24 @@ public final class NetworkManager {
         pn.destroy();
         pn = null;
         System.out.println("The pain won't stop");
+    }
+
+    /**
+     * Sends move info out
+     */
+    public void sendMove(int row, int col, int roomID, String playerID) {
+        System.out.println("Publishing on " + Channels.roomChannelSet + roomID);
+        pn.publish()
+                .message(new MoveInfo(roomID, playerID, row, col))
+                .channel(Channels.roomChannelSet + roomID)
+                .async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        // handle publish result, status always present, result if successful
+                        // status.isError() to see if error happened
+                        if (!status.isError()) {
+                        }
+                    }
+                });
     }
 }

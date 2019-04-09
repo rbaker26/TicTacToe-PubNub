@@ -1,5 +1,7 @@
 package Messages;
 
+import com.google.gson.JsonObject;
+
 import java.util.Objects;
 
 public class RoomInfo {
@@ -19,6 +21,10 @@ public class RoomInfo {
 
     }
 
+    public RoomInfo(int roomID, String playerID) {
+        setPlayer(playerID, Channels.privateChannelSet + playerID, true);
+        setRoomID(roomID);
+    }
     //region Getters and setters
 
     /**
@@ -48,6 +54,19 @@ public class RoomInfo {
         }
     }
 
+    public void addPlayer(String playerID) {
+        if(playerID == null) {
+            throw new NullPointerException("Null ID");
+        }
+        else if(hasPlayer1()) {
+            player2ID = playerID;
+            player2Channel = Channels.privateChannelSet + playerID;
+        }
+        else {
+            player1ID = playerID;
+            player1Channel = Channels.privateChannelSet + playerID;
+        }
+    }
 
     public String getPlayer1ID() {
         return player1ID;
@@ -96,6 +115,10 @@ public class RoomInfo {
 
     public boolean hasPlayer2() {
         return player2ID != null;
+    }
+
+    public boolean isAvailable() {
+        return this.player1ID == null || this.player2ID == null;
     }
     //endregion
 

@@ -3,10 +3,12 @@
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import Messages.RoomInfo;
 import com.pubnub.api.*;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -40,7 +42,7 @@ public class Client extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("HBox Experiment 1");
-
+        NetworkManager.getInstance();
 
         Label nameLabel = new Label("Name");
         TextField nameField = new TextField();
@@ -48,17 +50,45 @@ public class Client extends Application {
         Label roomLabel = new Label("Room");
         TextField roomField = new TextField();
 
+        Label turnOrder = new Label("Go first?");
+        CheckBox goFirst = new CheckBox();
+
         Button openButton = new Button("Open");
         Button joinButton = new Button("Join");
+        Button refreshButton = new Button("Get Room List");
 
         openButton.setOnAction(value ->  {
             System.out.println("Opening");
 
-            //NetworkManager.forceUUID(nameField.getText());
-            NetworkManager.getInstance().requestNewRoom(nameField.getText(), true);
+
+            NetworkManager.getInstance().requestNewRoom(nameField.getText(), goFirst.isSelected());
         });
 
-        VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
+        joinButton.setOnAction(e -> {
+            System.out.println("Joining");
+            RoomInfo room = new RoomInfo(Integer.parseInt(roomField.getText()), nameField.getText());
+            System.out.println(room);
+            NetworkManager.getInstance().joinLobby(room);
+        });
+
+        refreshButton.setOnAction(e -> {
+            System.out.println("Getting rooms");
+            NetworkManager.getInstance().getRoomList();
+        });
+
+        // FOLLOWING FOR TESTING
+        Label rowLabel = new Label("Row: ");
+        TextField rowField = new TextField();
+        Label colLabel = new Label("Col: ");
+        TextField colField = new TextField();
+        Button moveButton = new Button("Send Move");
+
+        moveButton.setOnAction(e -> {
+            NetworkManager.getInstance().sendMove(Integer.parseInt(rowField.getText()), Integer.parseInt(colField.getText()), 100000, nameField.getText());
+        });
+
+        HBox hbox = new HBox(rowLabel, rowField, colLabel, colField);
+        VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, turnOrder, goFirst, openButton, joinButton, refreshButton, hbox, moveButton);
 
         Scene scene = new Scene(vbox, 200, 200);
         primaryStage.setScene(scene);
