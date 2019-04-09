@@ -14,7 +14,12 @@ public class Move {
 
     @Override
     public String toString() {
+<<<<<<< HEAD
         return "RoomID:\t" + String.valueOf(roomID) + "\tRow:\t" + String.valueOf(row)+
                 "\tCol:\t" + String.valueOf(col)    + "\tplayerID:\t" + String.valueOf(playerID);
+=======
+         return "RoomID:\t" + String.valueOf(roomID) + "\tRow:\t" + String.valueOf(row)+
+                 "\tCol:\t" + String.valueOf(col)    + "\tplayerID:\t" + String.valueOf(playerID);
+>>>>>>> cbf7d4fd102e62c78034be54c2830da9898fd769
     }
 }
