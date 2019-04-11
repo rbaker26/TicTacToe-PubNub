@@ -18,15 +18,15 @@ import java.util.function.Consumer;
  */
 public class RoomRequesterCallback extends SubscribeCallback {
 
-    private String userID;
+    private String ourUserID;
     private String outgoingChannel;
     private String incomingChannel;
     private RoomInfo roomInfo;
     private Consumer<RoomInfo> successResponse;
     private Consumer<RoomInfo> failureResponse;
 
-    public RoomRequesterCallback(String userID, String outgoingChannel, String incomingChannel, RoomInfo roomInfo) {
-        this.userID = userID;
+    public RoomRequesterCallback(String ourUserID, String outgoingChannel, String incomingChannel, RoomInfo roomInfo) {
+        this.ourUserID = ourUserID;
         this.outgoingChannel = outgoingChannel;
         this.incomingChannel = incomingChannel;
 
@@ -113,11 +113,11 @@ public class RoomRequesterCallback extends SubscribeCallback {
 
 
             /*
-            if (creator.equals(userID)) {
+            if (creator.equals(ourUserID)) {
 
                 String channel = json.get("Channel").getAsString();
 
-                pubnub.addListener(new PlayerCallback(userID, channel));
+                pubnub.addListener(new PlayerCallback(ourUserID, channel));
                 pubnub.removeListener(this);
 
                 pubnub.subscribe().channels(Arrays.asList(channel)).execute();

@@ -1,76 +1,77 @@
-import com.google.gson.JsonObject;
+import Messages.Channels;
+import Messages.Keys;
+import Messages.RoomInfo;
+import EngineLib.Lobby;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
-import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
-import com.pubnub.api.enums.PNStatusCategory;
-import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
+import java.net.NetworkInterface;
+import java.util.*;
+
 
 public class Engine {
+    private PNConfiguration pnConfiguration = new PNConfiguration();
+    private PubNub pb;
+    private String myUuid;
+    private List<RoomInfo> RoomList = Collections.synchronizedList(new ArrayList<>());     // List of all rooms
+    private Map<Integer, Lobby> Lobbies = Collections.synchronizedMap(new HashMap<>());
+    private static int newRoomID = 100000;
+    private RoomsListListener rml;
+    private GameRequestListener grl;
+    private MoveListener ml;
 
-    public static GameInfo game;
-
-    public static void main(String[] args) {
-
-        // For the UUID, we need to pick something that we can ALWAYS regenerate.
-        // So we'll pick the host-name.
-        String hostname = "Unknown";
+    public Engine() {
+        pnConfiguration.setSubscribeKey(Keys.subKey);
+        pnConfiguration.setPublishKey(Keys.pubKey);
 
         try {
-            InetAddress addr;
-            addr = InetAddress.getLocalHost();
-            hostname = addr.getHostName();
+            byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+            StringBuilder uuid = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                uuid.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            }
+            uuid.append("engine");
+            myUuid = uuid.toString();
+            pnConfiguration.setUuid(myUuid);
 
-        } catch (UnknownHostException ex) {
-            System.out.println("Hostname can not be resolved");
+        }
+        catch(Exception ex) {
+            System.out.println("Cannot get local host... Creating default UUID");
+            myUuid = pnConfiguration.getUuid();
         }
 
-        PNConfiguration pnConfiguration = new PNConfiguration();
-        pnConfiguration.setSubscribeKey("sub-c-89b1d65a-4f40-11e9-bc3e-aabf89950afa");
-        pnConfiguration.setPublishKey("pub-c-79140f4c-8b9e-49ed-992f-cf6322c68d04");
-        pnConfiguration.setUuid(hostname + "Engine");
-
-
-        String roomRequestChannelName = "Rooms::Request";
-        String roomUpdateChannelName = "Rooms::Update";
-        //String moveChannelName = "Move";
-
-        // create message payload using Gson
-        /*
-        MoveData data = new MoveData();
-        data.column = 1;
-        data.row = 30;
-        data.sender = "Rad dude";
-        data.eVal = MoveData.TestEnum.Value2;
-        */
-
-
-        //System.out.println("Message to send: " + data.toString());
-        //System.out.println("Message to send: " + data.toString());
-
-        // TODO This should get created inside RoomCreatorCallback, but
-        //      at the time we just have one.
-        GameInfo game = new GameInfo(1);
-
-        PubNub pubnub = new PubNub(pnConfiguration);
-        pubnub.addListener(new RoomCreatorCallback(game, roomRequestChannelName, roomUpdateChannelName));
-        pubnub.subscribe().channels(Arrays.asList(roomRequestChannelName)).execute();
+        pb = new PubNub(pnConfiguration);
+        rml = new RoomsListListener(RoomList, myUuid);
+        grl = new GameRequestListener(RoomList, Lobbies, myUuid);
+        ml = new MoveListener(Lobbies);
+        Subscribe();
     }
 
-    public static void SendGameInfo(PubNub pubnub, GameInfo game, Integer previousRow, Integer previousCol) {
-        JsonObject data = new JsonObject();
-        data.addProperty("PreviousRow", previousRow);
-        data.addProperty("PreviousColumn", previousCol);
-        // IsGameOver
-        // Winner
-        // WinReason
-        //data.addProperty("PreviousPlayer", game.get)
+    public void Subscribe() {
+        pb.subscribe().
+                channels(Arrays.asList(
+                        Channels.roomListChannel,
+                        Channels.roomRequestChannel,
+                        Channels.roomMoveChannel)).execute();
+        pb.addListener(rml);
+        pb.addListener(grl);
+        pb.addListener(ml);
+
     }
+
+    public static int getNewRoomID() {
+        int id = newRoomID;
+        newRoomID++;
+        return id;
+    }
+
+    public static void main(String[] args) {
+        Engine engine = new Engine();
+    }
+
 }

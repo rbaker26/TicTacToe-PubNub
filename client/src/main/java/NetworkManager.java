@@ -1,12 +1,16 @@
 import Messages.Channels;
+import Messages.MoveInfo;
 import Messages.RoomInfo;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import com.pubnub.api.models.consumer.PNPublishResult;
+import com.pubnub.api.models.consumer.PNStatus;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -53,6 +57,7 @@ public final class NetworkManager {
         pnConfiguration.setUuid(uuid + "Client" + uuidModifier);
 
         pn = new PubNub(pnConfiguration);
+
     }
     //endregion
 
@@ -93,13 +98,14 @@ public final class NetworkManager {
         //clearCurrentListener();
 
         String incomingChannel = Channels.privateChannelSet + userID;
-        String outgoingChannel = Channels.privateChannelSet + userID;
-        //String outgoingChannel = Channels.roomRequestChannel;
+        //String outgoingChannel = Channels.privateChannelSet + userID;
+        String outgoingChannel = Channels.roomRequestChannel;
 
         RoomInfo roomInfo = new RoomInfo();
         roomInfo.setPlayer(userID, incomingChannel, goingFirst);
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
+                //userID, incomingChannel, incomingChannel, roomInfo
                 userID, outgoingChannel, incomingChannel, roomInfo
         );
 
@@ -123,9 +129,9 @@ public final class NetworkManager {
 
     /**
      * Joins a room which has been created via request requestNewRoom.
-     * @param userID
      * @param roomInfo
      */
+    /*
     public void joinRoom(String userID, RoomInfo roomInfo) {
         String incomingChannel = Channels.privateChannelSet + userID;
         String outgoingChannel = Channels.privateChannelSet + userID;
@@ -146,10 +152,44 @@ public final class NetworkManager {
         callback.setFailureResponse(responseRoomInfo -> {
             changeListener(null, null);
         });
+=======
+*/
+    public void joinRoom(String ourUserID, RoomInfo roomInfo) {
+        String incomingChannel = Channels.privateChannelSet + roomInfo.getPlayer1ID();
+        String outgoingChannel = Channels.roomRequestChannel;
+
+        // If player2 is already around, then we'll be going first.
+        // Otherwise, we'll go second.
+        boolean goingFirst = roomInfo.hasPlayer2();
+        roomInfo.setPlayer(ourUserID, incomingChannel, goingFirst);
+
+        RoomRequesterCallback callback = new RoomRequesterCallback(
+                //userID, incomingChannel, incomingChannel, roomInfo
+                ourUserID, outgoingChannel, incomingChannel, roomInfo
+        );
+
+        callback.setSuccessResponse(responseRoomInfo -> {
+            /*
+            pn.removeListener(callback);
+            pn.unsubscribe().channels(Arrays.asList(incomingChannel)).execute();
+             */
+            changeListener(null, null);
+        });
+
+        /*
+        pn.addListener(callback);
+        pn.subscribe().channels(Arrays.asList(incomingChannel)).execute();
+         */
 
         changeListener(callback, Arrays.asList(incomingChannel));
     }
 
+    /**
+     * Requests a room list from the engine
+     */
+    public void getRoomList() {
+        changeListener(new RoomsListCallback(), Arrays.asList(Channels.roomListChannel));
+    }
     public void dieHorribly() {
         System.out.println("Going down");
         pn.unsubscribeAll();
@@ -157,5 +197,24 @@ public final class NetworkManager {
         pn.destroy();
         pn = null;
         System.out.println("The pain won't stop");
+    }
+
+    /**
+     * Sends move info out
+     */
+    public void sendMove(int row, int col, int roomID, String playerID) {
+        System.out.println("Publishing on " + Channels.roomMoveChannel);
+        pn.publish()
+                .message(new MoveInfo(roomID, playerID, row, col))
+                .channel(Channels.roomMoveChannel)
+                .async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        // handle publish result, status always present, result if successful
+                        // status.isError() to see if error happened
+                        if (!status.isError()) {
+                        }
+                    }
+                });
     }
 }
