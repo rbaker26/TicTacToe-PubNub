@@ -16,12 +16,7 @@ public class Client extends Application {
 
     private ISceneController lobbyController;
     private ISceneController waitingController;
-
-    //I'm testing out my tableview
-    private ISceneController roomListController;
-
     private ISceneController playAgainController;
-
     private ISceneController mainWindowController;
 
     public static void main(String[] args) {
@@ -48,9 +43,6 @@ public class Client extends Application {
 
         playAgainController paObject = new playAgainController();
         playAgainController = paObject;
-
-        RoomListController roomlistObject = new RoomListController();
-        roomListController = roomlistObject;
 
         mainWindowController mainObject = new mainWindowController();
         mainWindowController = mainObject;
@@ -132,7 +124,7 @@ public class Client extends Application {
 >>>>>>> Engine
 	*/
 
-        roomlistObject.applyScene(primaryStage);
+        lobbyController.applyScene(primaryStage);
         primaryStage.setWidth(initWidth);
         primaryStage.setHeight(initHeight);
         primaryStage.show();
@@ -142,7 +134,7 @@ public class Client extends Application {
 
     @Override
     public void stop() throws Exception {
-        NetworkManager.getInstance().dieHorribly();
+        NetworkManager.dieIfNeeded();
 
         // TODO We shouldn't be forcing an exit, but... we have no other choice
         System.exit(0);

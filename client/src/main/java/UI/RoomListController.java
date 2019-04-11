@@ -34,6 +34,9 @@ public class RoomListController extends AbstractSceneController{
         joinButton = new Button("Join");
 
         //CREATING THE COLUMNS FOR THE TABLE
+
+        // TODO Look into another way of populating this which doesn't use PropertyValueFactory
+
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
         idColumn.setMinWidth(100);
         idColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));

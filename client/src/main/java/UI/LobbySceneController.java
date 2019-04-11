@@ -29,19 +29,7 @@ public class LobbySceneController extends AbstractSceneController {
         openButton = new Button("Open");
         joinButton = new Button("Join");
 
-	/*
-        // TODO THIS IS JUST FOR TESTING
-        Button debugButton = new Button("Show board view");
-        debugButton.setOnAction(value -> {
-            GameViewController newView = new GameViewController();
-            newView.applyScene((Stage) getRoot().getScene().getWindow());
-        });
-
-        //VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton, debugButton);
-        VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
-	*/
-	//
-        //CREATING THE COLUMNS FOR THE TABLE
+        //region Table config
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
         idColumn.setMinWidth(100);
         idColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
@@ -66,12 +54,14 @@ public class LobbySceneController extends AbstractSceneController {
         player2TokenColumn.setMinWidth(100);
         player2TokenColumn.setCellValueFactory(new PropertyValueFactory<>("Player2Token"));
 
+
         lobbyTable = new TableView<>();
+        lobbyTable.getColumns().addAll(idColumn, lobbyStatColumn, player1Column, player2Column,
+                player1TokenColumn, player2TokenColumn);
 
         lobbyTable.setItems(getRoomInfo());
+        //endregion
 
-        lobbyTable.getColumns().addAll(idColumn, lobbyStatColumn, player1Column, player2Column,
-                                        player1TokenColumn, player2TokenColumn);
 
         VBox vbox = new VBox(lobbyTable, nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
 

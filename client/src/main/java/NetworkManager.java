@@ -32,6 +32,17 @@ public final class NetworkManager {
     public static void setUuidModifier(String uuidModifier) {
         NetworkManager.uuidModifier = uuidModifier;
     }
+
+    /**
+     * Cleans up the network connection if it exists.
+     */
+    public static void dieIfNeeded() {
+        if(_instance != null) {
+            _instance.dieHorribly();
+            _instance = null;
+        }
+    }
+
     private static String getDefaultUUID() {
         String hostname = "Unknown";
 
@@ -190,7 +201,11 @@ public final class NetworkManager {
     public void getRoomList() {
         changeListener(new RoomsListCallback(), Arrays.asList(Channels.roomListChannel));
     }
-    public void dieHorribly() {
+
+    /**
+     * Do anything possible to end this instance at all costs instantaneously without regrets.
+     */
+    private void dieHorribly() {
         System.out.println("Going down");
         pn.unsubscribeAll();
         pn.disconnect();
