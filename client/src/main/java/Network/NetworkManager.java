@@ -105,6 +105,11 @@ public final class NetworkManager {
         currentChannels = newChannels;
     }
 
+    public void listenForRooms() {
+        // TODO Ping the engine to update the room list
+        // TODO Have a callback to let the outside world know
+    }
+
     public void requestNewRoom(String userID, boolean goingFirst, Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
 
         //clearCurrentListener();
@@ -143,29 +148,6 @@ public final class NetworkManager {
      * Joins a room which has been created via request requestNewRoom.
      * @param roomInfo
      */
-    /*
-    public void joinRoom(String userID, RoomInfo roomInfo) {
-        String incomingChannel = Channels.privateChannelSet + userID;
-        String outgoingChannel = Channels.privateChannelSet + userID;
-        //String outgoingChannel = Channels.roomRequestChannel;
-
-        // If player2 is already around, then we'll be going first.
-        // Otherwise, we'll go second.
-        boolean goingFirst = roomInfo.hasPlayer2();
-        roomInfo.setPlayer(userID, incomingChannel, goingFirst);
-
-        Network.RoomRequesterCallback callback = new Network.RoomRequesterCallback(
-                userID, outgoingChannel, incomingChannel, roomInfo
-        );
-
-        callback.setSuccessResponse(responseRoomInfo -> {
-            changeListener(null, null);
-        });
-        callback.setFailureResponse(responseRoomInfo -> {
-            changeListener(null, null);
-        });
-=======
-*/
     public void joinRoom(String ourUserID, RoomInfo roomInfo) {
         String incomingChannel = Channels.privateChannelSet + roomInfo.getPlayer1ID();
         String outgoingChannel = Channels.roomRequestChannel;
@@ -181,10 +163,6 @@ public final class NetworkManager {
         );
 
         callback.setSuccessResponse(responseRoomInfo -> {
-            /*
-            pn.removeListener(callback);
-            pn.unsubscribe().channels(Arrays.asList(incomingChannel)).execute();
-             */
             changeListener(null, null);
         });
 

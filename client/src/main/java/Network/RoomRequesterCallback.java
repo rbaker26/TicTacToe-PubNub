@@ -119,7 +119,7 @@ public class RoomRequesterCallback extends SubscribeCallback {
 
                 String channel = json.get("Channel").getAsString();
 
-                pubnub.addListener(new PlayerCallback(ourUserID, channel));
+                pubnub.addListener(new Network.PlayerCallback(ourUserID, channel));
                 pubnub.removeListener(this);
 
                 pubnub.subscribe().channels(Arrays.asList(channel)).execute();
