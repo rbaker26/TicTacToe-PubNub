@@ -172,10 +172,10 @@ public final class NetworkManager {
      * Sends move info out
      */
     public void sendMove(int row, int col, int roomID, String playerID) {
-        System.out.println("Publishing on " + Channels.roomChannelSet + roomID);
+        System.out.println("Publishing on " + Channels.roomMoveChannel);
         pn.publish()
                 .message(new MoveInfo(roomID, playerID, row, col))
-                .channel(Channels.roomChannelSet + roomID)
+                .channel(Channels.roomMoveChannel)
                 .async(new PNCallback<PNPublishResult>() {
                     @Override
                     public void onResponse(PNPublishResult result, PNStatus status) {

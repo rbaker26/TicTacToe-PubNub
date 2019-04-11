@@ -1,6 +1,6 @@
 package Messages;
 
-import Engine.Board;
+import EngineLib.Board;
 
 public class MoveRequest {
     private Board board;

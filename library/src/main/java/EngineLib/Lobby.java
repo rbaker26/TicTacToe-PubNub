@@ -1,15 +1,16 @@
-package Engine;
+package EngineLib;
 
 import Messages.RoomInfo;
 
 /**
  * This represents a lobby in the engine, which holds the room info as well as the game board.
- * It is specifically used by the Engine and the Engine's LobbyManager to keep track of the running
+ * It is specifically used by the Engine to keep track of the running
  * game.
  */
 public class Lobby {
     private RoomInfo roomInfo;
     private Board board;
+    private String currentPlayer = "";
     private boolean gameRunning = true;
 
     /**
@@ -27,6 +28,17 @@ public class Lobby {
 
     public Board getBoard() {
         return board;
+    }
+
+    public String getCurrentPlayer() { return currentPlayer; }
+
+    public void toggleCurrentPlayer() {
+        if(currentPlayer == "" || currentPlayer == roomInfo.getPlayer2ID()) {
+            currentPlayer = roomInfo.getPlayer1ID();
+        }
+        else {
+            currentPlayer = roomInfo.getPlayer2ID();
+        }
     }
 
     public boolean isRunning() {

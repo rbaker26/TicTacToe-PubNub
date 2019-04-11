@@ -1,4 +1,4 @@
-package Engine;
+package EngineLib;
 
 import java.util.Arrays;
 import java.util.Objects;

@@ -29,4 +29,12 @@ public class MoveInfo {
     public int getCol() {
         return col;
     }
+
+    @Override
+    public String toString() {
+        return "roomID: " + roomID +
+                " playerID: " + playerID +
+                " row: " + row +
+                " col: " + col;
+    }
 }
