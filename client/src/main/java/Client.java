@@ -1,5 +1,6 @@
 
 
+import Network.NetworkManager;
 import UI.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -39,7 +40,7 @@ public class Client extends Application {
 
         LobbySceneController lobby = new LobbySceneController();
         lobbyController = lobby;
-        //NetworkManager.getInstance();
+        //Network.NetworkManager.getInstance();
 
         playAgainController paObject = new playAgainController();
         playAgainController = paObject;
@@ -55,7 +56,7 @@ public class Client extends Application {
 
             waitingController.applyScene(primaryStage);
 
-            //NetworkManager.forceUUID(nameField.getText());
+            //Network.NetworkManager.forceUUID(nameField.getText());
             NetworkManager.getInstance().requestNewRoom(
                     lobby.getName(),
                     true,
@@ -93,19 +94,19 @@ public class Client extends Application {
             System.out.println("Opening");
 
 
-            NetworkManager.getInstance().requestNewRoom(nameField.getText(), goFirst.isSelected());
+            Network.NetworkManager.getInstance().requestNewRoom(nameField.getText(), goFirst.isSelected());
         });
 
         joinButton.setOnAction(e -> {
             System.out.println("Joining");
             RoomInfo room = new RoomInfo(Integer.parseInt(roomField.getText()), nameField.getText());
             System.out.println(room);
-            NetworkManager.getInstance().joinLobby(room);
+            Network.NetworkManager.getInstance().joinLobby(room);
         });
 
         refreshButton.setOnAction(e -> {
             System.out.println("Getting rooms");
-            NetworkManager.getInstance().getRoomList();
+            Network.NetworkManager.getInstance().getRoomList();
         });
 
         // FOLLOWING FOR TESTING
@@ -116,7 +117,7 @@ public class Client extends Application {
         Button moveButton = new Button("Send Move");
 
         moveButton.setOnAction(e -> {
-            NetworkManager.getInstance().sendMove(Integer.parseInt(rowField.getText()), Integer.parseInt(colField.getText()), 100000, nameField.getText());
+            Network.NetworkManager.getInstance().sendMove(Integer.parseInt(rowField.getText()), Integer.parseInt(colField.getText()), 100000, nameField.getText());
         });
 
         HBox hbox = new HBox(rowLabel, rowField, colLabel, colField);

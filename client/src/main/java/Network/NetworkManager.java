@@ -1,3 +1,5 @@
+package Network;
+
 import Messages.Channels;
 import Messages.MoveInfo;
 import Messages.RoomInfo;
@@ -10,7 +12,6 @@ import com.pubnub.api.models.consumer.PNStatus;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -153,7 +154,7 @@ public final class NetworkManager {
         boolean goingFirst = roomInfo.hasPlayer2();
         roomInfo.setPlayer(userID, incomingChannel, goingFirst);
 
-        RoomRequesterCallback callback = new RoomRequesterCallback(
+        Network.RoomRequesterCallback callback = new Network.RoomRequesterCallback(
                 userID, outgoingChannel, incomingChannel, roomInfo
         );
 

@@ -1,3 +1,5 @@
+package Network;
+
 import Messages.Channels;
 import Messages.Converter;
 import Messages.RoomInfo;
