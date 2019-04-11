@@ -1,7 +1,11 @@
 package UI;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.collections.ObservableList;
@@ -9,6 +13,25 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import javafx.application.Application;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.util.Callback;
+
 
 public class RoomListController extends AbstractSceneController{
 
@@ -86,5 +109,44 @@ public class RoomListController extends AbstractSceneController{
 
         return information;
     }
+
+    /****
+     * STILL IN PROGRESS
+     * This function allows something to happen when a row is selected from the table.
+     ****/
+    public void displaySelected(MouseEvent event) {
+        RoomInfo rowSelect = lobbyTable.getSelectionModel().getSelectedItem();
+
+        if(rowSelect == null) {
+            System.out.println("Nothing Selected");
+        }
+
+        else{
+
+            System.out.println("Hello world");
+        }
+
+    }
+
+    //I AM GOING TO FIGURE OUT WHICH ONE WILL WORK BEST - Naomi
+
+    /****
+     * STILL IN PROGRESS
+     * This is another way to implement the action of row selection of table.
+     */
+    class MyEventHandler implements EventHandler<MouseEvent> {
+
+        @Override
+        public void handle(MouseEvent t) {
+            TableCell c = (TableCell) t.getSource();
+            int index = c.getIndex();
+            System.out.println("Hello I am a sentence.");
+
+        }
+    }
+
+
+
+
 
 }
