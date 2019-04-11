@@ -10,6 +10,10 @@ import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 import java.util.Map;
 
+/**
+ * This listener will handle all incoming moves on the Rooms::Move channel.  All the move validation and
+ * execution will be handled here.
+ */
 public class MoveListener extends SubscribeCallback {
     private String myChannel;
     private Map<Integer, Lobby> lobbyList;
