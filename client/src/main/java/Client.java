@@ -5,7 +5,10 @@ import java.net.UnknownHostException;
 
 import UI.ISceneController;
 import UI.LobbySceneController;
+import UI.RoomListController;
+import UI.playAgainController;
 import UI.WaitingForOpponentScene;
+import UI.mainWindowController;
 import com.pubnub.api.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -26,11 +29,18 @@ import java.util.Arrays;
 
 public class Client extends Application {
 
-    private static final double initWidth = 200;
-    private static final double initHeight = 200;
+    private static final double initWidth = 800;
+    private static final double initHeight = 600;
 
     private ISceneController lobbyController;
     private ISceneController waitingController;
+
+    //I'm testing out my tableview
+    private ISceneController roomListController;
+
+    private ISceneController playAgainController;
+
+    private ISceneController mainWindowController;
 
     public static void main(String[] args) {
 
@@ -47,10 +57,20 @@ public class Client extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         primaryStage.setTitle("SABRCATST TicTacToe");
 
         LobbySceneController lobby = new LobbySceneController();
         lobbyController = lobby;
+
+        playAgainController paObject = new playAgainController();
+        playAgainController = paObject;
+
+        RoomListController roomlistObject = new RoomListController();
+        roomListController = roomlistObject;
+
+        mainWindowController mainObject = new mainWindowController();
+        mainWindowController = mainObject;
 
         waitingController = new WaitingForOpponentScene();
 
@@ -72,6 +92,7 @@ public class Client extends Application {
                             primaryStage.setScene(new Scene(new HBox(), 100, 100))
                         );
                          */
+
                     },
                     null
             );
@@ -86,10 +107,12 @@ public class Client extends Application {
             NetworkManager.getInstance().joinRoom(lobby.getName(), roomInfo);
         });
 
-        lobby.applyScene(primaryStage);
+        roomlistObject.applyScene(primaryStage);
         primaryStage.setWidth(initWidth);
         primaryStage.setHeight(initHeight);
         primaryStage.show();
+
+
     }
 
     @Override
@@ -100,3 +123,4 @@ public class Client extends Application {
         System.exit(0);
     }
 }
+
