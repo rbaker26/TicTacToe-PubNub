@@ -105,9 +105,11 @@ public final class NetworkManager {
         currentChannels = newChannels;
     }
 
-    public void listenForRooms() {
+    public void listenForRooms(Consumer<List<RoomInfo>> onUpdateCallback) {
         // TODO Ping the engine to update the room list
         // TODO Have a callback to let the outside world know
+
+        changeListener(new RoomListCallback(onUpdateCallback), Arrays.asList(Channels.roomListChannel));
     }
 
     public void requestNewRoom(String userID, boolean goingFirst, Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
@@ -172,13 +174,6 @@ public final class NetworkManager {
          */
 
         changeListener(callback, Arrays.asList(incomingChannel));
-    }
-
-    /**
-     * Requests a room list from the engine
-     */
-    public void getRoomList() {
-        changeListener(new RoomsListCallback(), Arrays.asList(Channels.roomListChannel));
     }
 
     /**

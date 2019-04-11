@@ -3,6 +3,7 @@
 import Network.NetworkManager;
 import UI.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 
@@ -124,6 +125,8 @@ public class Client extends Application {
         VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, turnOrder, goFirst, openButton, joinButton, refreshButton, hbox, moveButton);
 >>>>>>> Engine
 	*/
+
+
 
         lobbyController.applyScene(primaryStage);
         primaryStage.setWidth(initWidth);

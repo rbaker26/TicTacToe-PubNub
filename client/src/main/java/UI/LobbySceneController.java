@@ -1,5 +1,7 @@
 package UI;
 
+import Network.NetworkManager;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -8,6 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.util.List;
 import java.util.Objects;
 
 public class LobbySceneController extends AbstractSceneController {
@@ -84,7 +87,32 @@ public class LobbySceneController extends AbstractSceneController {
         return information;
     }
 
+    public void setRoomInfoAsync(List<Messages.RoomInfo> rooms) {
+        Platform.runLater(() -> setRoomInfo(rooms));
+    }
 
+    public void setRoomInfo(List<Messages.RoomInfo> rooms) {
+        ObservableList<RoomInfo> information = FXCollections.observableArrayList();
+        for(Messages.RoomInfo room : rooms) {
+            information.add(new RoomInfo(
+                    Integer.toString(room.getRoomID()),
+                    "Unknown",
+                    room.getPlayer1ID(),
+                    room.getPlayer2ID(),
+                    "X",
+                    "O"
+            ));
+        }
+
+        lobbyTable.setItems(information);
+    }
+
+    @Override
+    public void applyScene(Stage targetStage) {
+        super.applyScene(targetStage);
+
+        NetworkManager.getInstance().listenForRooms( this::setRoomInfo );
+    }
 
     //region Getters
     /*
