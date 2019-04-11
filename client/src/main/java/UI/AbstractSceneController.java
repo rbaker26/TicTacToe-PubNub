@@ -55,8 +55,12 @@ abstract public class AbstractSceneController implements ISceneController {
 
         // We will need to make sure the window isn't smaller than the
         // minimum values.
+        /*
         double targetWidth = Math.max(root.minWidth(stageHeight), stageWidth);
         double targetHeight = Math.max(root.minHeight(stageWidth), stageHeight);
+         */
+        double targetWidth = stageWidth;
+        double targetHeight = stageHeight;
 
         System.out.println("Width: " + root.minWidth(stageHeight) + ", " + stageWidth);
         System.out.println("Height: " + root.minHeight(stageWidth) + ", " + stageHeight);
@@ -64,11 +68,13 @@ abstract public class AbstractSceneController implements ISceneController {
         // Now we can finally apply the size stuff that we've figured out.
 
         // This is needed and it is dumb...
-        targetStage.setWidth(targetWidth);
-        targetStage.setHeight(targetHeight);
+
 
         Scene newScene = new Scene(root, targetWidth, targetHeight);
         targetStage.setScene(newScene);
+
+        //targetStage.setWidth(targetWidth);
+        //targetStage.setHeight(targetHeight);
 
         root.resize(targetWidth, targetHeight);    // This is needed so that layouts update correctly
     }
