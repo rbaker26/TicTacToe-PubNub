@@ -1,26 +1,9 @@
 
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import UI.ISceneController;
-import UI.LobbySceneController;
-import UI.WaitingForOpponentScene;
-import Messages.RoomInfo;
-import com.pubnub.api.*;
+import UI.*;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.util.Arrays;
 
 // NOTE: To change the uuid, go to the launch configurations and add this to the "Arguments" field
 //   -Pargs=Something
@@ -28,11 +11,18 @@ import java.util.Arrays;
 
 public class Client extends Application {
 
-    private static final double initWidth = 200;
-    private static final double initHeight = 200;
+    private static final double initWidth = 800;
+    private static final double initHeight = 600;
 
     private ISceneController lobbyController;
     private ISceneController waitingController;
+
+    //I'm testing out my tableview
+    private ISceneController roomListController;
+
+    private ISceneController playAgainController;
+
+    private ISceneController mainWindowController;
 
     public static void main(String[] args) {
 
@@ -49,11 +39,21 @@ public class Client extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         primaryStage.setTitle("SABRCATST TicTacToe");
 
         LobbySceneController lobby = new LobbySceneController();
         lobbyController = lobby;
         //NetworkManager.getInstance();
+
+        playAgainController paObject = new playAgainController();
+        playAgainController = paObject;
+
+        RoomListController roomlistObject = new RoomListController();
+        roomListController = roomlistObject;
+
+        mainWindowController mainObject = new mainWindowController();
+        mainWindowController = mainObject;
 
         waitingController = new WaitingForOpponentScene();
 
@@ -75,6 +75,7 @@ public class Client extends Application {
                             primaryStage.setScene(new Scene(new HBox(), 100, 100))
                         );
                          */
+
                     },
                     null
             );
@@ -131,10 +132,12 @@ public class Client extends Application {
 >>>>>>> Engine
 	*/
 
-        lobby.applyScene(primaryStage);
+        roomlistObject.applyScene(primaryStage);
         primaryStage.setWidth(initWidth);
         primaryStage.setHeight(initHeight);
         primaryStage.show();
+
+
     }
 
     @Override
@@ -145,3 +148,4 @@ public class Client extends Application {
         System.exit(0);
     }
 }
+
