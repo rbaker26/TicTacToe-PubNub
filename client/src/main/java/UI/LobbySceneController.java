@@ -33,6 +33,13 @@ public class LobbySceneController extends AbstractSceneController {
         joinButton = new Button("Join");
 
         //region Table config
+        // TODO Using setCellValueFactory and PropertyValueFactory can be mildly problematic.
+        //      It requires reflection, which must be specifically included for the final build.
+        //      We are left with two options:
+        //       1) Don't use them.
+        //       2) Look into building with this feature.
+        //      We need to do one or the other.
+
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
         idColumn.setMinWidth(100);
         idColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
@@ -87,11 +94,34 @@ public class LobbySceneController extends AbstractSceneController {
         return information;
     }
 
+    /**
+     * This is a proxy function to call setRoomInfo asynchronously. This means that the
+     * given room info will not be applied instantaneously; it will be applied whenever
+     * the JavaFX thread gets around to it.
+     *
+     * Use this if interacting with the lobby from another thread.
+     * @param rooms The room list.
+     */
     public void setRoomInfoAsync(List<Messages.RoomInfo> rooms) {
         Platform.runLater(() -> setRoomInfo(rooms));
     }
 
+    /**
+     * Updates the table of rooms with the new room info. Whatever was there
+     * previously will be discarded.
+     *
+     * This is UNSAFE to call from another thread. Refer to setRoomInfoAsync if calling
+     * from another thread.
+     * @param rooms The room list.
+     */
     public void setRoomInfo(List<Messages.RoomInfo> rooms) {
+
+        // TODO If possible, it's probably more convenient to make a 1-1 coupling, having
+        //      the table be able to take Messages.RoomInfo so we don't have to convert things.
+        //      However, if we stick with this reflection-based approach, it's probably better
+        //      to keep it as a separate UI object.
+
+        // This code is just going to convert the Messages.RoomInfo objects into UI.RoomInfo objects.
         ObservableList<RoomInfo> information = FXCollections.observableArrayList();
         for(Messages.RoomInfo room : rooms) {
             information.add(new RoomInfo(
@@ -105,13 +135,21 @@ public class LobbySceneController extends AbstractSceneController {
         }
 
         lobbyTable.setItems(information);
+
+        // TODO If we are selecting available rooms, we will need to check to make sure that the new
+        //      list of rooms has not invalidated our selection. We should probably track the RoomID of the
+        //      selected room, and then scan through the new list. If the RoomID is gone, we need to
+        //      deselect it.
     }
 
     @Override
     public void applyScene(Stage targetStage) {
         super.applyScene(targetStage);
 
-        NetworkManager.getInstance().listenForRooms( this::setRoomInfo );
+        // This causes us to automatically launch into the listening state when opening this scene.
+        // It passes the setRoomInfoAsync function, which will get called whenever we get an
+        // updated list of rooms.
+        NetworkManager.getInstance().listenForRooms( this::setRoomInfoAsync );
     }
 
     //region Getters
