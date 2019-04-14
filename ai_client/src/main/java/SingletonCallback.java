@@ -6,7 +6,6 @@ import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
-import jdk.net.SocketFlow;
 
 /**
  * This callback simply listens for messages on a channel. If it
@@ -21,7 +20,8 @@ public class SingletonCallback extends SubscribeCallback {
     /**
      * This is the time (in milliseconds) to wait before declaring ourselves the master.
      */
-    private static long waitTime = 5000;
+    //private static long waitTime = 5000;
+    private static long waitTime = 20000;
 
     private static class StatusMessage {
         public long spawnTime;
@@ -93,6 +93,32 @@ public class SingletonCallback extends SubscribeCallback {
     private UniquenessState state;
 
 
+    //region Getters and setters
+    public Runnable getIsMasterCallback() {
+        return isMasterCallback;
+    }
+
+    public void setIsMasterCallback(Runnable isMasterCallback) {
+        this.isMasterCallback = isMasterCallback;
+    }
+
+    public Runnable getNotMasterCallback() {
+        return notMasterCallback;
+    }
+
+    public void setNotMasterCallback(Runnable notMasterCallback) {
+        this.notMasterCallback = notMasterCallback;
+    }
+
+    public Runnable getInterruptedCallback() {
+        return interruptedCallback;
+    }
+
+    public void setInterruptedCallback(Runnable interruptedCallback) {
+        this.interruptedCallback = interruptedCallback;
+    }
+    //endregion
+
     public SingletonCallback(String channel) {
         spawnTime = System.currentTimeMillis();
         outgoingChannel = channel;
@@ -100,6 +126,10 @@ public class SingletonCallback extends SubscribeCallback {
         state = UniquenessState.UNKNOWN;
     }
 
+    /**
+     * Creates a status message for this instance of the singleton.
+     * @return
+     */
     public StatusMessage createStatusMessage() {
         return new StatusMessage(spawnTime);
     }
@@ -121,28 +151,31 @@ public class SingletonCallback extends SubscribeCallback {
     /**
      * Checks if we are a duplicate object based on the message we receive.
      * This will cause cleanup if necessary.
-     * @param msg
+     * @param pubnub Used for publishing a message in the case that we win.
      * @return
      */
-    synchronized boolean checkForDuplicate(PubNub pubnub, StatusMessage msg) {
+    synchronized UniquenessState checkForDuplicate(PubNub pubnub, StatusMessage msg) {
 
-
-        // If the other message was spawned before we were...
-        if(msg.spawnTime < spawnTime) {
-            // ...then they win! We are the duplicate.
-            state = UniquenessState.DUPLICATE;
+        // Don't bother doing anything if we've already deemed ourself a duplicate
+        if(state != UniquenessState.DUPLICATE) {
+            // If the other message was spawned before we were...
+            if (msg.spawnTime < spawnTime) {
+                // ...then they win! We are the duplicate.
+                state = UniquenessState.DUPLICATE;
+                notMasterCallback.run();
+            }
+            else {
+                // We're older than them, so we win! We need to let them
+                // know so that they can clean themselves up.
+                pubnub.publish().channel(outgoingChannel).message(createStatusMessage()).async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                    }
+                });
+            }
         }
-        else {
-            // They're older than us, so we win! We need to let them
-            // know so that they can clean themselves up.
-            pubnub.publish().channel(outgoingChannel).message(createStatusMessage()).async(/*new PNCallback<PNPublishResult>() {
-                @Override
-                public void onResponse(PNPublishResult result, PNStatus status) {
-                }
-            }*/ null);
-        }
 
-        return state == UniquenessState.DUPLICATE;
+        return state;
     }
 
     @Override
@@ -165,6 +198,8 @@ public class SingletonCallback extends SubscribeCallback {
                         // the time limit, we'll assume we are the only ones. This can potentially get interrupted
                         // by another message coming to us.
                         try {
+                            System.out.println("Waiting...");
+
                             Thread.sleep(waitTime);
 
                             if(makeMaster()) {
@@ -201,9 +236,7 @@ public class SingletonCallback extends SubscribeCallback {
 
         if(sourceChannel.equals(incomingChannel)) {
             StatusMessage msg = Messages.Converter.fromJson(message.getMessage(), StatusMessage.class);
-            if(checkForDuplicate(pubnub, msg)) {
-                notMasterCallback.run();
-            }
+            checkForDuplicate(pubnub, msg);
         }
     }
 

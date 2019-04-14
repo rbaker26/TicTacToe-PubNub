@@ -10,6 +10,7 @@ import com.pubnub.api.PubNub;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 public class Client {
 
@@ -39,11 +40,16 @@ public class Client {
 
         String testChannel = "AI_Test";
 
+        SingletonCallback singleton = new SingletonCallback(testChannel);
+        singleton.setIsMasterCallback(() -> System.out.println("Success"));
+        singleton.setNotMasterCallback(() -> System.out.println("Failed"));
+        singleton.setInterruptedCallback(() -> System.out.println("Interrupted"));
 
-    }
+        pn.addListener(singleton);
+        pn.subscribe().channels(Arrays.asList(testChannel)).execute();
 
-    public static boolean isAlreadyRunning() {
-        return false;
+
+
     }
 }
 

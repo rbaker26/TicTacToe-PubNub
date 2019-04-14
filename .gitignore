@@ -1,5 +1,6 @@
 .gradle
 **/build/
+**/out/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -20,3 +21,4 @@ gradle-app.setting
 
 *.idea
 *.iml
+*.kotlin_module

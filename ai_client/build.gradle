@@ -38,3 +38,13 @@ run{
         args project.args.split(',')
     }
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'Client'
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
