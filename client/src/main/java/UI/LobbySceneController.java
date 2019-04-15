@@ -1,7 +1,10 @@
 package UI;
 
+import UI.*;
 import Network.NetworkManager;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -20,6 +23,11 @@ public class LobbySceneController extends AbstractSceneController {
     private Button openButton;
     private Button joinButton;
 
+
+    private ISceneController boardGUI;
+    private ISceneController mainWindow;
+
+
     TableView<RoomInfo> lobbyTable;
 
     public LobbySceneController() {
@@ -33,6 +41,13 @@ public class LobbySceneController extends AbstractSceneController {
         joinButton = new Button("Join");
 
         //region Table config
+        // TODO Using setCellValueFactory and PropertyValueFactory can be mildly problematic.
+        //      It requires reflection, which must be specifically included for the final build.
+        //      We are left with two options:
+        //       1) Don't use them.
+        //       2) Look into building with this feature.
+        //      We need to do one or the other.
+
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
         idColumn.setMinWidth(100);
         idColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
@@ -84,14 +99,80 @@ public class LobbySceneController extends AbstractSceneController {
         information.add(new RoomInfo("34562", "Closed - Game in Play", "Bobby", "Keane", "X", "O"));
         information.add(new RoomInfo("67895", "Closed - Game in Play", "Daniel", "Naomi", "O", "X"));
 
+        testing();
+
         return information;
     }
 
+
+    public void testing() {
+
+        /*** ABOUT THIS FUNCTION - TESTING LISTENER FUNCTION
+         * Selection of row is implemented by this function. Right now, I am just able to determine
+         * if a row is selected, which will help lead us to starting up a game
+         * I want this to connect to board UI.
+         */
+        Stage getStage = new Stage();
+
+        lobbyTable.getSelectionModel().selectedIndexProperty().addListener(new InvalidationListener() {
+            @Override
+            public void invalidated(Observable observable) {
+
+                BoardGUIPane boardObject = new BoardGUIPane();
+
+                mainWindowController mainObject = new mainWindowController();
+
+                //SO WITHIN HERE WE MUST TAKE VALUES OF THE COLUMNS AND PASS THEM INTO BOARD FUNCTIONALITY
+                //THAT ALLOWS A GAME TO START GIVEN PLAYER INFORMATION AS WELL AS ROOM ID.
+
+                System.out.println("Selected indices: " + lobbyTable.getSelectionModel().getSelectedItems());
+
+                System.out.println("Selected items: " + lobbyTable.getSelectionModel().getSelectedItems());
+
+                // boardGUI = boardObject; //CANNOT SWITCH TO BOARD UI
+
+                //THIS IS JUST FOR TESTING: I WANT TO SWITCH OVER TO THE MAINwINDOW CONTROLLER IF I SELECT A ROW
+
+                mainWindow = mainObject;
+
+                mainObject.applyScene(getStage);
+
+
+            }
+
+        });
+
+    }
+
+
+    /**
+     * This is a proxy function to call setRoomInfo asynchronously. This means that the
+     * given room info will not be applied instantaneously; it will be applied whenever
+     * the JavaFX thread gets around to it.
+     *
+     * Use this if interacting with the lobby from another thread.
+     * @param rooms The room list.
+     */
     public void setRoomInfoAsync(List<Messages.RoomInfo> rooms) {
         Platform.runLater(() -> setRoomInfo(rooms));
     }
 
+    /**
+     * Updates the table of rooms with the new room info. Whatever was there
+     * previously will be discarded.
+     *
+     * This is UNSAFE to call from another thread. Refer to setRoomInfoAsync if calling
+     * from another thread.
+     * @param rooms The room list.
+     */
     public void setRoomInfo(List<Messages.RoomInfo> rooms) {
+
+        // TODO If possible, it's probably more convenient to make a 1-1 coupling, having
+        //      the table be able to take Messages.RoomInfo so we don't have to convert things.
+        //      However, if we stick with this reflection-based approach, it's probably better
+        //      to keep it as a separate UI object.
+
+        // This code is just going to convert the Messages.RoomInfo objects into UI.RoomInfo objects.
         ObservableList<RoomInfo> information = FXCollections.observableArrayList();
         for(Messages.RoomInfo room : rooms) {
             information.add(new RoomInfo(
@@ -105,13 +186,21 @@ public class LobbySceneController extends AbstractSceneController {
         }
 
         lobbyTable.setItems(information);
+
+        // TODO If we are selecting available rooms, we will need to check to make sure that the new
+        //      list of rooms has not invalidated our selection. We should probably track the RoomID of the
+        //      selected room, and then scan through the new list. If the RoomID is gone, we need to
+        //      deselect it.
     }
 
     @Override
     public void applyScene(Stage targetStage) {
         super.applyScene(targetStage);
 
-        NetworkManager.getInstance().listenForRooms( this::setRoomInfo );
+        // This causes us to automatically launch into the listening state when opening this scene.
+        // It passes the setRoomInfoAsync function, which will get called whenever we get an
+        // updated list of rooms.
+        NetworkManager.getInstance().listenForRooms( this::setRoomInfoAsync );
     }
 
     //region Getters
@@ -123,11 +212,11 @@ public class LobbySceneController extends AbstractSceneController {
     public TextField getRoomField() {
         return roomField;
     }
-     */
+
     public String getName() {
         return nameField.getText();
     }
-
+*/
     /**
      * @deprecated This should NOT be used for serious code. Instead, the
      *             user will be choosing rooms to join.
