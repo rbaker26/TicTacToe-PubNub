@@ -6,6 +6,7 @@
 // This will tack on "Something" to the UUID. Make several launch configs if you want.
 
 import Messages.Channels;
+import Network.SingletonCallback;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
 

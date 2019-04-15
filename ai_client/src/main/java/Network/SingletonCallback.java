@@ -1,3 +1,5 @@
+package Network;
+
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
@@ -162,7 +164,9 @@ public class SingletonCallback extends SubscribeCallback {
             if (msg.spawnTime < spawnTime) {
                 // ...then they win! We are the duplicate.
                 state = UniquenessState.DUPLICATE;
-                notMasterCallback.run();
+                if(notMasterCallback != null) {
+                    notMasterCallback.run();
+                }
             }
             else {
                 // We're older than them, so we win! We need to let them
@@ -203,14 +207,18 @@ public class SingletonCallback extends SubscribeCallback {
                             if(makeMaster()) {
                                 // If we are successful in becoming master, then... we've done it!
                                 // We can continue to do... whatever it was we were trying to do.
-                                isMasterCallback.run();
+                                if(isMasterCallback != null) {
+                                    isMasterCallback.run();
+                                }
                             }
                         }
                         catch(java.lang.InterruptedException ex) {
                             /**
                              * If we get interrupted, we're probably killing the thread. Thus, we failed?
                              */
-                            interruptedCallback.run();
+                            if(interruptedCallback != null) {
+                                interruptedCallback.run();
+                            }
                         }
                     }
                     else {
