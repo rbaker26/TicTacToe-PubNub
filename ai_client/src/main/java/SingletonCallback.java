@@ -20,8 +20,8 @@ public class SingletonCallback extends SubscribeCallback {
     /**
      * This is the time (in milliseconds) to wait before declaring ourselves the master.
      */
-    //private static long waitTime = 5000;
-    private static long waitTime = 20000;
+    private static long waitTime = 5000;
+    //private static long waitTime = 20000;
 
     private static class StatusMessage {
         public long spawnTime;
@@ -198,8 +198,6 @@ public class SingletonCallback extends SubscribeCallback {
                         // the time limit, we'll assume we are the only ones. This can potentially get interrupted
                         // by another message coming to us.
                         try {
-                            System.out.println("Waiting...");
-
                             Thread.sleep(waitTime);
 
                             if(makeMaster()) {

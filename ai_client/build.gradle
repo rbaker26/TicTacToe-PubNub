@@ -29,7 +29,7 @@ dependencies {
     compile group: 'ch.qos.logback', name:'logback-core', version: '1.0.9'
 }
 
-mainClassName = 'Client'
+mainClassName = 'AI_Client'
 
 run{
     //standardInput = System.in
@@ -41,7 +41,7 @@ run{
 
 jar {
     manifest {
-        attributes 'Main-Class': 'Client'
+        attributes 'Main-Class': 'AI_Client'
     }
 
     from {

@@ -11,6 +11,7 @@ import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 public abstract class AbstractAICallback extends SubscribeCallback {
 
     private String name;
+    private String incomingChannel;
     private String outgoingChannel;
 
     public AbstractAICallback(String name, String roomChannel) {
