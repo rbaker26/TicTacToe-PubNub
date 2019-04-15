@@ -1,3 +1,8 @@
+import com.google.gson.JsonObject;
+
+import java.sql.SQLException;
+import java.util.ArrayDeque;
+
 public class RecorderServer {
 
     public static void main(String[] args){
@@ -18,24 +23,48 @@ public class RecorderServer {
         //*********************************************
 
 
-        while (true) {
-            //*********************************************
-            // Get Pubnub Message
-            //*********************************************
+       ArrayDeque<JsonObject> bad_transmit = new ArrayDeque<JsonObject>();
+       int toggle = 0;
+        try {
+            while (true) {
+                //*********************************************
+                // Get Pubnub Message
+                //*********************************************
+                JsonObject json = new JsonObject();
+
+                //*********************************************
 
 
-            //*********************************************
+                //*********************************************
+                // Call Appropriate DB Function
+                //*********************************************
+                try {
+                    // Send to data base
+                    throw new SQLException();
+                }
+                catch(SQLException sqle) {
+                    bad_transmit.add(json);
+                }
+                finally {
+                    toggle = (toggle + 1) %4;
+                    if(toggle == 1) {
+                        try{
+                            // Resend message
+                            throw new SQLException();
+                        }
+                        catch(SQLException sqle) {
 
+                        }
 
-            //*********************************************
-            // Call Appropriate DB Function
-            //*********************************************
+                    }
+                }
+                //*********************************************
 
-
-            //*********************************************
+            }
         }
-
-
+        catch(Exception e) {
+            // Exit server
+        }
         // Test code
 //        Move move = new Move(1,2,3,4);
 //        System.out.println(move);
