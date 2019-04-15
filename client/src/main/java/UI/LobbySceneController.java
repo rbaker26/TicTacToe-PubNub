@@ -1,7 +1,10 @@
 package UI;
 
+import UI.*;
 import Network.NetworkManager;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -19,6 +22,11 @@ public class LobbySceneController extends AbstractSceneController {
     private TextField roomField;
     private Button openButton;
     private Button joinButton;
+
+
+    private ISceneController boardGUI;
+    private ISceneController mainWindow;
+
 
     TableView<RoomInfo> lobbyTable;
 
@@ -91,8 +99,51 @@ public class LobbySceneController extends AbstractSceneController {
         information.add(new RoomInfo("34562", "Closed - Game in Play", "Bobby", "Keane", "X", "O"));
         information.add(new RoomInfo("67895", "Closed - Game in Play", "Daniel", "Naomi", "O", "X"));
 
+        testing();
+
         return information;
     }
+
+
+    public void testing() {
+
+        /*** ABOUT THIS FUNCTION - TESTING LISTENER FUNCTION
+         * Selection of row is implemented by this function. Right now, I am just able to determine
+         * if a row is selected, which will help lead us to starting up a game
+         * I want this to connect to board UI.
+         */
+        Stage getStage = new Stage();
+
+        lobbyTable.getSelectionModel().selectedIndexProperty().addListener(new InvalidationListener() {
+            @Override
+            public void invalidated(Observable observable) {
+
+                BoardGUIPane boardObject = new BoardGUIPane();
+
+                mainWindowController mainObject = new mainWindowController();
+
+                //SO WITHIN HERE WE MUST TAKE VALUES OF THE COLUMNS AND PASS THEM INTO BOARD FUNCTIONALITY
+                //THAT ALLOWS A GAME TO START GIVEN PLAYER INFORMATION AS WELL AS ROOM ID.
+
+                System.out.println("Selected indices: " + lobbyTable.getSelectionModel().getSelectedItems());
+
+                System.out.println("Selected items: " + lobbyTable.getSelectionModel().getSelectedItems());
+
+                // boardGUI = boardObject; //CANNOT SWITCH TO BOARD UI
+
+                //THIS IS JUST FOR TESTING: I WANT TO SWITCH OVER TO THE MAINwINDOW CONTROLLER IF I SELECT A ROW
+
+                mainWindow = mainObject;
+
+                mainObject.applyScene(getStage);
+
+
+            }
+
+        });
+
+    }
+
 
     /**
      * This is a proxy function to call setRoomInfo asynchronously. This means that the
@@ -161,11 +212,11 @@ public class LobbySceneController extends AbstractSceneController {
     public TextField getRoomField() {
         return roomField;
     }
-     */
+
     public String getName() {
         return nameField.getText();
     }
-
+*/
     /**
      * @deprecated This should NOT be used for serious code. Instead, the
      *             user will be choosing rooms to join.
