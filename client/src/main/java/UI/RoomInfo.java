@@ -2,6 +2,7 @@ package UI;
 
 public class RoomInfo {
 
+    //instance variables
     private String id; //5 digit ID number
     private String lobbyStatus; //open or closed
     private String player1; //name
