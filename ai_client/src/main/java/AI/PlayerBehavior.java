@@ -20,5 +20,5 @@ public interface PlayerBehavior extends Serializable {
      * @param b The current board state.
      * @param token Player's token or symbol.
      */
-    void getMove(EngineLib.Board b, char token);
+    void getMove(EngineLib.Board b, char token, int roomID, String playerID);
 }

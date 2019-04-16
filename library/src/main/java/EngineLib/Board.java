@@ -7,9 +7,9 @@ public class Board {
     //***************************************************************************
     // Data
     //***************************************************************************
-    final int ROW_COUNT = 3;
-    final int COL_COUNT = 3;
-    final char DEFAULT_VALUE = ' ';
+    public final int ROW_COUNT = 3;
+    public final int COL_COUNT = 3;
+    public final char DEFAULT_VALUE = ' ';
     private char[][] boardArray = new char[ROW_COUNT][COL_COUNT];
     //***************************************************************************
 
