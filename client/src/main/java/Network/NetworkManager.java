@@ -71,6 +71,16 @@ public final class NetworkManager {
         return hostname;
     }
 
+    //endregion
+
+
+    private PubNub pn;
+    private SubscribeCallback currentListener = null;
+    private List<String> currentChannels = null;
+
+    private HeartbeatThreadCallback heartbeatCallback;
+    private Thread heartbeatThread;
+
     private NetworkManager() {
         this(getDefaultUUID());
     }
@@ -82,14 +92,11 @@ public final class NetworkManager {
 
         pn = new PubNub(pnConfiguration);
 
+        // Now to set up the heartbeat thread.
+        heartbeatCallback = new HeartbeatThreadCallback(pn, Channels.clientHeartbeatChannel);
+        heartbeatThread = new Thread(heartbeatCallback);
+        heartbeatThread.start();
     }
-    //endregion
-
-
-
-    private PubNub pn;
-    private SubscribeCallback currentListener = null;
-    private List<String> currentChannels = null;
 
     /**
      * Changes to another listener. This will override whatever current listener we have.
@@ -244,6 +251,17 @@ public final class NetworkManager {
      */
     private void dieHorribly() {
         System.out.println("Going down");
+
+        heartbeatCallback.setAlive(false);
+        try {
+            System.out.print("My heart...");
+            heartbeatThread.join();
+            System.out.println("has stopped...");
+        }
+        catch(InterruptedException ex) {
+            System.out.println("Wow, so impatient! I'll die faster, geez.");
+        }
+
         pn.unsubscribeAll();
         pn.disconnect();
         pn.destroy();
