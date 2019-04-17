@@ -16,6 +16,10 @@ public class RoomInfo {
     private int roomID = defaultRoomID;
     private String roomChannel = null;
 
+    private String status = "Unknown";
+    private String player1Token = "X";
+    private String player2Token = "O";
+
 
     public RoomInfo() {
 
@@ -84,6 +88,30 @@ public class RoomInfo {
         return player2Channel;
     }
 
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getPlayer1Token() {
+        return player1Token;
+    }
+
+    public void setPlayer1Token(String player1Token) {
+        this.player1Token = player1Token;
+    }
+
+    public String getPlayer2Token() {
+        return player2Token;
+    }
+
+    public void setPlayer2Token(String player2Token) {
+        this.player2Token = player2Token;
+    }
 
     public int getRoomID() {
         return roomID;
