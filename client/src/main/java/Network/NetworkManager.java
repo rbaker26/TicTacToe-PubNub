@@ -161,7 +161,8 @@ public final class NetworkManager {
      * @param successResponse Is called upon successfully getting a room. If null, the listeners will be cleared.
      * @param failureResponse Is called upon unsuccessfully getting a room. If null, the listeners will be cleared.
      */
-    public void requestNewRoom(String userID, boolean goingFirst, Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+    public void requestNewRoom(String userID, boolean goingFirst,
+                               Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
 
         //clearCurrentListener();
 
@@ -213,7 +214,8 @@ public final class NetworkManager {
      * @param successResponse Called upon successfully joining the room. If null, the listeners will be cleared.
      * @param failureResponse Called upon unsuccessfully joining the room. If null, the listeners will be cleared.
      */
-    public void joinRoom(String ourUserID, RoomInfo roomInfo, Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+    public void joinRoom(String ourUserID, RoomInfo roomInfo,
+                         Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
         String incomingChannel = Channels.privateChannelSet + roomInfo.getPlayer1ID();
         String outgoingChannel = Channels.roomRequestChannel;
 
@@ -266,7 +268,8 @@ public final class NetworkManager {
         pn.disconnect();
         pn.destroy();
         pn = null;
-        System.out.println("The pain won't stop");
+
+        System.out.println("The pain won't stop...");
     }
 
     /**

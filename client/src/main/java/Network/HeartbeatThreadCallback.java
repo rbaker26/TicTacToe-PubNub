@@ -42,14 +42,14 @@ public class HeartbeatThreadCallback implements Runnable {
                 pn.publish().message(beat).channel(getOutgoingChannel()).sync();
                 System.out.println("Thump");
             } catch (PubNubException ex) {
-                System.out.println("FAILED TO SEND HEARTBEAT: ex");
+                System.out.println("SKIPPED A BEAT: " + ex.toString());
             }
 
             try {
                 Thread.sleep(getBeatPeriod());
             }
             catch(InterruptedException ex) {
-                System.out.println("Heartbeat thread interrupted; dying");
+                System.out.println("Heartbeat interrupted; dying");
                 setAlive(false);
             }
         } // End while(isAlive())

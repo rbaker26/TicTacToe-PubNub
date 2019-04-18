@@ -4,10 +4,6 @@ import Messages.RoomInfo;
 import EngineLib.Lobby;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
-import com.pubnub.api.callbacks.SubscribeCallback;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -24,6 +20,7 @@ public class Engine {
     private RoomsListListener rml;
     private GameRequestListener grl;
     private MoveListener ml;
+    private HeartbeatCallback heartbeatCallback;
 
     public Engine() {
         pnConfiguration.setSubscribeKey(Keys.subKey);
@@ -49,6 +46,7 @@ public class Engine {
         rml = new RoomsListListener(RoomList, myUuid);
         grl = new GameRequestListener(RoomList, Lobbies, myUuid);
         ml = new MoveListener(Lobbies);
+        heartbeatCallback = new HeartbeatCallback(Channels.clientHeartbeatChannel);
         Subscribe();
     }
 
@@ -57,10 +55,12 @@ public class Engine {
                 channels(Arrays.asList(
                         Channels.roomListChannel,
                         Channels.roomRequestChannel,
-                        Channels.roomMoveChannel)).execute();
+                        Channels.roomMoveChannel,
+                        Channels.clientHeartbeatChannel)).execute();
         pb.addListener(rml);
         pb.addListener(grl);
         pb.addListener(ml);
+        pb.addListener(heartbeatCallback);
 
     }
 
