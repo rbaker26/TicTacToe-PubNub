@@ -1,3 +1,5 @@
+package Heartbeat;
+
 import Messages.Heartbeat;
 
 import java.util.Objects;
@@ -9,8 +11,9 @@ class HeartbeatSourceInfo {
     private String uuid;
     private Heartbeat previousBeat;
 
-    public HeartbeatSourceInfo(String uuid) {
+    public HeartbeatSourceInfo(String uuid, long timeOfLastHeartbeat) {
         this.uuid = uuid;
+        this.timeOfLastHeartbeat = timeOfLastHeartbeat;
     }
 
     //region Getters and setters
@@ -48,7 +51,7 @@ class HeartbeatSourceInfo {
 
     @Override
     public String toString() {
-        return "HeartbeatSourceInfo{" +
+        return "Heartbeat.HeartbeatSourceInfo{" +
                 "expiredCallback=" + expiredCallback +
                 ", timeOfLastHeartbeat=" + timeOfLastHeartbeat +
                 ", uuid='" + uuid + '\'' +
