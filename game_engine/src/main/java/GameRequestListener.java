@@ -74,7 +74,7 @@ public class GameRequestListener extends SubscribeCallback {
         if (roomIsValid(roomMsg)) {
             System.out.println("Join room request received: " + roomMsg);
             RoomInfo room = lobbyList.get(roomID).getRoomInfo();
-            room.addPlayer(roomMsg.getPlayer1ID());
+            room.addPlayer(roomMsg.getPlayer1());       // TODO Look into this
             for(int roomIndex = 0; roomIndex < roomInfoList.size(); roomIndex++) {
                 if(roomInfoList.get(roomIndex).getRoomID() == roomID) {
                     roomInfoList.remove(roomIndex);
@@ -94,7 +94,7 @@ public class GameRequestListener extends SubscribeCallback {
                     });
             pb.publish() // Notifying player 1 that game has started
                     .message(room)
-                    .channel(room.getPlayer1Channel())
+                    .channel(room.getPlayer1().getChannel())
                     .async(new PNCallback<PNPublishResult>() {
                         @Override
                         public void onResponse(PNPublishResult result, PNStatus status) {
@@ -106,7 +106,7 @@ public class GameRequestListener extends SubscribeCallback {
                     });
             pb.publish() // Notifying player 2 that game has started
                     .message(room)
-                    .channel(room.getPlayer2Channel())
+                    .channel(room.getPlayer2().getChannel())
                     .async(new PNCallback<PNPublishResult>() {
                         @Override
                         public void onResponse(PNPublishResult result, PNStatus status) {
@@ -120,7 +120,7 @@ public class GameRequestListener extends SubscribeCallback {
             pb.publish() // Sending initial move request
                     .message(new MoveRequest(lobbyList.get(roomID).getBoard(),
                             room,
-                            room.getPlayer1ID()))
+                            room.getPlayer1Name()))
                     .channel(Channels.roomChannelSet + room.getRoomID())
                     .async(new PNCallback<PNPublishResult>() {
                         @Override

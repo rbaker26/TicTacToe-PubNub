@@ -2,6 +2,7 @@ package Network;
 
 import Messages.Channels;
 import Messages.MoveInfo;
+import Messages.PlayerInfo;
 import Messages.RoomInfo;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
@@ -9,7 +10,6 @@ import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
-import org.w3c.dom.ranges.RangeException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -81,6 +81,13 @@ public final class NetworkManager {
     private HeartbeatThreadCallback heartbeatCallback;
     private Thread heartbeatThread;
 
+    /**
+     * When you're using this, call getBasePlayer, which makes a clone of this.
+     * Modifying this would also change the result of getBasePlayer. Thus, don't
+     * change this unless you know what you're doing.
+     */
+    private PlayerInfo basePlayer;
+
     private NetworkManager() {
         this(getDefaultUUID());
     }
@@ -96,6 +103,21 @@ public final class NetworkManager {
         heartbeatCallback = new HeartbeatThreadCallback(pn, Channels.clientHeartbeatChannel);
         heartbeatThread = new Thread(heartbeatCallback);
         heartbeatThread.start();
+
+        basePlayer = new PlayerInfo(pnConfiguration.getUuid());
+    }
+
+    private PlayerInfo getPlayerInfo(String userID, String privateChannel) {
+        try {
+            PlayerInfo result = (PlayerInfo) basePlayer.clone();
+            result.setId(userID);
+            result.setChannel(privateChannel);
+            return result;
+        }
+        catch(CloneNotSupportedException ex) {
+            System.out.println("NetworkManager.getPlayerInfo failed to clone somehow");
+            return null;
+        }
     }
 
     /**
@@ -170,12 +192,21 @@ public final class NetworkManager {
         //String outgoingChannel = Channels.privateChannelSet + userID;
         String outgoingChannel = Channels.roomRequestChannel;
 
-        RoomInfo roomInfo = new RoomInfo();
-        roomInfo.setPlayer(userID, incomingChannel, goingFirst);
+        RoomInfo room = new RoomInfo();
+        //roomInfo.setPlayer(userID, incomingChannel, goingFirst);
+        PlayerInfo player = getPlayerInfo(userID, incomingChannel);
+
+        if(goingFirst) {
+            room.setPlayer1(player);
+        }
+        else {
+            room.setPlayer2(player);
+        }
+
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo
-                userID, outgoingChannel, incomingChannel, roomInfo
+                userID, outgoingChannel, incomingChannel, room
         );
 
 
@@ -216,13 +247,13 @@ public final class NetworkManager {
      */
     public void joinRoom(String ourUserID, RoomInfo roomInfo,
                          Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
-        String incomingChannel = Channels.privateChannelSet + roomInfo.getPlayer1ID();
+        String incomingChannel = Channels.privateChannelSet + roomInfo.getPlayer1Name();
         String outgoingChannel = Channels.roomRequestChannel;
 
         // If player2 is already around, then we'll be going first.
         // Otherwise, we'll go second.
-        boolean goingFirst = roomInfo.hasPlayer2();
-        roomInfo.setPlayer(ourUserID, incomingChannel, goingFirst);
+        PlayerInfo player = getPlayerInfo(ourUserID, incomingChannel);
+        roomInfo.addPlayer(player);
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo

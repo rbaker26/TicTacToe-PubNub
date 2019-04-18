@@ -1,5 +1,6 @@
 package UI;
 
+import Messages.PlayerInfo;
 import Messages.RoomInfo;
 import Network.NetworkManager;
 import javafx.application.Platform;
@@ -41,13 +42,6 @@ public class LobbySceneController extends AbstractSceneController {
         joinButton = new Button("Join");
 
         //region Table config
-        // TODO Using setCellValueFactory and PropertyValueFactory can be mildly problematic.
-        //      It requires reflection, which must be specifically included for the final build.
-        //      We are left with two options:
-        //       1) Don't use them.
-        //       2) Look into building with this feature.
-        //      We need to do one or the other.
-
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
         idColumn.setMinWidth(100);
         idColumn.setCellValueFactory(new PropertyValueFactory<>("roomID"));
@@ -58,11 +52,11 @@ public class LobbySceneController extends AbstractSceneController {
 
         TableColumn<RoomInfo, String> player1Column = new TableColumn<>("Player1");
         player1Column.setMinWidth(100);
-        player1Column.setCellValueFactory(new PropertyValueFactory<>("player1ID"));
+        player1Column.setCellValueFactory(new PropertyValueFactory<>("player1Name"));
 
         TableColumn<RoomInfo, String> player2Column = new TableColumn<>("Player2");
         player2Column.setMinWidth(100);
-        player2Column.setCellValueFactory(new PropertyValueFactory<>("player2ID"));
+        player2Column.setCellValueFactory(new PropertyValueFactory<>("player2Name"));
 
         TableColumn<RoomInfo, String> player1TokenColumn = new TableColumn<>("Player1 Token");
         player1TokenColumn.setMinWidth(100);
@@ -98,9 +92,13 @@ public class LobbySceneController extends AbstractSceneController {
         ObservableList<RoomInfo> information = FXCollections.observableArrayList();
         //information.add(new RoomInfo("34562", "Closed - Game in Play", "Bobby", "Keane", "X", "O"));
         //information.add(new RoomInfo("67895", "Closed - Game in Play", "Daniel", "Naomi", "O", "X"));
-        information.add(new RoomInfo(193, "Hi"));
+        //information.add(new RoomInfo(193, "Hi"));
+        RoomInfo testRoom1 = new RoomInfo();
+        testRoom1.setRoomID(1324);
+        testRoom1.setPlayer1(new PlayerInfo("213", "Hi", "Oof"));
+        information.add(testRoom1);
 
-        testing();
+        //testing();
 
         return information;
     }
@@ -180,8 +178,8 @@ public class LobbySceneController extends AbstractSceneController {
             information.add(new RoomInfo(
                     Integer.toString(room.getRoomID()),
                     "Unknown",
-                    room.getPlayer1ID(),
-                    room.getPlayer2ID(),
+                    room.getPlayer1Name(),
+                    room.getPlayer2Name(),
                     "X",
                     "O"
             ));
