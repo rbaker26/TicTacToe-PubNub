@@ -2,7 +2,19 @@ package Messages;
 
 import java.util.Objects;
 
+/**
+ * This is info which relates specifically with one room, or requests to the engine
+ * pertaining to rooms.
+ */
 public class RoomInfo {
+
+    /**
+     * Marks which kind of request this is, assuming it's getting sent across PubNub.
+     */
+    public static enum RequestType {
+        RESULT, CREATE, JOIN, DISCONNECT
+    }
+
     public static final int defaultRoomID = -1;
 
     PlayerInfo player1 = null;
@@ -15,6 +27,16 @@ public class RoomInfo {
     private String player1Token = "X";
     private String player2Token = "O";
 
+    private RequestType requestMode = RequestType.RESULT;
+
+
+    public static RoomInfo makeDisconnectRoom(PlayerInfo player) {
+        RoomInfo result = new RoomInfo();
+        result.setPlayer1(player);
+        result.setRequestMode(RequestType.DISCONNECT);
+
+        return result;
+    }
 
     public RoomInfo() {
 
@@ -32,7 +54,24 @@ public class RoomInfo {
         }
     }
 
+    public boolean hasPlayer(PlayerInfo creator) {
+        if(creator == null) {
+            return false;
+        }
+        else {
+            return creator.equals(getPlayer1()) || creator.equals(getPlayer2());
+        }
+    }
+
     //region Getters and setters
+    public RequestType getRequestMode() {
+        return requestMode;
+    }
+
+    public void setRequestMode(RequestType requestMode) {
+        this.requestMode = requestMode;
+    }
+
     public PlayerInfo getPlayer1() {
         return player1;
     }
@@ -125,25 +164,7 @@ public class RoomInfo {
     }
     //endregion
 
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RoomInfo roomInfo = (RoomInfo) o;
-        return getRoomID() == roomInfo.getRoomID() &&
-                Objects.equals(player1, roomInfo.player1) &&
-                Objects.equals(player2, roomInfo.player2) &&
-                Objects.equals(getRoomChannel(), roomInfo.getRoomChannel()) &&
-                Objects.equals(getPlayer1Token(), roomInfo.getPlayer1Token()) &&
-                Objects.equals(getPlayer2Token(), roomInfo.getPlayer2Token());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(player1, player2, getRoomID(), getRoomChannel(), getPlayer1Token(), getPlayer2Token());
-    }
-
+    //region Object overrides
     @Override
     public String toString() {
         return "RoomInfo{" +
@@ -153,6 +174,29 @@ public class RoomInfo {
                 ", roomChannel='" + roomChannel + '\'' +
                 ", player1Token='" + player1Token + '\'' +
                 ", player2Token='" + player2Token + '\'' +
+                ", requestMode=" + requestMode +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RoomInfo roomInfo = (RoomInfo) o;
+        return getRoomID() == roomInfo.getRoomID() &&
+                Objects.equals(getPlayer1(), roomInfo.getPlayer1()) &&
+                Objects.equals(getPlayer2(), roomInfo.getPlayer2()) &&
+                Objects.equals(getRoomChannel(), roomInfo.getRoomChannel()) &&
+                Objects.equals(getPlayer1Token(), roomInfo.getPlayer1Token()) &&
+                Objects.equals(getPlayer2Token(), roomInfo.getPlayer2Token()) &&
+                getRequestMode() == roomInfo.getRequestMode();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPlayer1(), getPlayer2(), getRoomID(), getRoomChannel(), getPlayer1Token(), getPlayer2Token(), getRequestMode());
+    }
+
+    //endregion
+
 }

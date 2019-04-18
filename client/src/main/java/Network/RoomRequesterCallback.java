@@ -54,6 +54,19 @@ public class RoomRequesterCallback extends SubscribeCallback {
         this.failureResponse = failureResponse;
     }
 
+    /**
+     * Cancels the request to join/create a room. This does NOT clean up this callback;
+     * the caller must detach the callback and everything else.
+     * @param pubnub Used for sending the message.
+     */
+    public void cancelRequest(PubNub pubnub) {
+        roomInfo.setRequestMode(RoomInfo.RequestType.DISCONNECT);
+        pubnub.publish().channel(outgoingChannel).message(roomInfo).async(new PNCallback<PNPublishResult>() {
+            @Override
+            public void onResponse(PNPublishResult result, PNStatus status) { }
+        });
+    }
+
     @Override
     public void status(PubNub pubnub, PNStatus status) {
 

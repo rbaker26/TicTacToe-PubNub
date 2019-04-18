@@ -3,7 +3,6 @@
 import Network.NetworkManager;
 import UI.*;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.stage.Stage;
 
 
@@ -16,10 +15,10 @@ public class Client extends Application {
     private static final double initWidth = 800;
     private static final double initHeight = 600;
 
-    private ISceneController lobbyController;
-    private ISceneController waitingController;
-    private ISceneController playAgainController;
-    private ISceneController mainWindowController;
+    private LobbySceneController lobbyController;
+    private WaitingForOpponentScene waitingController;
+    private PlayAgainController playAgainController;
+    //private ISceneController mainWindowController;
 
     public static void main(String[] args) {
 
@@ -39,27 +38,24 @@ public class Client extends Application {
 
         primaryStage.setTitle("SABRCATST TicTacToe");
 
-        LobbySceneController lobby = new LobbySceneController();
-        lobbyController = lobby;
+        lobbyController = new LobbySceneController();
         //Network.NetworkManager.getInstance();
 
-        playAgainController paObject = new playAgainController();
-        playAgainController = paObject;
+        playAgainController = new PlayAgainController();
 
-        mainWindowController mainObject = new mainWindowController();
-        mainWindowController = mainObject;
+        //mainWindowController mainObject = new mainWindowController();
 
         waitingController = new WaitingForOpponentScene();
 
 
-        lobby.getOpenButton().setOnAction(value ->  {
+        lobbyController.getOpenButton().setOnAction(value ->  {
             System.out.println("Opening");
 
             waitingController.applyScene(primaryStage);
 
             //Network.NetworkManager.forceUUID(nameField.getText());
             NetworkManager.getInstance().requestNewRoom(
-                    lobby.getName(),
+                    lobbyController.getName(),
                     true,
                     responseRoomInfo -> {
                         /*
@@ -75,14 +71,21 @@ public class Client extends Application {
             );
         });
 
-        lobby.getJoinButton().setOnAction(value -> {
-            System.out.println("Joining " + lobby.getRoomID());
+        lobbyController.getJoinButton().setOnAction(value -> {
+            System.out.println("Joining " + lobbyController.getRoomID());
 
             // TODO This should we where we plug the room from the other player.
             Messages.RoomInfo roomInfo = new Messages.RoomInfo();
-            roomInfo.setRoomID(lobby.getRoomID());
-            NetworkManager.getInstance().joinRoom(lobby.getName(), roomInfo);
+            roomInfo.setRoomID(lobbyController.getRoomID());
+            NetworkManager.getInstance().joinRoom(lobbyController.getName(), roomInfo);
         });
+
+
+        waitingController.setOnCancel(value -> {
+            NetworkManager.getInstance().stopWaitingForRoom();
+            lobbyController.applySceneAsync(primaryStage);
+        });
+
 	/*
         Label turnOrder = new Label("Go first?");
         CheckBox goFirst = new CheckBox();

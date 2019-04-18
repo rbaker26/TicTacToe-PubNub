@@ -33,6 +33,10 @@ public class GameRequestListener extends SubscribeCallback {
         this.hbCallback = hbCallback;
     }
 
+    public boolean isDeleteRequest(RoomInfo roomRequest) {
+        return RoomInfo.RequestType.DISCONNECT.equals(roomRequest.getRequestMode());
+    }
+
     public boolean isCreateRequest(RoomInfo roomRequest) {
         return roomRequest.getRoomID() == RoomInfo.defaultRoomID;
     }
@@ -54,7 +58,7 @@ public class GameRequestListener extends SubscribeCallback {
         PlayerInfo player = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
         hbCallback.setExpireCallback(
                 player.getUuid(),
-                value -> removeRoom(pb, roomID)
+                value -> removeRoomByID(pb, roomID)
         );
     }
 
@@ -66,7 +70,7 @@ public class GameRequestListener extends SubscribeCallback {
             System.out.println("Join room request received: " + roomMsg);
             RoomInfo room = lobbyList.get(roomID).getRoomInfo();
             room.addPlayer(roomMsg.getPlayer1());       // TODO Look into this
-            removeRoom(pb, roomID);
+            removeRoomByID(pb, roomID);
             pb.publish() // Notifying player 1 that game has started
                     .message(room)
                     .channel(room.getPlayer1().getChannel())
@@ -117,18 +121,16 @@ public class GameRequestListener extends SubscribeCallback {
      * @param pb Pubnub object used to send out the message with the updated room list.
      * @param roomID ID of room to delete.
      */
-    private void removeRoom(PubNub pb, int roomID) {
+    private void removeRoomByID(PubNub pb, int roomID) {
         if(roomInfoList.removeIf(room -> room.getRoomID() == roomID)) {
             publishUpdatedRoomList(pb);
         }
+    }
 
-        /*
-        for(int roomIndex = 0; roomIndex < roomInfoList.size(); roomIndex++) {
-            if(roomInfoList.get(roomIndex).getRoomID() == roomID) {
-                roomInfoList.remove(roomIndex);
-            }
+    private void removeRoomByCreator(PubNub pb, PlayerInfo creator) {
+        if(roomInfoList.removeIf(room -> room.hasPlayer(creator))) {
+            publishUpdatedRoomList(pb);
         }
-         */
     }
 
     private void publishUpdatedRoomList(PubNub pb) {
@@ -152,15 +154,17 @@ public class GameRequestListener extends SubscribeCallback {
 
     @Override
     public void message(PubNub pb, PNMessageResult message) {
-        if(message.getChannel().equals(myChannel)) {
-            if (!message.getPublisher().equals(myUuid)) {
-                RoomInfo roomMsg = Converter.fromJson(message.getMessage(), RoomInfo.class);
-                if(isCreateRequest(roomMsg)) {
-                    createRoom(pb, roomMsg);
-                }
-                else {
-                    joinRoom(pb, roomMsg);
-                }
+        if(message.getChannel().equals(myChannel) && !message.getPublisher().equals(myUuid)) {
+            RoomInfo roomMsg = Converter.fromJson(message.getMessage(), RoomInfo.class);
+            if(isDeleteRequest(roomMsg)) {
+                PlayerInfo creator = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
+                removeRoomByCreator(pb, creator);
+            }
+            else if(isCreateRequest(roomMsg)) {
+                createRoom(pb, roomMsg);
+            }
+            else {
+                joinRoom(pb, roomMsg);
             }
         }
     }

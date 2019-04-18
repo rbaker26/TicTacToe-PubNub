@@ -247,6 +247,7 @@ public final class NetworkManager {
      */
     public void joinRoom(String ourUserID, RoomInfo roomInfo,
                          Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+
         String incomingChannel = Channels.privateChannelSet + roomInfo.getPlayer1Name();
         String outgoingChannel = Channels.roomRequestChannel;
 
@@ -279,28 +280,21 @@ public final class NetworkManager {
         changeListener(callback, Arrays.asList(incomingChannel));
     }
 
-    /**
-     * Do anything possible to end this instance at all costs instantaneously without regrets.
-     */
-    private void dieHorribly() {
-        System.out.println("Going down");
+    public boolean isWaitingForRoom() {
+        return currentListener.getClass().equals(RoomRequesterCallback.class);
+    }
 
-        heartbeatCallback.setAlive(false);
-        try {
-            System.out.print("My heart...");
-            heartbeatThread.join();
-            System.out.println("has stopped...");
+    public void stopWaitingForRoom() {
+
+        if(isWaitingForRoom()) {
+            RoomRequesterCallback callback = (RoomRequesterCallback)currentListener;
+            callback.cancelRequest(pn);
+            removeListener();
         }
-        catch(InterruptedException ex) {
-            System.out.println("Wow, so impatient! I'll die faster, geez.");
+        else {
+            System.out.println("Cannot cancel; not using RoomRequesterCallback");
         }
 
-        pn.unsubscribeAll();
-        pn.disconnect();
-        pn.destroy();
-        pn = null;
-
-        System.out.println("The pain won't stop...");
     }
 
     /**
@@ -321,4 +315,35 @@ public final class NetworkManager {
                     }
                 });
     }
+
+    /**
+     * Do anything possible to end this instance at all costs instantaneously without regrets.
+     */
+    private void dieHorribly() {
+        System.out.println("Going down");
+
+        if(isWaitingForRoom()) {
+            stopWaitingForRoom();
+        }
+        removeListener();
+
+        heartbeatCallback.setAlive(false);
+        try {
+            System.out.print("My heart...");
+            heartbeatThread.join();
+            System.out.println("has stopped...");
+        }
+        catch(InterruptedException ex) {
+            System.out.println("Wow, so impatient! I'll die faster, geez.");
+        }
+
+        pn.unsubscribeAll();
+        pn.disconnect();
+        pn.destroy();
+        pn = null;
+
+        System.out.println("The pain won't stop...");
+    }
+
+
 }
