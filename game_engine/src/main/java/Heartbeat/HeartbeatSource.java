@@ -5,23 +5,29 @@ import Messages.Heartbeat;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-class HeartbeatSourceInfo {
-    private Consumer<HeartbeatSourceInfo> expiredCallback;
+public class HeartbeatSource {
+    private Consumer<HeartbeatSource> expiredCallback;
     private long timeOfLastHeartbeat;
     private String uuid;
     private Heartbeat previousBeat;
 
-    public HeartbeatSourceInfo(String uuid, long timeOfLastHeartbeat) {
+    public HeartbeatSource(String uuid, long timeOfLastHeartbeat) {
         this.uuid = uuid;
         this.timeOfLastHeartbeat = timeOfLastHeartbeat;
     }
 
+    public synchronized void executeExpiredCallback() {
+        if(expiredCallback != null) {
+            expiredCallback.accept(this);
+        }
+    }
+
     //region Getters and setters
-    public synchronized Consumer<HeartbeatSourceInfo> getExpiredCallback() {
+    public synchronized Consumer<HeartbeatSource> getExpiredCallback() {
         return expiredCallback;
     }
 
-    public synchronized void setExpiredCallback(Consumer<HeartbeatSourceInfo> expiredCallback) {
+    public synchronized void setExpiredCallback(Consumer<HeartbeatSource> expiredCallback) {
         this.expiredCallback = expiredCallback;
     }
 
@@ -51,7 +57,7 @@ class HeartbeatSourceInfo {
 
     @Override
     public String toString() {
-        return "Heartbeat.HeartbeatSourceInfo{" +
+        return "Heartbeat.HeartbeatSource{" +
                 "expiredCallback=" + expiredCallback +
                 ", timeOfLastHeartbeat=" + timeOfLastHeartbeat +
                 ", uuid='" + uuid + '\'' +
@@ -63,7 +69,7 @@ class HeartbeatSourceInfo {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        HeartbeatSourceInfo that = (HeartbeatSourceInfo) o;
+        HeartbeatSource that = (HeartbeatSource) o;
         return getTimeOfLastHeartbeat() == that.getTimeOfLastHeartbeat() &&
                 Objects.equals(getExpiredCallback(), that.getExpiredCallback()) &&
                 Objects.equals(getUuid(), that.getUuid()) &&

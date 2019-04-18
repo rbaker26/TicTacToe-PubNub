@@ -47,7 +47,7 @@ public class Engine {
         rml = new RoomsListListener(RoomList, myUuid);
         grl = new GameRequestListener(RoomList, Lobbies, myUuid);
         ml = new MoveListener(Lobbies);
-        heartbeatCallback = new HeartbeatCallback(Channels.clientHeartbeatChannel);
+        heartbeatCallback = new HeartbeatCallback(Channels.clientHeartbeatChannel, true);
         Subscribe();
     }
 
