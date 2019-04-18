@@ -12,6 +12,7 @@ import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
@@ -57,18 +58,24 @@ public final class NetworkManager {
     }
 
     private static String getDefaultUUID() {
-        String hostname = "Unknown";
+        //String hostname = "Unknown";
+        String myUuid = "";
 
         try {
-            InetAddress addr;
-            addr = InetAddress.getLocalHost();
-            hostname = addr.getHostName();
-
-        } catch (UnknownHostException ex) {
-            System.out.println("Hostname can not be resolved");
+            byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+            StringBuilder uuid = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                uuid.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            }
+            uuid.append("Client");
+            myUuid = uuid.toString();
+        }
+        catch(Exception ex) {
+            System.out.println("Cannot get local host... Creating default UUID");
         }
 
-        return hostname;
+
+        return myUuid;
     }
 
     //endregion
@@ -95,7 +102,7 @@ public final class NetworkManager {
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.setSubscribeKey(Messages.Keys.subKey);
         pnConfiguration.setPublishKey(Messages.Keys.pubKey);
-        pnConfiguration.setUuid(uuid + "Client" + uuidModifier);
+        pnConfiguration.setUuid(uuid + uuidModifier);
 
         pn = new PubNub(pnConfiguration);
 
