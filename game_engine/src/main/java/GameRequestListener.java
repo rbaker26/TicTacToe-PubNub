@@ -1,3 +1,4 @@
+import Heartbeat.HeartbeatCallback;
 import Messages.Channels;
 import Messages.Converter;
 import Messages.MoveRequest;
@@ -23,6 +24,7 @@ public class GameRequestListener extends SubscribeCallback {
     private Map<Integer, Lobby> lobbyList;
     private String myUuid;
     private String myChannel;
+    private HeartbeatCallback hbCallback;
     ExecutorService lobbyThreads = Executors.newCachedThreadPool();
 
     public GameRequestListener(List<RoomInfo> roomList, Map<Integer, Lobby> lobbyList, String uuid) {
@@ -41,6 +43,99 @@ public class GameRequestListener extends SubscribeCallback {
                 lobbyList.get(roomRequest.getRoomID()).getRoomInfo().isAvailable();
     }
 
+    public void createRoom(PubNub pb, RoomInfo roomMsg) {
+        int roomID = roomMsg.getRoomID();
+
+        System.out.println("Create room request received: " + roomMsg);
+        roomID = Engine.getNewRoomID();
+        roomMsg.setRoomID(roomID);
+        roomMsg.setRoomChannel(Channels.roomChannelSet + roomID);
+        roomInfoList.add(roomMsg);
+        lobbyList.put(roomID, new Lobby(roomMsg));
+        pb.publish().message(roomInfoList.toArray())
+                .channel(Channels.roomListChannel)
+                .async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        // handle publish result, status always present, result if successful
+                        // status.isError() to see if error happened
+                        if (!status.isError()) {
+                        }
+                    }
+                });
+
+        //hbCallback.setExpireCallback();
+    }
+
+    public void joinRoom(PubNub pb, RoomInfo roomMsg) {
+
+        int roomID = roomMsg.getRoomID();
+
+        if (roomIsValid(roomMsg)) {
+            System.out.println("Join room request received: " + roomMsg);
+            RoomInfo room = lobbyList.get(roomID).getRoomInfo();
+            room.addPlayer(roomMsg.getPlayer1ID());
+            for(int roomIndex = 0; roomIndex < roomInfoList.size(); roomIndex++) {
+                if(roomInfoList.get(roomIndex).getRoomID() == roomID) {
+                    roomInfoList.remove(roomIndex);
+                }
+            }
+            pb.publish() // Publishing updated room list
+                    .message(roomInfoList)
+                    .channel(Channels.roomListChannel)
+                    .async(new PNCallback<PNPublishResult>() {
+                        @Override
+                        public void onResponse(PNPublishResult result, PNStatus status) {
+                            // handle publish result, status always present, result if successful
+                            // status.isError() to see if error happened
+                            if (!status.isError()) {
+                            }
+                        }
+                    });
+            pb.publish() // Notifying player 1 that game has started
+                    .message(room)
+                    .channel(room.getPlayer1Channel())
+                    .async(new PNCallback<PNPublishResult>() {
+                        @Override
+                        public void onResponse(PNPublishResult result, PNStatus status) {
+                            // handle publish result, status always present, result if successful
+                            // status.isError() to see if error happened
+                            if (!status.isError()) {
+                            }
+                        }
+                    });
+            pb.publish() // Notifying player 2 that game has started
+                    .message(room)
+                    .channel(room.getPlayer2Channel())
+                    .async(new PNCallback<PNPublishResult>() {
+                        @Override
+                        public void onResponse(PNPublishResult result, PNStatus status) {
+                            // handle publish result, status always present, result if successful
+                            // status.isError() to see if error happened
+                            if (!status.isError()) {
+                            }
+                        }
+                    });
+            // TODO This should probably not happen until both have joined the room.
+            pb.publish() // Sending initial move request
+                    .message(new MoveRequest(lobbyList.get(roomID).getBoard(),
+                            room,
+                            room.getPlayer1ID()))
+                    .channel(Channels.roomChannelSet + room.getRoomID())
+                    .async(new PNCallback<PNPublishResult>() {
+                        @Override
+                        public void onResponse(PNPublishResult result, PNStatus status) {
+                            // handle publish result, status always present, result if successful
+                            // status.isError() to see if error happened
+                            if (!status.isError()) {
+                            }
+                        }
+                    });
+            lobbyList.get(roomID).toggleCurrentPlayer();
+            System.out.println("Game started for room " + roomID);
+        }
+    }
+
     @Override
     public void status(PubNub pb, PNStatus status) {
     }
@@ -50,90 +145,11 @@ public class GameRequestListener extends SubscribeCallback {
         if(message.getChannel().equals(myChannel)) {
             if (!message.getPublisher().equals(myUuid)) {
                 RoomInfo roomMsg = Converter.fromJson(message.getMessage(), RoomInfo.class);
-                int roomID = roomMsg.getRoomID();
                 if(isCreateRequest(roomMsg)) {
-                    System.out.println("Create room request received: " + roomMsg);
-                    roomID = Engine.getNewRoomID();
-                    roomMsg.setRoomID(roomID);
-                    roomMsg.setRoomChannel(Channels.roomChannelSet + roomID);
-                    roomInfoList.add(roomMsg);
-                    lobbyList.put(roomID, new Lobby(roomMsg));
-                    pb.publish().message(roomInfoList.toArray())
-                            .channel(Channels.roomListChannel)
-                            .async(new PNCallback<PNPublishResult>() {
-                                @Override
-                                public void onResponse(PNPublishResult result, PNStatus status) {
-                                    // handle publish result, status always present, result if successful
-                                    // status.isError() to see if error happened
-                                    if (!status.isError()) {
-                                    }
-                                }
-                            });
-
+                    createRoom(pb, roomMsg);
                 }
                 else {
-                    if (roomIsValid(roomMsg)) {
-                        System.out.println("Join room request received: " + roomMsg);
-                        RoomInfo room = lobbyList.get(roomID).getRoomInfo();
-                        room.addPlayer(roomMsg.getPlayer1ID());
-                        for(int roomIndex = 0; roomIndex < roomInfoList.size(); roomIndex++) {
-                            if(roomInfoList.get(roomIndex).getRoomID() == roomID) {
-                                roomInfoList.remove(roomIndex);
-                            }
-                        }
-                        pb.publish() // Publishing updated room list
-                                .message(roomInfoList)
-                                .channel(Channels.roomListChannel)
-                                .async(new PNCallback<PNPublishResult>() {
-                                    @Override
-                                    public void onResponse(PNPublishResult result, PNStatus status) {
-                                        // handle publish result, status always present, result if successful
-                                        // status.isError() to see if error happened
-                                        if (!status.isError()) {
-                                        }
-                                    }
-                                });
-                        pb.publish() // Notifying player 1 that game has started
-                                .message(room)
-                                .channel(room.getPlayer1Channel())
-                                .async(new PNCallback<PNPublishResult>() {
-                                    @Override
-                                    public void onResponse(PNPublishResult result, PNStatus status) {
-                                        // handle publish result, status always present, result if successful
-                                        // status.isError() to see if error happened
-                                        if (!status.isError()) {
-                                        }
-                                    }
-                                });
-                        pb.publish() // Notifying player 2 that game has started
-                                .message(room)
-                                .channel(room.getPlayer2Channel())
-                                .async(new PNCallback<PNPublishResult>() {
-                                    @Override
-                                    public void onResponse(PNPublishResult result, PNStatus status) {
-                                        // handle publish result, status always present, result if successful
-                                        // status.isError() to see if error happened
-                                        if (!status.isError()) {
-                                        }
-                                    }
-                                });
-                        pb.publish() // Sending initial move request
-                                .message(new MoveRequest(lobbyList.get(roomID).getBoard(),
-                                        room,
-                                        room.getPlayer1ID()))
-                                .channel(Channels.roomChannelSet + room.getRoomID())
-                                .async(new PNCallback<PNPublishResult>() {
-                                    @Override
-                                    public void onResponse(PNPublishResult result, PNStatus status) {
-                                        // handle publish result, status always present, result if successful
-                                        // status.isError() to see if error happened
-                                        if (!status.isError()) {
-                                        }
-                                    }
-                                });
-                        lobbyList.get(roomID).toggleCurrentPlayer();
-                        System.out.println("Game started for room " + roomID);
-                    }
+                    joinRoom(pb, roomMsg);
                 }
             }
         }

@@ -43,11 +43,11 @@ public class Engine {
             myUuid = pnConfiguration.getUuid();
         }
 
+        heartbeatCallback = new HeartbeatCallback(Channels.clientHeartbeatChannel, true);
         pb = new PubNub(pnConfiguration);
         rml = new RoomsListListener(RoomList, myUuid);
         grl = new GameRequestListener(RoomList, Lobbies, myUuid);
         ml = new MoveListener(Lobbies);
-        heartbeatCallback = new HeartbeatCallback(Channels.clientHeartbeatChannel, true);
         Subscribe();
     }
 
