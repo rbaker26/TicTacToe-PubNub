@@ -71,6 +71,7 @@ public class Engine {
     }
 
     public static void main(String[] args) {
+        System.out.println("Hello");
         Engine engine = new Engine();
     }
 
