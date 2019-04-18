@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public class HeartbeatCallback extends SubscribeCallback {
 
     private static final long EXPIRATION_TIME = Heartbeat.DEFAULT_BEAT_PERIOD * 2;
-    private static final long CLEAN_PERIOD = 5000;
+    private static final long CLEAN_PERIOD = 500;
 
     private class SourceGarbageCollector implements Runnable {
 

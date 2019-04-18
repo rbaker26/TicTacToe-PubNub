@@ -49,17 +49,7 @@ public class GameRequestListener extends SubscribeCallback {
         roomMsg.setRoomChannel(Channels.roomChannelSet + roomID);
         roomInfoList.add(roomMsg);
         lobbyList.put(roomID, new Lobby(roomMsg));
-        pb.publish().message(roomInfoList.toArray())
-                .channel(Channels.roomListChannel)
-                .async(new PNCallback<PNPublishResult>() {
-                    @Override
-                    public void onResponse(PNPublishResult result, PNStatus status) {
-                        // handle publish result, status always present, result if successful
-                        // status.isError() to see if error happened
-                        if (!status.isError()) {
-                        }
-                    }
-                });
+        publishUpdatedRoomList(pb);
 
         PlayerInfo player = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
         hbCallback.setExpireCallback(
@@ -76,14 +66,6 @@ public class GameRequestListener extends SubscribeCallback {
             System.out.println("Join room request received: " + roomMsg);
             RoomInfo room = lobbyList.get(roomID).getRoomInfo();
             room.addPlayer(roomMsg.getPlayer1());       // TODO Look into this
-            /*
-            for(int roomIndex = 0; roomIndex < roomInfoList.size(); roomIndex++) {
-                if(roomInfoList.get(roomIndex).getRoomID() == roomID) {
-                    roomInfoList.remove(roomIndex);
-                }
-            }
-
-             */
             removeRoom(pb, roomID);
             pb.publish() // Notifying player 1 that game has started
                     .message(room)

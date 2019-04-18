@@ -5,5 +5,5 @@ package Messages;
  * showing that the sender is still alive.
  */
 public class Heartbeat {
-    public static final long DEFAULT_BEAT_PERIOD = 10 * 1000;
+    public static final long DEFAULT_BEAT_PERIOD = 5 * 1000;
 }
