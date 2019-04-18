@@ -1,8 +1,6 @@
 import Heartbeat.HeartbeatCallback;
-import Messages.Channels;
-import Messages.Converter;
-import Messages.MoveRequest;
-import Messages.RoomInfo;
+import Messages.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -27,11 +25,12 @@ public class GameRequestListener extends SubscribeCallback {
     private HeartbeatCallback hbCallback;
     ExecutorService lobbyThreads = Executors.newCachedThreadPool();
 
-    public GameRequestListener(List<RoomInfo> roomList, Map<Integer, Lobby> lobbyList, String uuid) {
+    public GameRequestListener(List<RoomInfo> roomList, Map<Integer, Lobby> lobbyList, String uuid, HeartbeatCallback hbCallback) {
         this.roomInfoList = roomList;
         this.lobbyList = lobbyList;
         this.myUuid = uuid;
         this.myChannel = Channels.roomRequestChannel;
+        this.hbCallback = hbCallback;
     }
 
     public boolean isCreateRequest(RoomInfo roomRequest) {
@@ -40,14 +39,12 @@ public class GameRequestListener extends SubscribeCallback {
 
     public boolean roomIsValid(RoomInfo roomRequest) {
         return lobbyList.containsKey(roomRequest.getRoomID()) &&
-                lobbyList.get(roomRequest.getRoomID()).getRoomInfo().isAvailable();
+                lobbyList.get(roomRequest.getRoomID()).getRoomInfo().isOpen();
     }
 
     public void createRoom(PubNub pb, RoomInfo roomMsg) {
-        int roomID = roomMsg.getRoomID();
-
         System.out.println("Create room request received: " + roomMsg);
-        roomID = Engine.getNewRoomID();
+        final int roomID = Engine.getNewRoomID();
         roomMsg.setRoomID(roomID);
         roomMsg.setRoomChannel(Channels.roomChannelSet + roomID);
         roomInfoList.add(roomMsg);
@@ -64,7 +61,11 @@ public class GameRequestListener extends SubscribeCallback {
                     }
                 });
 
-        //hbCallback.setExpireCallback();
+        PlayerInfo player = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
+        hbCallback.setExpireCallback(
+                player.getUuid(),
+                value -> removeRoom(pb, roomID)
+        );
     }
 
     public void joinRoom(PubNub pb, RoomInfo roomMsg) {
@@ -75,23 +76,15 @@ public class GameRequestListener extends SubscribeCallback {
             System.out.println("Join room request received: " + roomMsg);
             RoomInfo room = lobbyList.get(roomID).getRoomInfo();
             room.addPlayer(roomMsg.getPlayer1());       // TODO Look into this
+            /*
             for(int roomIndex = 0; roomIndex < roomInfoList.size(); roomIndex++) {
                 if(roomInfoList.get(roomIndex).getRoomID() == roomID) {
                     roomInfoList.remove(roomIndex);
                 }
             }
-            pb.publish() // Publishing updated room list
-                    .message(roomInfoList)
-                    .channel(Channels.roomListChannel)
-                    .async(new PNCallback<PNPublishResult>() {
-                        @Override
-                        public void onResponse(PNPublishResult result, PNStatus status) {
-                            // handle publish result, status always present, result if successful
-                            // status.isError() to see if error happened
-                            if (!status.isError()) {
-                            }
-                        }
-                    });
+
+             */
+            removeRoom(pb, roomID);
             pb.publish() // Notifying player 1 that game has started
                     .message(room)
                     .channel(room.getPlayer1().getChannel())
@@ -134,6 +127,41 @@ public class GameRequestListener extends SubscribeCallback {
             lobbyList.get(roomID).toggleCurrentPlayer();
             System.out.println("Game started for room " + roomID);
         }
+    }
+
+    /**
+     * Removes the room which has the matching roomID. Afterward, a new room list is sent out.
+     * If the roomID cannot be found, then no update is sent out.
+     * @param pb Pubnub object used to send out the message with the updated room list.
+     * @param roomID ID of room to delete.
+     */
+    private void removeRoom(PubNub pb, int roomID) {
+        if(roomInfoList.removeIf(room -> room.getRoomID() == roomID)) {
+            publishUpdatedRoomList(pb);
+        }
+
+        /*
+        for(int roomIndex = 0; roomIndex < roomInfoList.size(); roomIndex++) {
+            if(roomInfoList.get(roomIndex).getRoomID() == roomID) {
+                roomInfoList.remove(roomIndex);
+            }
+        }
+         */
+    }
+
+    private void publishUpdatedRoomList(PubNub pb) {
+        pb.publish() // Publishing updated room list
+                .message(roomInfoList)
+                .channel(Channels.roomListChannel)
+                .async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        // handle publish result, status always present, result if successful
+                        // status.isError() to see if error happened
+                        if (!status.isError()) {
+                        }
+                    }
+                });
     }
 
     @Override
