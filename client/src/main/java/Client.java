@@ -1,5 +1,3 @@
-
-
 import Network.NetworkManager;
 import UI.*;
 import javafx.application.Application;
