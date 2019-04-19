@@ -46,7 +46,7 @@ public class Client extends Application {
         waitingController = new WaitingForOpponentScene();
 
 
-        lobbyController.getOpenButton().setOnAction(value ->  {
+        lobbyController.setOpenHandler(() ->  {
             System.out.println("Opening");
 
             waitingController.applyScene(primaryStage);
@@ -69,13 +69,16 @@ public class Client extends Application {
             );
         });
 
-        lobbyController.getJoinButton().setOnAction(value -> {
+        lobbyController.setJoinHandler(room -> {
+            /*
             System.out.println("Joining " + lobbyController.getRoomID());
 
             // TODO This should we where we plug the room from the other player.
             Messages.RoomInfo roomInfo = new Messages.RoomInfo();
             roomInfo.setRoomID(lobbyController.getRoomID());
             NetworkManager.getInstance().joinRoom(lobbyController.getName(), roomInfo);
+             */
+            System.out.println("Selected room: " + room.toString());
         });
 
 
