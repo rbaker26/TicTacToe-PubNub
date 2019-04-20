@@ -30,13 +30,13 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.util.Objects;
 
-public class mainWindowController extends AbstractSceneController{
+public class MainWindowController extends AbstractSceneController{
 
     private Button multiPlayerButton;
     private Button easyAIButton;
     private Button hardAIButton;
 
-    public mainWindowController() {
+    public MainWindowController() {
 
 
             VBox vbox = new VBox(10);
@@ -64,7 +64,6 @@ public class mainWindowController extends AbstractSceneController{
 
 
 
-    //@Deprecated
     public Button getMultiPlayerButton() {
         return multiPlayerButton;
     }

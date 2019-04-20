@@ -16,7 +16,7 @@ public class Client extends Application {
     private LobbySceneController lobbyController;
     private WaitingForOpponentScene waitingController;
     private PlayAgainController playAgainController;
-    private ISceneController mainWindowController;
+    private MainWindowController mainWindowController;
 
     public static void main(String[] args) {
 
@@ -41,7 +41,7 @@ public class Client extends Application {
 
         playAgainController = new PlayAgainController();
 
-        mainWindowController  = new mainWindowController();
+        mainWindowController  = new MainWindowController();
 
         waitingController = new WaitingForOpponentScene();
 

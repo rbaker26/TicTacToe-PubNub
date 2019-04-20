@@ -8,7 +8,6 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -119,7 +118,7 @@ public class LobbySceneController extends AbstractSceneController {
 
                 BoardGUIPane boardObject = new BoardGUIPane();
 
-                mainWindowController mainObject = new mainWindowController();
+                MainWindowController mainObject = new MainWindowController();
 
                 //SO WITHIN HERE WE MUST TAKE VALUES OF THE COLUMNS AND PASS THEM INTO BOARD FUNCTIONALITY
                 //THAT ALLOWS A GAME TO START GIVEN PLAYER INFORMATION AS WELL AS ROOM ID.
