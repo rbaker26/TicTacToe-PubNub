@@ -88,10 +88,14 @@ public class Client extends Application {
             lobbyController.applySceneAsync(primaryStage);
         });
 
+        /**
+         * Starting from the main window, when the user selects
+         * Multiplayer button, they get transferred to the
+         * lobby window.
+         */
         mainWindowController.getMultiPlayerButton().setOnAction(value -> {
 
-            System.out.println("testing");
-
+            lobbyController.applyScene(primaryStage);
 
         });
 
@@ -140,7 +144,7 @@ public class Client extends Application {
 
 
 
-        lobbyController.applyScene(primaryStage);
+        mainWindowController.applyScene(primaryStage);
         primaryStage.setWidth(initWidth);
         primaryStage.setHeight(initHeight);
         primaryStage.show();
