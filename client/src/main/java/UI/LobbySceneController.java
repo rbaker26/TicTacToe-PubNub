@@ -241,6 +241,8 @@ public class LobbySceneController extends AbstractSceneController {
     public Button getJoinButton() {
         return joinButton;
     }
+
+
     //endregion
 
     //region Object overrides

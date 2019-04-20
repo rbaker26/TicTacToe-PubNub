@@ -16,7 +16,7 @@ public class Client extends Application {
     private LobbySceneController lobbyController;
     private WaitingForOpponentScene waitingController;
     private PlayAgainController playAgainController;
-    //private ISceneController mainWindowController;
+    private ISceneController mainWindowController;
 
     public static void main(String[] args) {
 
@@ -41,9 +41,12 @@ public class Client extends Application {
 
         playAgainController = new PlayAgainController();
 
-        //mainWindowController mainObject = new mainWindowController();
+        mainWindowController  = new mainWindowController();
 
         waitingController = new WaitingForOpponentScene();
+
+
+
 
 
         lobbyController.getOpenButton().setOnAction(value ->  {
@@ -69,6 +72,7 @@ public class Client extends Application {
             );
         });
 
+
         lobbyController.getJoinButton().setOnAction(value -> {
             System.out.println("Joining " + lobbyController.getRoomID());
 
@@ -82,6 +86,13 @@ public class Client extends Application {
         waitingController.setOnCancel(value -> {
             NetworkManager.getInstance().stopWaitingForRoom();
             lobbyController.applySceneAsync(primaryStage);
+        });
+
+        mainWindowController.getMultiPlayerButton().setOnAction(value -> {
+
+            System.out.println("testing");
+
+
         });
 
 	/*
