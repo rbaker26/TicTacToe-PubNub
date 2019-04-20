@@ -16,6 +16,7 @@ public class Client extends Application {
     private LobbySceneController lobbyController;
     private WaitingForOpponentScene waitingController;
     private PlayAgainController playAgainController;
+    private GameViewController gameViewController;
     //private ISceneController mainWindowController;
 
     public static void main(String[] args) {
@@ -37,13 +38,13 @@ public class Client extends Application {
         primaryStage.setTitle("SABRCATST TicTacToe");
 
         lobbyController = new LobbySceneController();
-        //Network.NetworkManager.getInstance();
-
         playAgainController = new PlayAgainController();
+        waitingController = new WaitingForOpponentScene();
+        gameViewController = new GameViewController();
+
 
         //mainWindowController mainObject = new mainWindowController();
 
-        waitingController = new WaitingForOpponentScene();
 
 
         lobbyController.setOpenHandler(() ->  {
@@ -56,29 +57,24 @@ public class Client extends Application {
                     lobbyController.getName(),
                     true,
                     responseRoomInfo -> {
-                        /*
-                        System.out.println("Hi");
-
-                        Platform.runLater(() ->
-                            primaryStage.setScene(new Scene(new HBox(), 100, 100))
-                        );
-                         */
-
+                        System.out.println("Connected (creating): " + responseRoomInfo.toString());
+                        gameViewController.applySceneAsync(primaryStage);
                     },
                     null
             );
         });
 
         lobbyController.setJoinHandler(room -> {
-            /*
-            System.out.println("Joining " + lobbyController.getRoomID());
-
-            // TODO This should we where we plug the room from the other player.
-            Messages.RoomInfo roomInfo = new Messages.RoomInfo();
-            roomInfo.setRoomID(lobbyController.getRoomID());
-            NetworkManager.getInstance().joinRoom(lobbyController.getName(), roomInfo);
-             */
             System.out.println("Selected room: " + room.toString());
+            NetworkManager.getInstance().joinRoom(
+                    lobbyController.getName(),
+                    room,
+                    responseRoomInfo -> {
+                        System.out.println("Connected (joining): " + responseRoomInfo.toString());
+                        gameViewController.applySceneAsync(primaryStage);
+                    },
+                    null
+            );
         });
 
 

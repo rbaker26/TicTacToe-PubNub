@@ -195,7 +195,7 @@ public final class NetworkManager {
 
         //clearCurrentListener();
 
-        String incomingChannel = Channels.privateChannelSet + userID;
+        String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         //String outgoingChannel = Channels.privateChannelSet + userID;
         String outgoingChannel = Channels.roomRequestChannel;
 
@@ -255,7 +255,7 @@ public final class NetworkManager {
     public void joinRoom(String ourUserID, RoomInfo roomInfo,
                          Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
 
-        String incomingChannel = Channels.privateChannelSet + roomInfo.getPlayer1Name();
+        String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         String outgoingChannel = Channels.roomRequestChannel;
 
         // If player2 is already around, then we'll be going first.
