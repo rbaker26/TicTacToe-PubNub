@@ -1,3 +1,4 @@
+import Messages.RoomInfo;
 import Network.NetworkManager;
 import UI.*;
 import javafx.application.Application;
@@ -59,7 +60,7 @@ public class Client extends Application {
                         true,
                         responseRoomInfo -> {
                             System.out.println("Connected (creating): " + responseRoomInfo.toString());
-                            gameViewController.applySceneAsync(primaryStage);
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoomInfo);
                         },
                         null
                 );
@@ -67,12 +68,12 @@ public class Client extends Application {
 
             lobbyController.setJoinHandler(room -> {
                 System.out.println("Selected room: " + room.toString());
-                NetworkManager.getInstance().joinRoom(
+                NetworkManager.getInstance().requestJoinRoom(
                         lobbyController.getName(),
                         room,
                         responseRoomInfo -> {
                             System.out.println("Connected (joining): " + responseRoomInfo.toString());
-                            gameViewController.applySceneAsync(primaryStage);
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoomInfo);
                         },
                         null
                 );
@@ -106,6 +107,11 @@ public class Client extends Application {
 
         // TODO We shouldn't be forcing an exit, but... we have no other choice
         System.exit(0);
+    }
+
+    private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room) {
+        gameViewController.applySceneAsync(primaryStage);
+        NetworkManager.getInstance().joinRoom(ourUserID, room);
     }
 }
 

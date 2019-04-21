@@ -31,6 +31,8 @@ public class PlayerCallback extends SubscribeCallback {
 
         else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
 
+            System.out.println("Established connection: " + room.toString());
+
             // Connect event. You can do stuff like publish, and know you'll get it.
             // Or just use the connected event to confirm you are subscribed for
             // UI / internal notifications, etc
