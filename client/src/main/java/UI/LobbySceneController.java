@@ -22,7 +22,7 @@ public class LobbySceneController extends AbstractSceneController {
     private TextField roomField;
     private Button openButton;
     private Button joinButton;
-
+    private Button backButton;
 
     private ISceneController boardGUI;
     private ISceneController mainWindow;
@@ -39,6 +39,8 @@ public class LobbySceneController extends AbstractSceneController {
 
         openButton = new Button("Open");
         joinButton = new Button("Join");
+        backButton = new Button ("Back");
+
 
         //region Table config
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
@@ -74,7 +76,7 @@ public class LobbySceneController extends AbstractSceneController {
         //endregion
 
 
-        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
+        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, roomLabel, roomField, openButton, joinButton, backButton);
 
         //setMasterScene(new Scene(vbox, 200, 200));
         setRoot(vbox);
@@ -241,6 +243,8 @@ public class LobbySceneController extends AbstractSceneController {
         return joinButton;
     }
 
+    public Button getBackButton() { return backButton; }
+
 
     //endregion
 
@@ -254,12 +258,13 @@ public class LobbySceneController extends AbstractSceneController {
         return Objects.equals(getNameField(), that.getNameField()) &&
                 Objects.equals(getRoomField(), that.getRoomField()) &&
                 Objects.equals(getOpenButton(), that.getOpenButton()) &&
-                Objects.equals(getJoinButton(), that.getJoinButton());
+                Objects.equals(getJoinButton(), that.getJoinButton()) &&
+                Objects.equals(getBackButton(), that.getBackButton());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getNameField(), getRoomField(), getOpenButton(), getJoinButton());
+        return Objects.hash(super.hashCode(), getNameField(), getRoomField(), getOpenButton(), getJoinButton(), getBackButton());
     }
 
     @Override
@@ -269,6 +274,7 @@ public class LobbySceneController extends AbstractSceneController {
                 ", roomField=" + roomField +
                 ", openButton=" + openButton +
                 ", joinButton=" + joinButton +
+                ", backButton=" + backButton +
                 '}';
     }
     //endregion

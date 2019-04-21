@@ -82,6 +82,15 @@ public class Client extends Application {
             NetworkManager.getInstance().joinRoom(lobbyController.getName(), roomInfo);
         });
 
+        /**
+         * Just allows user to go back to main menu when they are in lobby table UI.
+         */
+        lobbyController.getBackButton().setOnAction(value -> {
+
+            mainWindowController.applyScene(primaryStage);
+
+        });
+
 
         waitingController.setOnCancel(value -> {
             NetworkManager.getInstance().stopWaitingForRoom();
@@ -96,6 +105,23 @@ public class Client extends Application {
         mainWindowController.getMultiPlayerButton().setOnAction(value -> {
 
             lobbyController.applyScene(primaryStage);
+
+        });
+
+        /**
+         * Both the easyAI and hardAI buttons will switch to the board ui
+         */
+        mainWindowController.getEasyAIButton().setOnAction(value -> {
+
+            //TAKE TO BOARD UI
+            System.out.println("Easy AI Button works!");
+
+        });
+
+        mainWindowController.getHardAIButton().setOnAction(value -> {
+
+            //TAKE TO BOARD UI
+            System.out.println("Hard AI Button works!");
 
         });
 

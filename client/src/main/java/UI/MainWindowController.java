@@ -67,6 +67,8 @@ public class MainWindowController extends AbstractSceneController{
     public Button getMultiPlayerButton() {
         return multiPlayerButton;
     }
+    public Button getEasyAIButton() { return easyAIButton; }
+    public Button getHardAIButton() { return hardAIButton; }
 
     //region Object overrides
     @Override
@@ -81,13 +83,15 @@ public class MainWindowController extends AbstractSceneController{
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getMultiPlayerButton());
+        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton());
     }
 
     @Override
     public String toString() {
         return "LobbySceneController{" +
                 "multiPlayerButton = " + multiPlayerButton +
+                "easyAIButton = " + easyAIButton +
+                "hardAIButton = " + hardAIButton +
                 '}';
     }
 
