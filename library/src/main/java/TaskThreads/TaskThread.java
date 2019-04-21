@@ -1,9 +1,14 @@
-package Network.Thread;
+package TaskThreads;
 
 /**
  * Deals with a single task on another thread.
  */
 public interface TaskThread {
+
+    static void meh() {
+
+    }
+
     /**
      * Starts up the thread.
      */

@@ -1,4 +1,4 @@
-package Network.Thread;
+package TaskThreads;
 
 import Messages.Heartbeat;
 import com.pubnub.api.PubNub;

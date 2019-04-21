@@ -1,4 +1,4 @@
-package Network.Thread;
+package TaskThreads;
 
 /**
  * This is a runnable which is meant to be run in a thread, and has an alive property.

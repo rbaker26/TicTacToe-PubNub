@@ -1,4 +1,4 @@
-package Network.Thread;
+package TaskThreads;
 
 class DefaultTaskThread implements TaskThread {
     private InterruptibleCallback callback;
