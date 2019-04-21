@@ -69,7 +69,12 @@ public class GameRequestListener extends SubscribeCallback {
         if (roomIsValid(roomMsg)) {
             System.out.println("Join room request received: " + roomMsg);
             RoomInfo room = lobbyList.get(roomID).getRoomInfo();
-            room.addPlayer(roomMsg.getPlayer2());       // TODO Look into this
+            if(!room.hasPlayer2()) {
+                room.setPlayer2(roomMsg.getPlayer2());
+            }
+            else {
+                room.setPlayer1(roomMsg.getPlayer1());
+            }
             removeRoomByID(pb, roomID);
             System.out.println("Sending out this room: " + room.toString());
             pb.publish() // Notifying player 1 that game has started

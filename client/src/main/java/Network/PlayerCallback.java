@@ -1,5 +1,6 @@
 package Network;
 
+import Messages.RoomInfo;
 import com.google.gson.JsonObject;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
@@ -14,10 +15,12 @@ public class PlayerCallback extends SubscribeCallback {
 
     private String name;
     private String outgoingChannel;
+    private RoomInfo room;
 
-    public PlayerCallback(String name, String roomChannel) {
+    public PlayerCallback(String name, String outgoingChannel, RoomInfo room) {
         this.name = name;
-        this.outgoingChannel = roomChannel;
+        this.outgoingChannel = outgoingChannel;
+        this.room = room;
     }
 
     @Override
@@ -32,6 +35,9 @@ public class PlayerCallback extends SubscribeCallback {
             // Or just use the connected event to confirm you are subscribed for
             // UI / internal notifications, etc
 
+
+            // TODO We might want to send some message to say that we're ready.
+            /*
             JsonObject data = new JsonObject();
             data.addProperty("name", name);
 
@@ -53,6 +59,8 @@ public class PlayerCallback extends SubscribeCallback {
                     }
                 }
             });
+
+             */
         }
     }
 
