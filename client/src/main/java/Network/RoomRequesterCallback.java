@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 /**
  * Attempts to ask for a room from the engine. This can be used either
- * for joining or for creating a room. (If the roomInfo object has an ID,
+ * for joining or for creating a room. (If the request object has an ID,
  * it's assumed we're joining. Otherwise, it's assumed we're creating.)
  */
 public class RoomRequesterCallback extends SubscribeCallback {
@@ -23,35 +23,35 @@ public class RoomRequesterCallback extends SubscribeCallback {
     private String ourUserID;
     private String outgoingChannel;
     private String incomingChannel;
-    private RoomInfo roomInfo;
-    private Consumer<RoomInfo> successResponse;
-    private Consumer<RoomInfo> failureResponse;
+    private RoomInfo request;
+    private Consumer<RoomInfo> successCallback;
+    private Consumer<RoomInfo> failureCallback;
 
     public RoomRequesterCallback(String ourUserID, String outgoingChannel, String incomingChannel, RoomInfo roomInfo) {
         this.ourUserID = ourUserID;
         this.outgoingChannel = outgoingChannel;
         this.incomingChannel = incomingChannel;
 
-        this.roomInfo = roomInfo;
+        this.request = roomInfo;
     }
 
     /**
      * Sets the callback to use when we've successfully gotten a room which we
      * may join.
-     * @param successResponse Response to use. May be null, and overrides old callbacks.
+     * @param successCallback Response to use. May be null, and overrides old callbacks.
      */
-    public void setSuccessResponse(Consumer<RoomInfo> successResponse) {
-        this.successResponse = successResponse;
+    public void setSuccessCallback(Consumer<RoomInfo> successCallback) {
+        this.successCallback = successCallback;
     }
 
     /**
      * Sets the callback to use when we've failed to get a room which we
      * may join. This can occur for several reasons, and might be able
      * to be deduced based on the RoomInfo object.
-     * @param failureResponse Response to use. May be null, and overrides old callbacks.
+     * @param failureCallback Response to use. May be null, and overrides old callbacks.
      */
-    public void setFailureResponse(Consumer<RoomInfo> failureResponse) {
-        this.failureResponse = failureResponse;
+    public void setFailureCallback(Consumer<RoomInfo> failureCallback) {
+        this.failureCallback = failureCallback;
     }
 
     /**
@@ -60,8 +60,8 @@ public class RoomRequesterCallback extends SubscribeCallback {
      * @param pubnub Used for sending the message.
      */
     public void cancelRequest(PubNub pubnub) {
-        roomInfo.setRequestMode(RoomInfo.RequestType.DISCONNECT);
-        pubnub.publish().channel(outgoingChannel).message(roomInfo).async(new PNCallback<PNPublishResult>() {
+        request.setRequestMode(RoomInfo.RequestType.DISCONNECT);
+        pubnub.publish().channel(outgoingChannel).message(request).async(new PNCallback<PNPublishResult>() {
             @Override
             public void onResponse(PNPublishResult result, PNStatus status) { }
         });
@@ -81,7 +81,7 @@ public class RoomRequesterCallback extends SubscribeCallback {
             // Or just use the connected event to confirm you are subscribed for
             // UI / internal notifications, etc
 
-            pubnub.publish().channel(outgoingChannel).message(roomInfo).async(new PNCallback<PNPublishResult>() {
+            pubnub.publish().channel(outgoingChannel).message(request).async(new PNCallback<PNPublishResult>() {
                 @Override
                 public void onResponse(PNPublishResult result, PNStatus status) {
                     // Check whether request successfully completed or not.
@@ -117,13 +117,15 @@ public class RoomRequesterCallback extends SubscribeCallback {
         if(sourceChannel.equals(incomingChannel)) {
             //JsonObject json = message.getMessage().getAsJsonObject();
             //String creator = json.get("Creator").getAsString();
-            RoomInfo responseRoomInfo = Converter.fromJson(message.getMessage(), RoomInfo.class);
+            RoomInfo response = Converter.fromJson(message.getMessage(), RoomInfo.class);
 
-            System.out.println(responseRoomInfo.toString());
+            System.out.println(response.toString());
 
-            // TODO Check for success/failure
-            if(successResponse != null) {
-                successResponse.accept(responseRoomInfo);
+            if (response.getRequestMode().equals(RoomInfo.RequestType.DENIED) && failureCallback != null) {
+                failureCallback.accept(response);
+            }
+            else if(successCallback != null) {
+                successCallback.accept(response);
             }
 
         }

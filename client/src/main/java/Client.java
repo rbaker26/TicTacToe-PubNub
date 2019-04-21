@@ -58,24 +58,39 @@ public class Client extends Application {
                 NetworkManager.getInstance().requestNewRoom(
                         lobbyController.getName(),
                         true,
-                        responseRoomInfo -> {
-                            System.out.println("Connected (creating): " + responseRoomInfo.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoomInfo);
+                        responseRoom -> {
+                            System.out.println("Connected (creating): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
                         },
-                        null
+                        responseRoom -> {
+                            System.out.println("Got rejected");
+                        }
                 );
             });
 
             lobbyController.setJoinHandler(room -> {
                 System.out.println("Selected room: " + room.toString());
+
+                waitingController.applyScene(primaryStage);
+
+                // TODO Remove the sleep. This is a test to see what happens if the room vanishes before we can join
+                try {
+                    Thread.sleep(10000);
+                }
+                catch(InterruptedException ex) {
+
+                }
+
                 NetworkManager.getInstance().requestJoinRoom(
                         lobbyController.getName(),
                         room,
-                        responseRoomInfo -> {
-                            System.out.println("Connected (joining): " + responseRoomInfo.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoomInfo);
+                        responseRoom -> {
+                            System.out.println("Connected (joining): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
                         },
-                        null
+                        responseRoom -> {
+                            System.out.println("Got rejected");
+                        }
                 );
             });
 

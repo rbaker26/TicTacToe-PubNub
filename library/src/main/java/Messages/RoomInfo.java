@@ -12,7 +12,7 @@ public class RoomInfo {
      * Marks which kind of request this is, assuming it's getting sent across PubNub.
      */
     public static enum RequestType {
-        RESULT, CREATE, JOIN, DISCONNECT
+        NORMAL, DISCONNECT, DENIED
     }
 
     public static final int defaultRoomID = -1;
@@ -27,13 +27,25 @@ public class RoomInfo {
     private String player1Token = "X";
     private String player2Token = "O";
 
-    private RequestType requestMode = RequestType.RESULT;
+    private RequestType requestMode = RequestType.NORMAL;
 
-
+    /**
+     * Creates a room object which tells the engine that we are no longer
+     * interested in joining.
+     * @param player The player who is not interested in joining.
+     * @return An object which represents a disconnect request.
+     */
     public static RoomInfo makeDisconnectRoom(PlayerInfo player) {
         RoomInfo result = new RoomInfo();
         result.setPlayer1(player);
         result.setRequestMode(RequestType.DISCONNECT);
+
+        return result;
+    }
+
+    public static RoomInfo makeDeniedRoom() {
+        RoomInfo result = new RoomInfo();
+        result.setRequestMode(RequestType.DENIED);
 
         return result;
     }

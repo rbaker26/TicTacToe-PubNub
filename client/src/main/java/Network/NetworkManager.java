@@ -13,7 +13,6 @@ import com.pubnub.api.models.consumer.PNStatus;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -228,8 +227,8 @@ public final class NetworkManager {
             };
         }
 
-        callback.setSuccessResponse(successResponse);
-        callback.setFailureResponse(failureResponse);
+        callback.setSuccessCallback(successResponse);
+        callback.setFailureCallback(failureResponse);
 
 
         changeListener(callback, Arrays.asList(incomingChannel));
@@ -270,8 +269,8 @@ public final class NetworkManager {
             };
         }
 
-        callback.setSuccessResponse(successResponse);
-        callback.setFailureResponse(failureResponse);
+        callback.setSuccessCallback(successResponse);
+        callback.setFailureCallback(failureResponse);
 
         changeListener(callback, Arrays.asList(incomingChannel));
     }
