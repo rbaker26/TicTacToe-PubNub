@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  * to clients going offline. Note that it may take some time before we decide
  * that a client has gone offline.
  */
-public class HeartbeatCallback extends SubscribeCallback {
+public class HeartbeatListener extends SubscribeCallback {
 
     private static final long EXPIRATION_TIME = Heartbeat.DEFAULT_BEAT_PERIOD * 2;
     private static final long CLEAN_PERIOD = 500;
@@ -60,7 +60,7 @@ public class HeartbeatCallback extends SubscribeCallback {
                     Thread.sleep(CLEAN_PERIOD);
                 }
                 catch(InterruptedException ex) {
-                    System.out.println("SourceGarbageCollector (in HeartbeatCallback) has been interrupted and will die");
+                    System.out.println("SourceGarbageCollector (in HeartbeatListener) has been interrupted and will die");
                     alive = false;
                 }
             } // End while(alive)
@@ -80,12 +80,12 @@ public class HeartbeatCallback extends SubscribeCallback {
      * @param incomingChannel Channel to listen on.
      * @param debugMode If true, stuff will be printed to the console.
      */
-    public HeartbeatCallback(String incomingChannel, boolean debugMode) {
+    public HeartbeatListener(String incomingChannel, boolean debugMode) {
         this(incomingChannel);
         this.debugMode = debugMode;
     }
 
-    public HeartbeatCallback(String incomingChannel) {
+    public HeartbeatListener(String incomingChannel) {
         this.incomingChannel = incomingChannel;
         livingSources = Collections.synchronizedMap(new HashMap<>());
 

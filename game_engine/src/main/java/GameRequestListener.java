@@ -1,4 +1,4 @@
-import Heartbeat.HeartbeatCallback;
+import HeartbeatListener;
 import Messages.*;
 
 import java.util.List;
@@ -22,10 +22,10 @@ public class GameRequestListener extends SubscribeCallback {
     private Map<Integer, Lobby> lobbyList;
     private String myUuid;
     private String myChannel;
-    private HeartbeatCallback hbCallback;
+    private HeartbeatListener hbCallback;
     ExecutorService lobbyThreads = Executors.newCachedThreadPool();
 
-    public GameRequestListener(List<RoomInfo> roomList, Map<Integer, Lobby> lobbyList, String uuid, HeartbeatCallback hbCallback) {
+    public GameRequestListener(List<RoomInfo> roomList, Map<Integer, Lobby> lobbyList, String uuid, HeartbeatListener hbCallback) {
         this.roomInfoList = roomList;
         this.lobbyList = lobbyList;
         this.myUuid = uuid;
