@@ -18,7 +18,7 @@ import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
  * This listener will handle all Creation/Join requests on the Rooms::Requests channel.
  */
 public class GameRequestListener extends SubscribeCallback {
-    private List<RoomInfo> roomInfoList;
+    private List<RoomInfo> roomInfoList;        // TODO This feels a bit like a weird hack. Could a callback work?
     private Map<Integer, Lobby> lobbyList;
     private String myUuid;
     private String myChannel;
@@ -58,7 +58,7 @@ public class GameRequestListener extends SubscribeCallback {
         PlayerInfo player = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
         hbCallback.setExpireCallback(
                 player.getUuid(),
-                value -> removeRoomByID(pb, roomID)
+                value -> hideRoom(pb, roomID)
         );
     }
 
@@ -66,16 +66,21 @@ public class GameRequestListener extends SubscribeCallback {
 
         int roomID = roomMsg.getRoomID();
 
+        System.out.println("Join room request received: " + roomMsg);
+
         if (roomIsValid(roomMsg)) {
-            System.out.println("Join room request received: " + roomMsg);
+
             RoomInfo room = lobbyList.get(roomID).getRoomInfo();
-            if(!room.hasPlayer2()) {
-                room.setPlayer2(roomMsg.getPlayer2());
-            }
-            else {
+            System.out.println(room);
+
+            if(!room.hasPlayer1()) {
                 room.setPlayer1(roomMsg.getPlayer1());
             }
-            removeRoomByID(pb, roomID);
+            else {
+                room.setPlayer2(roomMsg.getPlayer2());
+            }
+
+            hideRoom(pb, roomID);
             System.out.println("Sending out this room: " + room.toString());
             pb.publish() // Notifying player 1 that game has started
                     .message(room)
@@ -119,27 +124,54 @@ public class GameRequestListener extends SubscribeCallback {
             lobbyList.get(roomID).toggleCurrentPlayer();
             System.out.println("Game started for room " + roomID);
         }
+        else {
+            System.out.println("Rejecting; room full or unavailable");
+
+            // TODO We are currently assuming that Player2 is the joiner. This is NOT ALWAYS THE CASE RIGHT NOW.
+            PlayerInfo requester = roomMsg.getPlayer2();
+
+            pb.publish()
+                    .message(RoomInfo.makeDeniedRoom())
+                    .channel(requester.getChannel())
+                    .async(new PNCallback<PNPublishResult>() {
+                        @Override
+                        public void onResponse(PNPublishResult result, PNStatus status) {
+                            // handle publish result, status always present, result if successful
+                            // status.isError() to see if error happened
+                            if (!status.isError()) {
+                            }
+                        }
+                    });
+        }
     }
 
     /**
-     * Removes the room which has the matching roomID. Afterward, a new room list is sent out.
-     * If the roomID cannot be found, then no update is sent out.
-     * @param pb Pubnub object used to send out the message with the updated room list.
-     * @param roomID ID of room to delete.
+     * Hides the given room, causing it to no longer show up when the room list is published.
+     * @param pb Used to send out the message with the updated room list.
+     * @param roomID ID of room to hide.
      */
-    private void removeRoomByID(PubNub pb, int roomID) {
+    private void hideRoom(PubNub pb, int roomID) {
         if(roomInfoList.removeIf(room -> room.getRoomID() == roomID)) {
             publishUpdatedRoomList(pb);
         }
     }
 
-    private void removeRoomByCreator(PubNub pb, PlayerInfo creator) {
+    /**
+     * Deletes the given room entirely, making it as if the room never even existed. Use this if the creator
+     * ditches the match.
+     * @param pb Used to send out the message with the updated room list.
+     * @param creator Creator of the room.
+     */
+    private void deleteRoom(PubNub pb, PlayerInfo creator) {
         if(roomInfoList.removeIf(room -> room.hasPlayer(creator))) {
+            // TODO This is a terrible hack.
+            lobbyList.values().removeIf(lobby -> lobby.getRoomInfo().hasPlayer(creator));
             publishUpdatedRoomList(pb);
         }
     }
 
     private void publishUpdatedRoomList(PubNub pb) {
+
         pb.publish() // Publishing updated room list
                 .message(roomInfoList)
                 .channel(Channels.roomListChannel)
@@ -163,8 +195,10 @@ public class GameRequestListener extends SubscribeCallback {
         if(message.getChannel().equals(myChannel) && !message.getPublisher().equals(myUuid)) {
             RoomInfo roomMsg = Converter.fromJson(message.getMessage(), RoomInfo.class);
             if(isDeleteRequest(roomMsg)) {
-                PlayerInfo creator = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
-                removeRoomByCreator(pb, creator);
+                //PlayerInfo creator = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
+                // TODO We're assuming player 1 is the creator.
+                PlayerInfo creator = roomMsg.getPlayer1();
+                deleteRoom(pb, creator);
             }
             else if(isCreateRequest(roomMsg)) {
                 createRoom(pb, roomMsg);

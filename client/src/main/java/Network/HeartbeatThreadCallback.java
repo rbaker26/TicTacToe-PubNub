@@ -40,7 +40,7 @@ public class HeartbeatThreadCallback implements Runnable {
             try {
                 Messages.Heartbeat beat = new Heartbeat();
                 pn.publish().message(beat).channel(getOutgoingChannel()).sync();
-                System.out.println("Thump");
+                //System.out.println("Thump");
             } catch (PubNubException ex) {
                 System.out.println("SKIPPED A BEAT: " + ex.toString());
             }

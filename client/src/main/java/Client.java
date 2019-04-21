@@ -2,6 +2,8 @@ import Messages.RoomInfo;
 import Network.NetworkManager;
 import UI.*;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 
@@ -58,24 +60,42 @@ public class Client extends Application {
                 NetworkManager.getInstance().requestNewRoom(
                         lobbyController.getName(),
                         true,
-                        responseRoomInfo -> {
-                            System.out.println("Connected (creating): " + responseRoomInfo.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoomInfo);
+                        responseRoom -> {
+                            System.out.println("Connected (creating): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
                         },
-                        null
+                        responseRoom -> {
+                            Platform.runLater(() -> {
+                                respondToFailedConnection(
+                                        primaryStage,
+                                        "Failed to create room"
+                                );
+                            });
+                        }
                 );
             });
 
             lobbyController.setJoinHandler(room -> {
                 System.out.println("Selected room: " + room.toString());
+                waitingController.applyScene(primaryStage);
+
+                //try { Thread.sleep(5000); } catch(InterruptedException ex) {}
+
                 NetworkManager.getInstance().requestJoinRoom(
                         lobbyController.getName(),
                         room,
-                        responseRoomInfo -> {
-                            System.out.println("Connected (joining): " + responseRoomInfo.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoomInfo);
+                        responseRoom -> {
+                            System.out.println("Connected (joining): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
                         },
-                        null
+                        responseRoom -> {
+                            Platform.runLater(() -> {
+                                respondToFailedConnection(
+                                        primaryStage,
+                                        "The room either no longer exists or is now full."
+                                );
+                            });
+                        }
                 );
             });
 
@@ -109,9 +129,34 @@ public class Client extends Application {
         System.exit(0);
     }
 
+    /**
+     * Connects to the given game. This can be called whether we created the room or
+     * are joining someone else's room.
+     * @param primaryStage The main JavaFX stage.
+     * @param ourUserID The user's ID.
+     * @param room The room to join.
+     */
     private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room) {
         gameViewController.applySceneAsync(primaryStage);
         NetworkManager.getInstance().joinRoom(ourUserID, room);
+    }
+
+    /**
+     * Does various cleanup if failed to connect to a game. Note that this MUST be
+     * run asynchronously.
+     * @param primaryStage Stage to draw to.
+     * @param message Message to show in the warning box.
+     */
+    private void respondToFailedConnection(Stage primaryStage, String message) {
+        NetworkManager.getInstance().stopWaitingForRoom();
+
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Failed to join the room");
+        alert.setContentText(message);
+        alert.showAndWait();
+
+        lobbyController.applyScene(primaryStage);
     }
 }
 
