@@ -2,6 +2,8 @@ package Heartbeat;
 
 import Messages.Converter;
 import Messages.Heartbeat;
+import TaskThreads.TaskThread;
+import TaskThreads.TaskThreadFactory;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNStatus;
@@ -21,57 +23,10 @@ public class HeartbeatListener extends SubscribeCallback {
     private static final long EXPIRATION_TIME = Heartbeat.DEFAULT_BEAT_PERIOD * 2;
     private static final long CLEAN_PERIOD = 500;
 
-    private class SourceGarbageCollector implements Runnable {
-
-        boolean alive = false;
-
-        public synchronized boolean isAlive() {
-            return alive;
-        }
-
-        public synchronized void setAlive(boolean alive) {
-            this.alive = alive;
-        }
-
-        @Override
-        public void run() {
-            alive = true;
-
-            // We're using the iterator rather than foreach because we need to
-            // be able to call iterator.delete() to remove elements.
-            while(alive) {
-                HeartbeatSource info = null;
-                Iterator<HeartbeatSource> iterator = livingSources.values().iterator();
-                while (iterator.hasNext()) {
-                    info = iterator.next();
-
-                    if (System.currentTimeMillis() - info.getTimeOfLastHeartbeat() > EXPIRATION_TIME) {
-
-                        if(debugMode) {
-                            System.out.println(info.getUuid() + " died! q.p");
-                        }
-
-                        info.executeExpiredCallback();
-                        iterator.remove();
-                    }
-                }
-
-                try {
-                    Thread.sleep(CLEAN_PERIOD);
-                }
-                catch(InterruptedException ex) {
-                    System.out.println("SourceGarbageCollector (in HeartbeatListener) has been interrupted and will die");
-                    alive = false;
-                }
-            } // End while(alive)
-        }
-    }
-
-    private Map<String, HeartbeatSource> livingSources;
+    private Map<String, HeartbeatSourceInfo> livingSources;
     private String incomingChannel;
 
-    private SourceGarbageCollector cleanerCallback;
-    private Thread cleanerThread;
+    private TaskThread cleanerThread;
 
     private boolean debugMode;
 
@@ -81,17 +36,31 @@ public class HeartbeatListener extends SubscribeCallback {
      * @param debugMode If true, stuff will be printed to the console.
      */
     public HeartbeatListener(String incomingChannel, boolean debugMode) {
-        this(incomingChannel);
         this.debugMode = debugMode;
-    }
 
-    public HeartbeatListener(String incomingChannel) {
         this.incomingChannel = incomingChannel;
         livingSources = Collections.synchronizedMap(new HashMap<>());
 
-        cleanerCallback = new SourceGarbageCollector();
-        cleanerThread = new Thread(cleanerCallback);
+        cleanerThread = TaskThreadFactory.makeCustomThread(CLEAN_PERIOD, this::removeOldSources);
         cleanerThread.start();
+    }
+
+    public void removeOldSources() {
+        HeartbeatSourceInfo info = null;
+        Iterator<HeartbeatSourceInfo> iterator = livingSources.values().iterator();
+        while (iterator.hasNext()) {
+            info = iterator.next();
+
+            if (System.currentTimeMillis() - info.getTimeOfLastHeartbeat() > EXPIRATION_TIME) {
+
+                if(debugMode) {
+                    System.out.println(info.getUuid() + " died! q.p");
+                }
+
+                info.executeExpiredCallback();
+                iterator.remove();
+            }
+        }
     }
 
     /**
@@ -104,7 +73,7 @@ public class HeartbeatListener extends SubscribeCallback {
      * @param uuid UUID to listen on.
      * @param callback Callback to call. This can be null.
      */
-    public void setExpireCallback(String uuid, Consumer<HeartbeatSource> callback) {
+    public void setExpireCallback(String uuid, Consumer<HeartbeatSourceInfo> callback) {
         getHeartbeatSource(uuid).setExpiredCallback(callback);
     }
 
@@ -117,12 +86,12 @@ public class HeartbeatListener extends SubscribeCallback {
      * @param sourceUUID The UUID to get info from.
      * @return The info associated with sourceUUID.
      */
-    private HeartbeatSource getHeartbeatSource(String sourceUUID) {
+    private HeartbeatSourceInfo getHeartbeatSource(String sourceUUID) {
         long currentTime = System.currentTimeMillis();
 
-        HeartbeatSource sourceInfo = livingSources.get(sourceUUID);
+        HeartbeatSourceInfo sourceInfo = livingSources.get(sourceUUID);
         if(sourceInfo == null) {
-            sourceInfo = new HeartbeatSource(sourceUUID, currentTime);
+            sourceInfo = new HeartbeatSourceInfo(sourceUUID, currentTime);
             livingSources.put(sourceUUID, sourceInfo);
         }
 
@@ -145,7 +114,7 @@ public class HeartbeatListener extends SubscribeCallback {
             Heartbeat beat = Converter.fromJson(message.getMessage(), Heartbeat.class);
             String sourceUUID = message.getPublisher();
 
-            HeartbeatSource sourceInfo = getHeartbeatSource(sourceUUID);
+            HeartbeatSourceInfo sourceInfo = getHeartbeatSource(sourceUUID);
             sourceInfo.setTimeOfLastHeartbeat(System.currentTimeMillis());
 
             if(debugMode) {

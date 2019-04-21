@@ -1,11 +1,11 @@
-import HeartbeatListener;
+import Heartbeat.HeartbeatListener;
+import EngineLib.Lobby;
 import Messages.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import EngineLib.Lobby;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
@@ -127,7 +127,7 @@ public class GameRequestListener extends SubscribeCallback {
         else {
             System.out.println("Rejecting; room full or unavailable");
 
-            // TODO We are currently assuming that Player2 is the joiner. This is NOT ALWAYS THE CASE RIGHT NOW.
+            // TODO We are currently assuming that Player2 is the joiner. This is NOT NECESSARILY THE CASE RIGHT NOW.
             PlayerInfo requester = roomMsg.getPlayer2();
 
             pb.publish()

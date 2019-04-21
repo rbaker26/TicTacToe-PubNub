@@ -32,4 +32,22 @@ public final class TaskThreadFactory {
                 new HeartbeatCallback(pubnub, outgoingChannel, beat)
         );
     }
+
+    /**
+     * Creates a custom thread which runs the given code.
+     * @param period The time between updates.
+     * @param callback The code to run.
+     * @return Returns the thread which runs the callback.
+     */
+    public static TaskThread makeCustomThread(long period, Runnable callback) {
+
+        return new DefaultTaskThread(
+                new AbstractInterruptibleCallback(period) {
+                    @Override
+                    protected void update() {
+                        callback.run();
+                    }
+                }
+        );
+    }
 }
