@@ -29,7 +29,7 @@ public final class NetworkManager {
      * Gets the instance of the network manager. Creates it if necessary.
      * @return The network manager.
      */
-    public static NetworkManager getInstance() {
+    public synchronized static NetworkManager getInstance() {
         if(_instance == null) {
             _instance = new NetworkManager();
         }
@@ -195,7 +195,7 @@ public final class NetworkManager {
 
         //clearCurrentListener();
 
-        String incomingChannel = Channels.privateChannelSet + userID;
+        String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         //String outgoingChannel = Channels.privateChannelSet + userID;
         String outgoingChannel = Channels.roomRequestChannel;
 
@@ -236,26 +236,16 @@ public final class NetworkManager {
     }
 
     /**
-     * Call the other joinRoom function instead.
-     * @param ourUserID
-     * @param roomInfo
-     */
-    @Deprecated
-    public void joinRoom(String ourUserID, RoomInfo roomInfo) {
-        joinRoom(ourUserID, roomInfo, null, null);
-    }
-
-    /**
      * Joins a room.
      * @param ourUserID Our user ID.
      * @param roomInfo Info on the room. (Probably should have come as a result of listenForRooms.
      * @param successResponse Called upon successfully joining the room. If null, the listeners will be cleared.
      * @param failureResponse Called upon unsuccessfully joining the room. If null, the listeners will be cleared.
      */
-    public void joinRoom(String ourUserID, RoomInfo roomInfo,
-                         Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+    public void requestJoinRoom(String ourUserID, RoomInfo roomInfo,
+                                Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
 
-        String incomingChannel = Channels.privateChannelSet + roomInfo.getPlayer1Name();
+        String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         String outgoingChannel = Channels.roomRequestChannel;
 
         // If player2 is already around, then we'll be going first.
@@ -283,6 +273,14 @@ public final class NetworkManager {
         callback.setSuccessResponse(successResponse);
         callback.setFailureResponse(failureResponse);
 
+        changeListener(callback, Arrays.asList(incomingChannel));
+    }
+
+    public void joinRoom(String ourUserID, RoomInfo room) {
+        String outgoingChannel = Channels.roomMoveChannel;
+        String incomingChannel = room.getRoomChannel();
+
+        PlayerCallback callback = new PlayerCallback(ourUserID, outgoingChannel, room);
 
         changeListener(callback, Arrays.asList(incomingChannel));
     }
@@ -292,7 +290,7 @@ public final class NetworkManager {
     }
 
     public void stopWaitingForRoom() {
-
+        // TODO Make this instead check for an interface.
         if(isWaitingForRoom()) {
             RoomRequesterCallback callback = (RoomRequesterCallback)currentListener;
             callback.cancelRequest(pn);

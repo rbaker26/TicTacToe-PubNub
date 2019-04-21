@@ -8,6 +8,8 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -16,6 +18,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class LobbySceneController extends AbstractSceneController {
 
@@ -25,8 +28,7 @@ public class LobbySceneController extends AbstractSceneController {
     private Button joinButton;
 
 
-    private ISceneController boardGUI;
-    private ISceneController mainWindow;
+    private Consumer<RoomInfo> joinHandler;
 
 
     TableView<RoomInfo> lobbyTable;
@@ -71,7 +73,18 @@ public class LobbySceneController extends AbstractSceneController {
         lobbyTable.getColumns().addAll(idColumn, lobbyStatColumn, player1Column, player2Column,
                 player1TokenColumn, player2TokenColumn);
 
-        lobbyTable.setItems(getRoomInfo());
+        lobbyTable.getSelectionModel().selectedIndexProperty().addListener(new InvalidationListener() {
+            @Override
+            public void invalidated(Observable observable) {
+
+                ObservableList<RoomInfo> selection = lobbyTable.getSelectionModel().getSelectedItems();
+
+                if(selection.size() > 0 && joinHandler != null) {
+                    joinHandler.accept( selection.get(0) );
+                }
+            }
+        });
+
         //endregion
 
 
@@ -88,6 +101,7 @@ public class LobbySceneController extends AbstractSceneController {
      *  can be passed in values instead of hard coding values.
      *  Player's name and token need to be taken from TextField and ToggleButton**/
 
+    @Deprecated
     public ObservableList<RoomInfo> getRoomInfo() {
         ObservableList<RoomInfo> information = FXCollections.observableArrayList();
         //information.add(new RoomInfo("34562", "Closed - Game in Play", "Bobby", "Keane", "X", "O"));
@@ -101,46 +115,6 @@ public class LobbySceneController extends AbstractSceneController {
         //testing();
 
         return information;
-    }
-
-
-    public void testing() {
-
-        /*** ABOUT THIS FUNCTION - TESTING LISTENER FUNCTION
-         * Selection of row is implemented by this function. Right now, I am just able to determine
-         * if a row is selected, which will help lead us to starting up a game
-         * I want this to connect to board UI.
-         */
-        Stage getStage = new Stage();
-
-        lobbyTable.getSelectionModel().selectedIndexProperty().addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(Observable observable) {
-
-                BoardGUIPane boardObject = new BoardGUIPane();
-
-                mainWindowController mainObject = new mainWindowController();
-
-                //SO WITHIN HERE WE MUST TAKE VALUES OF THE COLUMNS AND PASS THEM INTO BOARD FUNCTIONALITY
-                //THAT ALLOWS A GAME TO START GIVEN PLAYER INFORMATION AS WELL AS ROOM ID.
-
-                System.out.println("Selected indices: " + lobbyTable.getSelectionModel().getSelectedItems());
-
-                System.out.println("Selected items: " + lobbyTable.getSelectionModel().getSelectedItems());
-
-                // boardGUI = boardObject; //CANNOT SWITCH TO BOARD UI
-
-                //THIS IS JUST FOR TESTING: I WANT TO SWITCH OVER TO THE MAINwINDOW CONTROLLER IF I SELECT A ROW
-
-                mainWindow = mainObject;
-
-                mainObject.applyScene(getStage);
-
-
-            }
-
-        });
-
     }
 
 
@@ -166,32 +140,10 @@ public class LobbySceneController extends AbstractSceneController {
      */
     public void setRoomInfo(List<Messages.RoomInfo> rooms) {
 
-        // TODO If possible, it's probably more convenient to make a 1-1 coupling, having
-        //      the table be able to take Messages.RoomInfo so we don't have to convert things.
-        //      However, if we stick with this reflection-based approach, it's probably better
-        //      to keep it as a separate UI object.
-
         // This code is just going to convert the Messages.RoomInfo objects into UI.RoomInfo objects.
         ObservableList<RoomInfo> information = FXCollections.observableArrayList(rooms);
-        /*
-        for(Messages.RoomInfo room : rooms) {
-            information.add(new RoomInfo(
-                    Integer.toString(room.getRoomID()),
-                    "Unknown",
-                    room.getPlayer1Name(),
-                    room.getPlayer2Name(),
-                    "X",
-                    "O"
-            ));
-        }
-         */
-
         lobbyTable.setItems(information);
 
-        // TODO If we are selecting available rooms, we will need to check to make sure that the new
-        //      list of rooms has not invalidated our selection. We should probably track the RoomID of the
-        //      selected room, and then scan through the new list. If the RoomID is gone, we need to
-        //      deselect it.
     }
 
     @Override
@@ -219,6 +171,7 @@ public class LobbySceneController extends AbstractSceneController {
         return Integer.parseInt(roomField.getText());
     }
 
+    @Deprecated
     public TextField getNameField() {
         return nameField;
     }
@@ -234,12 +187,22 @@ public class LobbySceneController extends AbstractSceneController {
         return roomField;
     }
 
+    @Deprecated
     public Button getOpenButton() {
         return openButton;
     }
 
+    @Deprecated
     public Button getJoinButton() {
         return joinButton;
+    }
+
+    public void setOpenHandler(Runnable handler) {
+        openButton.setOnAction(value -> handler.run());
+    }
+
+    public void setJoinHandler(Consumer<RoomInfo> handler) {
+        joinHandler = handler;
     }
     //endregion
 

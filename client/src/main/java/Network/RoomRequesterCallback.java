@@ -123,22 +123,9 @@ public class RoomRequesterCallback extends SubscribeCallback {
 
             // TODO Check for success/failure
             if(successResponse != null) {
-                successResponse.accept(roomInfo);
+                successResponse.accept(responseRoomInfo);
             }
 
-
-            /*
-            if (creator.equals(ourUserID)) {
-
-                String channel = json.get("Channel").getAsString();
-
-                pubnub.addListener(new Network.PlayerCallback(ourUserID, channel));
-                pubnub.removeListener(this);
-
-                pubnub.subscribe().channels(Arrays.asList(channel)).execute();
-                pubnub.unsubscribe().channels(Arrays.asList(sourceChannel)).execute();
-            }
-             */
         }
     } // End message(PubNube pubnub, PNMessageResult message)
 
