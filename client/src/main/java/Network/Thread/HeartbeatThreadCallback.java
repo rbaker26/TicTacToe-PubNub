@@ -1,4 +1,4 @@
-package Network;
+package Network.Thread;
 
 import Messages.Heartbeat;
 import com.pubnub.api.PubNub;
@@ -10,19 +10,25 @@ import java.util.Objects;
  * While the HeartbeatThreadCallback is running, it will periodically send Heartbeats
  * on the outgoing channel.
  */
-public class HeartbeatThreadCallback implements Runnable {
+class HeartbeatThreadCallback implements InterruptibleCallback {
 
     private PubNub pn;
     private String outgoingChannel;
     private boolean alive;
     private long beatPeriod;
+    private Heartbeat beat;
 
-    public HeartbeatThreadCallback() {
-        this(null, null);
-    }
+    HeartbeatThreadCallback(PubNub pn, String outgoingChannel, Heartbeat beat) {
+        if(pn == null || outgoingChannel == null) {
+            throw new IllegalStateException("Cannot run while Pubnub object or outgoing channel is null");
+        }
 
-    public HeartbeatThreadCallback(PubNub pn, String outgoingChannel) {
+        if(beat == null) {
+            throw new NullPointerException("The heartbeat object passed to HeartbeatThreadCallback must NOT be null!");
+        }
+
         this.pn = pn;
+        this.beat = beat;
         alive = false;
         beatPeriod = Heartbeat.DEFAULT_BEAT_PERIOD;
         this.outgoingChannel = outgoingChannel;
@@ -30,15 +36,11 @@ public class HeartbeatThreadCallback implements Runnable {
 
     @Override
     public void run() {
-        if(pn == null || outgoingChannel == null) {
-            throw new IllegalStateException("Cannot run while Pubnub object or outgoing channel is null");
-        }
 
         setAlive(true);
 
         while (isAlive()) {
             try {
-                Messages.Heartbeat beat = new Heartbeat();
                 pn.publish().message(beat).channel(getOutgoingChannel()).sync();
                 //System.out.println("Thump");
             } catch (PubNubException ex) {
