@@ -2,6 +2,8 @@ import Messages.RoomInfo;
 import Network.NetworkManager;
 import UI.*;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 
@@ -70,16 +72,7 @@ public class Client extends Application {
 
             lobbyController.setJoinHandler(room -> {
                 System.out.println("Selected room: " + room.toString());
-
                 waitingController.applyScene(primaryStage);
-
-                // TODO Remove the sleep. This is a test to see what happens if the room vanishes before we can join
-                try {
-                    Thread.sleep(10000);
-                }
-                catch(InterruptedException ex) {
-
-                }
 
                 NetworkManager.getInstance().requestJoinRoom(
                         lobbyController.getName(),
@@ -89,7 +82,17 @@ public class Client extends Application {
                             connectToGame(primaryStage, lobbyController.getName(), responseRoom);
                         },
                         responseRoom -> {
-                            System.out.println("Got rejected");
+                            NetworkManager.getInstance().stopWaitingForRoom();
+
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Error");
+                                alert.setHeaderText("Failed to join the room");
+                                alert.setContentText("The room either no longer exists or is now full.");
+                                alert.showAndWait();
+
+                                lobbyController.applyScene(primaryStage);
+                            });
                         }
                 );
             });
