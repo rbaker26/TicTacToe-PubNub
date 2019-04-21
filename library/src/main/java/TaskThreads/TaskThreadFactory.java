@@ -29,7 +29,7 @@ public final class TaskThreadFactory {
     public static TaskThread makeHeartbeatThread(PubNub pubnub, String outgoingChannel, Heartbeat beat) {
 
         return new DefaultTaskThread(
-                new HeartbeatThreadCallback(pubnub, outgoingChannel, beat)
+                new HeartbeatCallback(pubnub, outgoingChannel, beat)
         );
     }
 }
