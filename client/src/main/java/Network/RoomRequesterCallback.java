@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * for joining or for creating a room. (If the request object has an ID,
  * it's assumed we're joining. Otherwise, it's assumed we're creating.)
  */
-public class RoomRequesterCallback extends SubscribeCallback {
+public class RoomRequesterCallback extends SubscribeCallback implements InterruptibleListener {
 
     private String ourUserID;
     private String outgoingChannel;
@@ -59,7 +59,7 @@ public class RoomRequesterCallback extends SubscribeCallback {
      * the caller must detach the callback and everything else.
      * @param pubnub Used for sending the message.
      */
-    public void cancelRequest(PubNub pubnub) {
+    public void interrupt(PubNub pubnub) {
         request.setRequestMode(RoomInfo.RequestType.DISCONNECT);
         pubnub.publish().channel(outgoingChannel).message(request).async(new PNCallback<PNPublishResult>() {
             @Override

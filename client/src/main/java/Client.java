@@ -101,7 +101,7 @@ public class Client extends Application {
 
 
             waitingController.setOnCancel(value -> {
-                NetworkManager.getInstance().stopWaitingForRoom();
+                NetworkManager.getInstance().clear();
                 lobbyController.applySceneAsync(primaryStage);
             });
 
@@ -125,7 +125,6 @@ public class Client extends Application {
     public void stop() throws Exception {
         NetworkManager.dieIfNeeded();
 
-        // TODO We shouldn't be forcing an exit, but... we have no other choice
         System.exit(0);
     }
 
@@ -148,7 +147,7 @@ public class Client extends Application {
      * @param message Message to show in the warning box.
      */
     private void respondToFailedConnection(Stage primaryStage, String message) {
-        NetworkManager.getInstance().stopWaitingForRoom();
+        NetworkManager.getInstance().clear();
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");

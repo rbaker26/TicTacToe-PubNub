@@ -1,11 +1,11 @@
-import Heartbeat.HeartbeatCallback;
+import Heartbeat.HeartbeatListener;
+import EngineLib.Lobby;
 import Messages.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import EngineLib.Lobby;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
@@ -22,10 +22,10 @@ public class GameRequestListener extends SubscribeCallback {
     private Map<Integer, Lobby> lobbyList;
     private String myUuid;
     private String myChannel;
-    private HeartbeatCallback hbCallback;
+    private HeartbeatListener hbCallback;
     ExecutorService lobbyThreads = Executors.newCachedThreadPool();
 
-    public GameRequestListener(List<RoomInfo> roomList, Map<Integer, Lobby> lobbyList, String uuid, HeartbeatCallback hbCallback) {
+    public GameRequestListener(List<RoomInfo> roomList, Map<Integer, Lobby> lobbyList, String uuid, HeartbeatListener hbCallback) {
         this.roomInfoList = roomList;
         this.lobbyList = lobbyList;
         this.myUuid = uuid;
@@ -127,7 +127,7 @@ public class GameRequestListener extends SubscribeCallback {
         else {
             System.out.println("Rejecting; room full or unavailable");
 
-            // TODO We are currently assuming that Player2 is the joiner. This is NOT ALWAYS THE CASE RIGHT NOW.
+            // TODO We are currently assuming that Player2 is the joiner. This is NOT NECESSARILY THE CASE RIGHT NOW.
             PlayerInfo requester = roomMsg.getPlayer2();
 
             pb.publish()
@@ -164,7 +164,6 @@ public class GameRequestListener extends SubscribeCallback {
      */
     private void deleteRoom(PubNub pb, PlayerInfo creator) {
         if(roomInfoList.removeIf(room -> room.hasPlayer(creator))) {
-            // TODO This is a terrible hack.
             lobbyList.values().removeIf(lobby -> lobby.getRoomInfo().hasPlayer(creator));
             publishUpdatedRoomList(pb);
         }
