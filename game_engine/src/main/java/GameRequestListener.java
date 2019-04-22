@@ -164,7 +164,6 @@ public class GameRequestListener extends SubscribeCallback {
      */
     private void deleteRoom(PubNub pb, PlayerInfo creator) {
         if(roomInfoList.removeIf(room -> room.hasPlayer(creator))) {
-            // TODO This is a terrible hack.
             lobbyList.values().removeIf(lobby -> lobby.getRoomInfo().hasPlayer(creator));
             publishUpdatedRoomList(pb);
         }

@@ -125,7 +125,6 @@ public class Client extends Application {
     public void stop() throws Exception {
         NetworkManager.dieIfNeeded();
 
-        // TODO We shouldn't be forcing an exit, but... we have no other choice
         System.exit(0);
     }
 
