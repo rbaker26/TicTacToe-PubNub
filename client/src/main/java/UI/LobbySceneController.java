@@ -10,25 +10,72 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.StageStyle;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class LobbySceneController extends AbstractSceneController {
 
+    public static class OpenRequest {
+
+        private String password;
+        private boolean goingFirst;
+
+        public OpenRequest(String password, boolean goingFirst) {
+            this.password = password;
+            this.goingFirst = goingFirst;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public boolean isGoingFirst() {
+            return goingFirst;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            OpenRequest that = (OpenRequest) o;
+            return isGoingFirst() == that.isGoingFirst() &&
+                    Objects.equals(getPassword(), that.getPassword());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getPassword(), isGoingFirst());
+        }
+
+        @Override
+        public String toString() {
+            return "OpenRequest{" +
+                    "password='" + password + '\'' +
+                    ", goingFirst=" + goingFirst +
+                    '}';
+        }
+    }
+
     private TextField nameField;
-    private TextField roomField;
+    //private TextField roomField;
     private Button openButton;
-    private Button joinButton;
+    //private Button joinButton;
 
 
     private Consumer<RoomInfo> joinHandler;
+    private Consumer<OpenRequest> openHandler;
 
 
     TableView<RoomInfo> lobbyTable;
@@ -37,11 +84,69 @@ public class LobbySceneController extends AbstractSceneController {
         Label nameLabel = new Label("Name");
         nameField = new TextField();
 
+        /*
         Label roomLabel = new Label("Room");
         roomField = new TextField();
+         */
 
         openButton = new Button("Open");
-        joinButton = new Button("Join");
+
+        openButton.setOnAction(event -> {
+            // See "Custom Login Dialog" in https://code.makery.ch/blog/javafx-dialogs-official/
+
+            // Create the custom dialog.
+            Dialog<OpenRequest> dialog = new Dialog<>();
+            dialog.setTitle("Room Configuration");
+            //dialog.setHeaderText("");
+            dialog.initStyle(StageStyle.UTILITY);
+
+            // Set the button types.
+            ButtonType loginButtonType = new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+            // Create the username and password labels and fields.
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            PasswordField password = new PasswordField();
+            password.setPromptText("Password");
+
+            final ToggleGroup turnOrderGroup = new ToggleGroup();
+            RadioButton firstButton = new RadioButton("First");
+            RadioButton secondButton = new RadioButton("Second");
+            firstButton.setSelected(true);
+            firstButton.setToggleGroup(turnOrderGroup);
+            secondButton.setToggleGroup(turnOrderGroup);
+
+            grid.add(new Label("Password:"), 0, 0);
+            grid.add(password, 1, 0);
+            grid.add(firstButton, 0, 1);
+            grid.add(secondButton, 1, 1);
+
+            dialog.getDialogPane().setContent(grid);
+
+            // Convert the result to a username-password-pair when the login button is clicked.
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == loginButtonType) {
+                    return new OpenRequest(password.getText(), firstButton.isSelected());
+                }
+                return null;
+            });
+
+            Optional<OpenRequest> result = dialog.showAndWait();
+
+            result.ifPresent(usernamePassword -> {
+                //System.out.println("Username=" + usernamePassword.getKey() + ", Password=" + usernamePassword.getValue());
+                //System.out.println(result);
+                if(openHandler != null) {
+                    openHandler.accept(result.get());
+                }
+            });
+        });
+
+        //joinButton = new Button("Join");
 
         //region Table config
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
@@ -88,35 +193,12 @@ public class LobbySceneController extends AbstractSceneController {
         //endregion
 
 
-        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
+        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, openButton);
 
         //setMasterScene(new Scene(vbox, 200, 200));
         setRoot(vbox);
 
     }
-
-    /**ABOUT THIS FUNCTION - THIS IS JUST A TESTING FUNCTION FOR TABLEVIEW CONTENTS
-     *  Needs to be modified in order to become flexible.
-     *  TableView populating option: we can change this function so that it
-     *  can be passed in values instead of hard coding values.
-     *  Player's name and token need to be taken from TextField and ToggleButton**/
-
-    @Deprecated
-    public ObservableList<RoomInfo> getRoomInfo() {
-        ObservableList<RoomInfo> information = FXCollections.observableArrayList();
-        //information.add(new RoomInfo("34562", "Closed - Game in Play", "Bobby", "Keane", "X", "O"));
-        //information.add(new RoomInfo("67895", "Closed - Game in Play", "Daniel", "Naomi", "O", "X"));
-        //information.add(new RoomInfo(193, "Hi"));
-        RoomInfo testRoom1 = new RoomInfo();
-        testRoom1.setRoomID(1324);
-        testRoom1.setPlayer1(new PlayerInfo("213", "Hi", "Oof"));
-        information.add(testRoom1);
-
-        //testing();
-
-        return information;
-    }
-
 
     /**
      * This is a proxy function to call setRoomInfo asynchronously. This means that the
@@ -150,25 +232,17 @@ public class LobbySceneController extends AbstractSceneController {
     public void applyScene(Stage targetStage) {
         super.applyScene(targetStage);
 
+
+        // TODO This needs to be passed in as a lambda
         // This causes us to automatically launch into the listening state when opening this scene.
         // It passes the setRoomInfoAsync function, which will get called whenever we get an
         // updated list of rooms.
         NetworkManager.getInstance().listenForRooms( this::setRoomInfoAsync );
     }
 
-    //region Getters
+    //region Getters and setters
     public String getName() {
         return nameField.getText();
-    }
-
-    /**
-     * @deprecated This should NOT be used for serious code. Instead, the
-     *             user will be choosing rooms to join.
-     * @return
-     */
-    @Deprecated
-    public int getRoomID() {
-        return Integer.parseInt(roomField.getText());
     }
 
     @Deprecated
@@ -176,29 +250,13 @@ public class LobbySceneController extends AbstractSceneController {
         return nameField;
     }
 
-    /**
-     * @deprecated This is deprecated because we should NOT be using the
-     *             room field. This will eventually go away and be replaced
-     * by a full listing.
-     * @return
-     */
     @Deprecated
-    public TextField getRoomField() {
-        return roomField;
-    }
-
-    @Deprecated
-    public Button getOpenButton() {
-        return openButton;
-    }
-
-    @Deprecated
-    public Button getJoinButton() {
-        return joinButton;
-    }
-
     public void setOpenHandler(Runnable handler) {
-        openButton.setOnAction(value -> handler.run());
+        //openButton.setOnAction(value -> handler.run());
+    }
+
+    public void setOpenHandler(Consumer<OpenRequest> handler) {
+        openHandler = handler;
     }
 
     public void setJoinHandler(Consumer<RoomInfo> handler) {
@@ -208,30 +266,32 @@ public class LobbySceneController extends AbstractSceneController {
 
     //region Object overrides
     @Override
+    public String toString() {
+        return "LobbySceneController{" +
+                "nameField=" + nameField +
+                ", openButton=" + openButton +
+                ", joinHandler=" + joinHandler +
+                ", openHandler=" + openHandler +
+                ", lobbyTable=" + lobbyTable +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         LobbySceneController that = (LobbySceneController) o;
         return Objects.equals(getNameField(), that.getNameField()) &&
-                Objects.equals(getRoomField(), that.getRoomField()) &&
-                Objects.equals(getOpenButton(), that.getOpenButton()) &&
-                Objects.equals(getJoinButton(), that.getJoinButton());
+                Objects.equals(openButton, that.openButton) &&
+                Objects.equals(joinHandler, that.joinHandler) &&
+                Objects.equals(openHandler, that.openHandler) &&
+                Objects.equals(lobbyTable, that.lobbyTable);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getNameField(), getRoomField(), getOpenButton(), getJoinButton());
-    }
-
-    @Override
-    public String toString() {
-        return "LobbySceneController{" +
-                "nameField=" + nameField +
-                ", roomField=" + roomField +
-                ", openButton=" + openButton +
-                ", joinButton=" + joinButton +
-                '}';
+        return Objects.hash(super.hashCode(), openButton, joinHandler, openHandler, lobbyTable);
     }
     //endregion
 

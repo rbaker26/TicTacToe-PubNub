@@ -51,8 +51,8 @@ public class Client extends Application {
             //mainWindowController mainObject = new mainWindowController();
 
 
-            lobbyController.setOpenHandler(() -> {
-                System.out.println("Opening");
+            lobbyController.setOpenHandler(requestInfo -> {
+                System.out.println("Opening " + requestInfo);
 
                 waitingController.applyScene(primaryStage);
 
