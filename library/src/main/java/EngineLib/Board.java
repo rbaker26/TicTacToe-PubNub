@@ -170,6 +170,31 @@ public class Board {
 
     //***************************************************************************
     /**
+     * Returns whether or not the passed token won the game
+     */
+    public boolean isWinner(char token) {
+        for(int index = 0; index < ROW_COUNT; index++) {
+            if ((boardArray[index][0] == boardArray[index][1] &&
+                 boardArray[index][1] == boardArray[index][2] &&
+                 boardArray[index][0] == token) ||
+                (boardArray[0][index] == boardArray[1][index] &&
+                 boardArray[1][index] == boardArray[2][index] &&
+                 boardArray[0][index] == token)) {
+                return true;
+            }
+        }
+        if((boardArray[0][0] == boardArray[1][1] &&
+            boardArray[1][1] == boardArray[2][2] &&
+            boardArray[0][0] == token) ||
+           (boardArray[0][2] == boardArray[1][1] &&
+            boardArray[1][1] == boardArray[2][0] &&
+            boardArray[0][2] == token)){
+            return true;
+        }
+        return false;
+    }
+    //***************************************************************************
+    /**
      * Returns the amount of empty spaces on the board
      * @return (int) emptySpaces
      * @author Bob Baker

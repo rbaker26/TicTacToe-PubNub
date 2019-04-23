@@ -29,7 +29,12 @@ public class Engine {
         pnConfiguration.setPublishKey(Keys.pubKey);
 
         try {
-            byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+            InetAddress local = InetAddress.getLocalHost();
+            NetworkInterface network = NetworkInterface.getByInetAddress(local);
+            if(network == null) {
+                network = NetworkInterface.getNetworkInterfaces().nextElement();
+            }
+            byte[] mac = network.getHardwareAddress();
             StringBuilder uuid = new StringBuilder();
             for (int i = 0; i < mac.length; i++) {
                 uuid.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
@@ -40,8 +45,10 @@ public class Engine {
 
         }
         catch(Exception ex) {
+            System.out.println(ex);
             System.out.println("Cannot get local host... Creating default UUID");
-            myUuid = pnConfiguration.getUuid();
+            pnConfiguration.setUuid(pnConfiguration.getUuid() + "engine");
+            myUuid = pnConfiguration.getUuid() + "engine";
         }
 
         heartbeatListener = new HeartbeatListener(Channels.clientHeartbeatChannel, true);

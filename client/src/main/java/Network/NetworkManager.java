@@ -1,5 +1,6 @@
 package Network;
 
+import EngineLib.Board;
 import Messages.Channels;
 import Messages.MoveInfo;
 import Messages.PlayerInfo;
@@ -301,11 +302,11 @@ public final class NetworkManager {
         changeListener(callback, Arrays.asList(incomingChannel));
     }
 
-    public void joinRoom(String ourUserID, RoomInfo room) {
+    public void joinRoom(String ourUserID, RoomInfo room, Consumer<Board> response) {
         String outgoingChannel = Channels.roomMoveChannel;
         String incomingChannel = room.getRoomChannel();
 
-        PlayerCallback callback = new PlayerCallback(ourUserID, outgoingChannel, room);
+        PlayerCallback callback = new PlayerCallback(ourUserID, outgoingChannel, room, response);
 
         changeListener(callback, Arrays.asList(incomingChannel));
     }
@@ -315,6 +316,7 @@ public final class NetworkManager {
      */
     public void sendMove(int row, int col, int roomID, String playerID) {
         System.out.println("Publishing on " + Channels.roomMoveChannel);
+        System.out.printf("Row: %d%n Col: %d%n RoomID: %d%n, Name: %s%n", row, col, roomID, playerID);
         pn.publish()
                 .message(new MoveInfo(roomID, playerID, row, col))
                 .channel(Channels.roomMoveChannel)

@@ -29,7 +29,17 @@ dependencies {
     compile group: 'ch.qos.logback', name:'logback-core', version: '1.0.9'
 }
 
-mainClassName = 'Client'
+jar {
+    manifest {
+        attributes 'Main-Class': 'Main'
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+mainClassName = 'Main'
 
 // This is necessary to make System.in work correctly
 run{
