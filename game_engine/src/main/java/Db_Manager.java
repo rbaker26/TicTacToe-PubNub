@@ -58,7 +58,7 @@ public class Db_Manager {
 
 
     //******************************************************************************************
-    boolean UserExists(String playerID) throws SQLException {
+    boolean UserExistsByName(String playerName) throws SQLException {
         PreparedStatement preparedStatement =  connection
                 .prepareStatement(  "    SELECT CASE WHEN EXISTS ( SELECT *  FROM  players  WHERE user_id = ?  LIMIT  1 )" +
                                          "    THEN                " +
@@ -67,7 +67,7 @@ public class Db_Manager {
                                          "    CAST ( 0 AS BIT)    " +
                                          "    END  );             ");
 
-        preparedStatement.setString(1,playerID);
+        preparedStatement.setString(1,playerName);
 
 
         ResultSet rs =  preparedStatement.executeQuery();
@@ -80,6 +80,27 @@ public class Db_Manager {
     //******************************************************************************************
 
 
+    //******************************************************************************************
+    boolean UserExistsByID(int playerID) throws SQLException {
+        PreparedStatement preparedStatement =  connection
+                .prepareStatement(  "    SELECT CASE WHEN EXISTS ( SELECT *  FROM  players  WHERE user_id = ?  LIMIT  1 )" +
+                        "    THEN                " +
+                        "    CAST ( 1 AS BIT)    " +
+                        "    ELSE                " +
+                        "    CAST ( 0 AS BIT)    " +
+                        "    END  );             ");
+
+        preparedStatement.setInt(1,playerID);
+
+
+        ResultSet rs =  preparedStatement.executeQuery();
+
+        rs.first();
+
+        return rs.getBoolean(0);
+
+    }
+    //******************************************************************************************
 
 
     //******************************************************************************************
