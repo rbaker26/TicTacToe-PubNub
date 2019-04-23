@@ -1,7 +1,9 @@
+import Messages.MoveInfo;
+
 import java.sql.*;
 
 
-public class Db_Manager {
+class Db_Manager {
 
     //******************************************************************************************
     // Server Details
@@ -25,7 +27,7 @@ public class Db_Manager {
         }
         if(connection == null){
             try {
-                Class.forName("com.mysql.jdbc.Driver");
+               Class.forName("com.mysql.jdbc.Driver");
                 connection =  DriverManager.getConnection("jdbc:mysql://"+IP+":"+PORT +"?" + "user="+USERNAME+"&password="+PASSWORD);
             }
             catch (SQLException sqle) {
@@ -56,11 +58,8 @@ public class Db_Manager {
 
 
 
-
-
-
     //******************************************************************************************
-    public void WriteMove( int roomID, int row, int col, int playerID) throws SQLException {
+    public void WriteMove( int roomID, int row, int col, String playerID) throws SQLException {
         //    private Statement statement = null;
         //    private PreparedStatement preparedStatement = null;
         //    private ResultSet resultSet = null;
@@ -68,21 +67,27 @@ public class Db_Manager {
         PreparedStatement preparedStatement =  connection
                 .prepareStatement("insert into  tictactoe.moves (room_id, row_val, col_val, player_id) values (?, ?, ?, ?)");
 
+
         preparedStatement.setInt(1,roomID);
         preparedStatement.setInt(2,row);
         preparedStatement.setInt(3,col);
-        preparedStatement.setInt(4,playerID);
+        preparedStatement.setString(4,playerID);
         preparedStatement.executeUpdate();
-
     }
     //******************************************************************************************
     //******************************************************************************************
-    public void WriteMove(Move move) throws SQLException {
-        WriteMove( move.roomID, move.row, move.col, move.playerID);
+    public void WriteMove(MoveInfo move) throws SQLException {
+        WriteMove( move.getRoomID(), move.getRow(), move.getCol(), move.getPlayerID());
     }
     //******************************************************************************************
 
 
+//    public void WriteWinner(MoveInfo move) {
+//        if(move.getRow() == -1 && move.Get) {
+//
+//        }
+//    }
+//
 
 
     //******************************************************************************************
@@ -100,5 +105,13 @@ public class Db_Manager {
     public void WritePlayer(Player player)  throws SQLException{
         WritePlayer(player.name, player.playerID);
     }
+    //******************************************************************************************
+
+
+    //******************************************************************************************
+    public void WriteLobby(int lobbyID, int roomID, int player1ID, int player2ID) { }
+    //******************************************************************************************
+    //******************************************************************************************
+    public void WriteLobby(Lobby lobby) { }
     //******************************************************************************************
 }
