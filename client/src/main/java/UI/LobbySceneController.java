@@ -5,6 +5,7 @@ import Network.NetworkManager;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -117,10 +118,21 @@ public class LobbySceneController extends AbstractSceneController {
         player2TokenColumn.setMinWidth(100);
         player2TokenColumn.setCellValueFactory(new PropertyValueFactory<>("player2Token"));
 
+        TableColumn<RoomInfo, Boolean> hasPasswordColumn = new TableColumn<>("Password?");
+        hasPasswordColumn.setMinWidth(50);
+        hasPasswordColumn.setCellValueFactory(cellData -> new SimpleBooleanProperty(cellData.getValue().hasPassword()));
+        hasPasswordColumn.setCellFactory(col -> new TableCell<RoomInfo, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : (item ? "Yes" : "No") );
+            }
+        });
+
 
         lobbyTable = new TableView<>();
         lobbyTable.getColumns().addAll(idColumn, lobbyStatColumn, player1Column, player2Column,
-                player1TokenColumn, player2TokenColumn);
+                player1TokenColumn, player2TokenColumn, hasPasswordColumn);
 
         /*
         lobbyTable.getSelectionModel().selectedIndexProperty().addListener(new InvalidationListener() {
