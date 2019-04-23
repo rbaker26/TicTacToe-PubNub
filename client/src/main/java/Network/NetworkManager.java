@@ -204,8 +204,11 @@ public final class NetworkManager {
      * @param onUpdateCallback Gets fired whenever there is a new room list.
      */
     public void listenForRooms(Consumer<List<RoomInfo>> onUpdateCallback) {
-
         changeListener(new RoomListCallback(onUpdateCallback), Arrays.asList(Channels.roomListChannel));
+    }
+
+    public boolean isListeningForRooms() {
+        return (currentCallback instanceof RoomListCallback);
     }
 
     /**
@@ -231,7 +234,7 @@ public final class NetworkManager {
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo
-                userID, outgoingChannel, incomingChannel, room
+                userID, outgoingChannel, incomingChannel, room, player
         );
 
 
@@ -273,7 +276,7 @@ public final class NetworkManager {
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo
-                ourUserID, outgoingChannel, incomingChannel, roomInfo
+                ourUserID, outgoingChannel, incomingChannel, roomInfo, player
         );
 
 

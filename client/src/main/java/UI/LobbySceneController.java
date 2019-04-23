@@ -9,6 +9,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -71,9 +73,11 @@ public class LobbySceneController extends AbstractSceneController {
 
     private Consumer<RoomInfo> joinHandler;
     private Consumer<OpenRequest> openHandler;
+    private Runnable sceneApplyHandler;
 
 
     TableView<RoomInfo> lobbyTable;
+    List<RoomInfo> latestRoomList;
 
     public LobbySceneController() {
         Label nameLabel = new Label("Name");
@@ -118,6 +122,7 @@ public class LobbySceneController extends AbstractSceneController {
         lobbyTable.getColumns().addAll(idColumn, lobbyStatColumn, player1Column, player2Column,
                 player1TokenColumn, player2TokenColumn);
 
+        /*
         lobbyTable.getSelectionModel().selectedIndexProperty().addListener(new InvalidationListener() {
             @Override
             public void invalidated(Observable observable) {
@@ -130,7 +135,14 @@ public class LobbySceneController extends AbstractSceneController {
                 }
             }
         });
+         */
 
+        lobbyTable.setOnMouseClicked((MouseEvent event) -> {
+            if(event.getButton().equals(MouseButton.PRIMARY) && !lobbyTable.getSelectionModel().isEmpty()) {
+                //System.out.println(lobbyTable.getSelectionModel().getSelectedItem());
+                OnSelectedRoom(lobbyTable.getSelectionModel().getSelectedItem());
+            }
+        });
         //endregion
 
 
@@ -138,7 +150,6 @@ public class LobbySceneController extends AbstractSceneController {
 
         //setMasterScene(new Scene(vbox, 200, 200));
         setRoot(vbox);
-
     }
 
     private void OnSelectedRoom(RoomInfo room) {
@@ -259,11 +270,6 @@ public class LobbySceneController extends AbstractSceneController {
                 alert.showAndWait();
             }
         });
-
-        // We need to always clear the selection. Since our method for checking for a change
-        // is based on a selection change, we have to clear this in case the user hasn't moved
-        // on to another screen.
-        clearSelection();
     }
 
     /**
@@ -303,11 +309,9 @@ public class LobbySceneController extends AbstractSceneController {
         // This causes us to automatically launch into the listening state when opening this scene.
         // It passes the setRoomInfoAsync function, which will get called whenever we get an
         // updated list of rooms.
-        NetworkManager.getInstance().listenForRooms( this::setRoomInfoAsync );
-    }
-
-    private void clearSelection() {
-        Platform.runLater( () -> lobbyTable.getSelectionModel().clearSelection() );
+        if(!NetworkManager.getInstance().isListeningForRooms()) {
+            NetworkManager.getInstance().listenForRooms(this::setRoomInfoAsync);
+        }
     }
 
     //region Getters and setters

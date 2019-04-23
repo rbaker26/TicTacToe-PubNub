@@ -151,6 +151,7 @@ public class GameRequestListener extends SubscribeCallback {
      * @param roomID ID of room to hide.
      */
     private void hideRoom(PubNub pb, int roomID) {
+        System.out.println("Hiding room ID " + roomID);
         if(roomInfoList.removeIf(room -> room.getRoomID() == roomID)) {
             publishUpdatedRoomList(pb);
         }
@@ -163,6 +164,7 @@ public class GameRequestListener extends SubscribeCallback {
      * @param creator Creator of the room.
      */
     private void deleteRoom(PubNub pb, PlayerInfo creator) {
+        System.out.println("Deleting room by " + creator.getId());
         if(roomInfoList.removeIf(room -> room.hasPlayer(creator))) {
             lobbyList.values().removeIf(lobby -> lobby.getRoomInfo().hasPlayer(creator));
             publishUpdatedRoomList(pb);
