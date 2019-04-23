@@ -35,7 +35,7 @@ jar {
     }
 
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        compileJava.classpath.collect {it.isDirectory() ? it : zipTree(it)}
     }
 }
 
@@ -49,7 +49,4 @@ run{
         args project.args.split(',')
     }
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> recorder-pubnub
