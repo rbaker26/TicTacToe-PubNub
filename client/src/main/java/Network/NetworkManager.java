@@ -16,6 +16,7 @@ import com.pubnub.api.models.consumer.PNStatus;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -63,7 +64,20 @@ public final class NetworkManager {
         String myUuid = "";
 
         try {
-            byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+            byte[] mac = NetworkInterface.getNetworkInterfaces().nextElement().getHardwareAddress();
+
+            if(mac == null) {
+                System.out.println("Couldn't get MAC address using the Linux approach, trying Windows approach.");
+                mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+            }
+
+            /*
+            Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces();
+            while(list.hasMoreElements()) {
+                System.out.println(list.nextElement());
+            }
+            */
+            //System.out.println(NetworkInterface.getNetworkInterfaces().);
             StringBuilder uuid = new StringBuilder();
             for (int i = 0; i < mac.length; i++) {
                 uuid.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
@@ -73,6 +87,7 @@ public final class NetworkManager {
         }
         catch(Exception ex) {
             System.out.println("Cannot get local host... Creating default UUID");
+            System.out.println(ex);
         }
 
 
