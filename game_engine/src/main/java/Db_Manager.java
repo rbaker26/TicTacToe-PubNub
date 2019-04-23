@@ -57,4 +57,30 @@ public class Db_Manager {
 
 
 
+    //******************************************************************************************
+    boolean UserExists(String playerIU) throws SQLException {
+        PreparedStatement preparedStatement =  connection
+                .prepareStatement(  "    SELECT CASE WHEN EXISTS ( SELECT *  FROM  players  WHERE user_id = (:user_id)  LIMIT  1 )\n" +
+                                         "    THEN                " +
+                                         "    CAST ( 1 AS BIT)    " +
+                                         "    ELSE                " +
+                                         "    CAST ( 0 AS BIT)    " +
+                                         "    END  );             ");
+
+        preparedStatement.setString(1,"user_id");
+
+
+        ResultSet rs =  preparedStatement.executeQuery();
+
+        rs.first();
+
+        return rs.getBoolean(0);
+
+    }
+
+
+    //******************************************************************************************
+
+
+
 }
