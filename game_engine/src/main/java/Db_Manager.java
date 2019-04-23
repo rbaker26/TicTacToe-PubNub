@@ -32,7 +32,7 @@ public class Db_Manager {
 
             }
             catch (Exception e) {
-
+                System.out.println("");
             }
         }
         return instance;
