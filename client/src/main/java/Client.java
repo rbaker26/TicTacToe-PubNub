@@ -180,7 +180,7 @@ public class Client extends Application {
 
 
 
-            loginController.applyScene(primaryStage);
+            mainWindowController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();
