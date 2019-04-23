@@ -131,7 +131,7 @@ public class GameRequestListener extends SubscribeCallback {
             PlayerInfo requester = roomMsg.getPlayer2();
 
             pb.publish()
-                    .message(RoomInfo.makeDeniedRoom())
+                    .message(RoomFactory.makeDeniedRoom())
                     .channel(requester.getChannel())
                     .async(new PNCallback<PNPublishResult>() {
                         @Override

@@ -1,6 +1,5 @@
 package UI;
 
-import Messages.PlayerInfo;
 import Messages.RoomInfo;
 import Network.NetworkManager;
 import javafx.application.Platform;
@@ -8,13 +7,9 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -90,63 +85,8 @@ public class LobbySceneController extends AbstractSceneController {
          */
 
         openButton = new Button("Open");
+        openButton.setOnAction(event -> { CreateRoomDialog(); });
 
-        openButton.setOnAction(event -> {
-            // See "Custom Login Dialog" in https://code.makery.ch/blog/javafx-dialogs-official/
-
-            // Create the custom dialog.
-            Dialog<OpenRequest> dialog = new Dialog<>();
-            dialog.setTitle("Room Configuration");
-            //dialog.setHeaderText("");
-            dialog.initStyle(StageStyle.UTILITY);
-
-            // Set the button types.
-            ButtonType loginButtonType = new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
-            dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-
-            // Create the username and password labels and fields.
-            GridPane grid = new GridPane();
-            grid.setHgap(10);
-            grid.setVgap(10);
-            grid.setPadding(new Insets(20, 150, 10, 10));
-
-            PasswordField password = new PasswordField();
-            password.setPromptText("Password");
-
-            final ToggleGroup turnOrderGroup = new ToggleGroup();
-            RadioButton firstButton = new RadioButton("First");
-            RadioButton secondButton = new RadioButton("Second");
-            firstButton.setSelected(true);
-            firstButton.setToggleGroup(turnOrderGroup);
-            secondButton.setToggleGroup(turnOrderGroup);
-
-            grid.add(new Label("Password:"), 0, 0);
-            grid.add(password, 1, 0);
-            grid.add(firstButton, 0, 1);
-            grid.add(secondButton, 1, 1);
-
-            dialog.getDialogPane().setContent(grid);
-
-            // Convert the result to a username-password-pair when the login button is clicked.
-            dialog.setResultConverter(dialogButton -> {
-                if (dialogButton == loginButtonType) {
-                    return new OpenRequest(password.getText(), firstButton.isSelected());
-                }
-                return null;
-            });
-
-            Optional<OpenRequest> result = dialog.showAndWait();
-
-            result.ifPresent(usernamePassword -> {
-                //System.out.println("Username=" + usernamePassword.getKey() + ", Password=" + usernamePassword.getValue());
-                //System.out.println(result);
-                if(openHandler != null) {
-                    openHandler.accept(result.get());
-                }
-            });
-        });
-
-        //joinButton = new Button("Join");
 
         //region Table config
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
@@ -184,8 +124,9 @@ public class LobbySceneController extends AbstractSceneController {
 
                 ObservableList<RoomInfo> selection = lobbyTable.getSelectionModel().getSelectedItems();
 
-                if(selection.size() > 0 && joinHandler != null) {
-                    joinHandler.accept( selection.get(0) );
+                if(selection.size() > 0) {
+                    //joinHandler.accept( selection.get(0) );
+                    OnSelectedRoom(selection.get(0));
                 }
             }
         });
@@ -198,6 +139,129 @@ public class LobbySceneController extends AbstractSceneController {
         //setMasterScene(new Scene(vbox, 200, 200));
         setRoot(vbox);
 
+    }
+
+    private void OnSelectedRoom(RoomInfo room) {
+        System.out.println("Picked this room: " + room);
+        System.out.println(room.hasPassword());
+
+        if(room.hasPassword()) {
+            PasswordDialog( room );
+        }
+        else {
+            joinHandler.accept(room);
+        }
+    }
+
+    private void CreateRoomDialog() {
+        // See "Custom Login Dialog" in https://code.makery.ch/blog/javafx-dialogs-official/
+
+        // Create the custom dialog.
+        Dialog<OpenRequest> dialog = new Dialog<>();
+        dialog.setTitle("Room Configuration");
+        //dialog.setHeaderText("");
+        dialog.initStyle(StageStyle.UTILITY);
+
+        // Set the button types.
+        ButtonType loginButtonType = new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+        // Create the username and password labels and fields.
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        PasswordField password = new PasswordField();
+        password.setPromptText("Password");
+
+        final ToggleGroup turnOrderGroup = new ToggleGroup();
+        RadioButton firstButton = new RadioButton("First");
+        RadioButton secondButton = new RadioButton("Second");
+        firstButton.setSelected(true);
+        firstButton.setToggleGroup(turnOrderGroup);
+        secondButton.setToggleGroup(turnOrderGroup);
+
+        grid.add(new Label("Password:"), 0, 0);
+        grid.add(password, 1, 0);
+        grid.add(firstButton, 0, 1);
+        grid.add(secondButton, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Convert the result to a username-password-pair when the login button is clicked.
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == loginButtonType) {
+                return new OpenRequest(password.getText(), firstButton.isSelected());
+            }
+            return null;
+        });
+
+        Optional<OpenRequest> result = dialog.showAndWait();
+
+        result.ifPresent(requestInfo -> {
+            //System.out.println("Username=" + usernamePassword.getKey() + ", Password=" + usernamePassword.getValue());
+            //System.out.println(result);
+            if(openHandler != null) {
+                openHandler.accept(requestInfo);
+            }
+        });
+    }
+
+    private void PasswordDialog(RoomInfo room) {
+        // See "Custom Login Dialog" in https://code.makery.ch/blog/javafx-dialogs-official/
+
+        // Create the custom dialog.
+        Dialog<Boolean> dialog = new Dialog<>();
+        dialog.setTitle("Enter password");
+        dialog.initStyle(StageStyle.UTILITY);
+
+        // Set the button types.
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Create the password field
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        PasswordField password = new PasswordField();
+        password.setPromptText("Password");
+
+        grid.add(new Label("Password:"), 0, 0);
+        grid.add(password, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Convert the result to a username-password-pair when the login button is clicked.
+        dialog.setResultConverter(dialogButton -> {
+            if(dialogButton == ButtonType.OK) {
+                return room.passwordMatches(password.getText());
+            }
+            else {
+                return null;
+            }
+        });
+
+        Optional<Boolean> result = dialog.showAndWait();
+
+        result.ifPresent(isCorrect -> {
+            if(isCorrect) {
+                if (joinHandler != null) {
+                    joinHandler.accept(room);
+                }
+            }
+            else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Incorrect password");
+                alert.setHeaderText("That password was not correct.");
+                alert.setContentText("Do you have caps-lock on?");
+
+                alert.showAndWait();
+            }
+        });
+
+        clearSelection();
     }
 
     /**
@@ -238,6 +302,10 @@ public class LobbySceneController extends AbstractSceneController {
         // It passes the setRoomInfoAsync function, which will get called whenever we get an
         // updated list of rooms.
         NetworkManager.getInstance().listenForRooms( this::setRoomInfoAsync );
+    }
+
+    private void clearSelection() {
+        Platform.runLater( () -> lobbyTable.getSelectionModel().clearSelection() );
     }
 
     //region Getters and setters

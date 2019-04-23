@@ -23,35 +23,28 @@ public class RoomInfo {
     private int roomID = defaultRoomID;
     private String roomChannel = null;
 
+    private String password;
+
     // TODO Throw this in PlayerInfo
     private String player1Token = "X";
     private String player2Token = "O";
 
     private RequestType requestMode = RequestType.NORMAL;
 
-    /**
-     * Creates a room object which tells the engine that we are no longer
-     * interested in joining.
-     * @param player The player who is not interested in joining.
-     * @return An object which represents a disconnect request.
-     */
-    public static RoomInfo makeDisconnectRoom(PlayerInfo player) {
-        RoomInfo result = new RoomInfo();
-        result.setPlayer1(player);
-        result.setRequestMode(RequestType.DISCONNECT);
+    //region Factories
 
-        return result;
-    }
-
-    public static RoomInfo makeDeniedRoom() {
-        RoomInfo result = new RoomInfo();
-        result.setRequestMode(RequestType.DENIED);
-
-        return result;
-    }
+    //endregion
 
     public RoomInfo() {
+        this("");
+    }
 
+    public RoomInfo(String password) {
+        if(password == null) {
+            password = "";
+        }
+
+        this.password = password;
     }
 
     public void addPlayer(PlayerInfo newPlayer) {
@@ -74,6 +67,26 @@ public class RoomInfo {
             return creator.equals(getPlayer1()) || creator.equals(getPlayer2());
         }
     }
+
+    //region Password stuff
+
+    /**
+     * Checks if the room is password protected.
+     * @return True, if the room is password protected.
+     */
+    public boolean hasPassword() {
+        return !password.isEmpty();
+    }
+
+    /**
+     * Checks if the given password matches.
+     * @param attempt The password attempt.
+     * @return If the password matches the stored one, returns true.
+     */
+    public boolean passwordMatches(String attempt) {
+        return password.equals(attempt);
+    }
+    //endregion
 
     //region Getters and setters
     public RequestType getRequestMode() {
@@ -184,6 +197,7 @@ public class RoomInfo {
                 ", player2=" + player2 +
                 ", roomID=" + roomID +
                 ", roomChannel='" + roomChannel + '\'' +
+                ", password='" + password + '\'' +
                 ", player1Token='" + player1Token + '\'' +
                 ", player2Token='" + player2Token + '\'' +
                 ", requestMode=" + requestMode +
@@ -199,6 +213,7 @@ public class RoomInfo {
                 Objects.equals(getPlayer1(), roomInfo.getPlayer1()) &&
                 Objects.equals(getPlayer2(), roomInfo.getPlayer2()) &&
                 Objects.equals(getRoomChannel(), roomInfo.getRoomChannel()) &&
+                Objects.equals(password, roomInfo.password) &&
                 Objects.equals(getPlayer1Token(), roomInfo.getPlayer1Token()) &&
                 Objects.equals(getPlayer2Token(), roomInfo.getPlayer2Token()) &&
                 getRequestMode() == roomInfo.getRequestMode();
@@ -206,7 +221,7 @@ public class RoomInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPlayer1(), getPlayer2(), getRoomID(), getRoomChannel(), getPlayer1Token(), getPlayer2Token(), getRequestMode());
+        return Objects.hash(getPlayer1(), getPlayer2(), getRoomID(), getRoomChannel(), password, getPlayer1Token(), getPlayer2Token(), getRequestMode());
     }
 
     //endregion

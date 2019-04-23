@@ -1,3 +1,4 @@
+import Messages.RoomFactory;
 import Messages.RoomInfo;
 import Network.NetworkManager;
 import UI.*;
@@ -59,7 +60,7 @@ public class Client extends Application {
                 //Network.NetworkManager.forceUUID(nameField.getText());
                 NetworkManager.getInstance().requestNewRoom(
                         lobbyController.getName(),
-                        true,
+                        RoomFactory.makeCreateRequest(requestInfo.isGoingFirst(), requestInfo.getPassword()),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
                             connectToGame(primaryStage, lobbyController.getName(), responseRoom);
