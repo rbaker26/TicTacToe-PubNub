@@ -5,6 +5,11 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 
 public class loginController extends AbstractSceneController{
 
@@ -69,6 +74,7 @@ public class loginController extends AbstractSceneController{
 
     }
 
+
     public Button getEnterButton() {
         return enterButton;
     }
@@ -84,6 +90,8 @@ public class loginController extends AbstractSceneController{
     public String getPasswordField() {
         return passwordField.getText();
     }
+
+
 
 
 }

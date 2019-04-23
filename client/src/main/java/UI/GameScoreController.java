@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+
 import java.util.Objects;
 
 public class GameScoreController extends AbstractSceneController {
@@ -27,6 +28,7 @@ public class GameScoreController extends AbstractSceneController {
     private Button backButton;
 
     public GameScoreController() {
+
 
         backButton = new Button("Back");
 

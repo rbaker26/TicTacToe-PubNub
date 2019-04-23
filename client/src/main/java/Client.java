@@ -172,6 +172,8 @@ public class Client extends Application {
 
             loginController.getEnterButton().setOnAction(value -> {
 
+                boolean playerInDatabase;
+
                 System.out.println("Welcome player");
 
             });
