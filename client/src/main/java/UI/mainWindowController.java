@@ -35,6 +35,7 @@ public class mainWindowController extends AbstractSceneController{
     private Button multiPlayerButton;
     private Button easyAIButton;
     private Button hardAIButton;
+    private Button gameHistoryButton;
 
     public mainWindowController() {
 
@@ -50,10 +51,9 @@ public class mainWindowController extends AbstractSceneController{
         multiPlayerButton = new Button("Multiplayer");
         easyAIButton = new Button("Against Computer - Easy");
         hardAIButton = new Button("Against Computer - Hard");
+        gameHistoryButton = new Button("Game History");
 
-        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton);
-
-
+        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton, gameHistoryButton);
 
 
         vbox.setAlignment(Pos.CENTER);
@@ -69,29 +69,21 @@ public class mainWindowController extends AbstractSceneController{
     }
     public Button getEasyAIButton() { return easyAIButton; }
     public Button getHardAIButton() { return hardAIButton; }
+    public Button getGameHistoryButton() { return gameHistoryButton; }
 
-    //region Object overrides
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        LobbySceneController that = (LobbySceneController) o;
-        return Objects.equals(getMultiPlayerButton(), that.getNameField());
-
-    }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton());
+        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton(), getGameHistoryButton());
     }
 
     @Override
     public String toString() {
-        return "LobbySceneController{" +
+        return "mainWindowController {" +
                 "multiPlayerButton = " + multiPlayerButton +
                 "easyAIButton = " + easyAIButton +
                 "hardAIButton = " + hardAIButton +
+                "gameHistoryButton = " + gameHistoryButton +
                 '}';
     }
 

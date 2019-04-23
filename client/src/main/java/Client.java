@@ -152,7 +152,21 @@ public class Client extends Application {
 
             });
 
-            gameScoreController.applyScene(primaryStage);
+            mainWindowController.getGameHistoryButton().setOnAction(value -> {
+
+                gameScoreController.applyScene(primaryStage);
+
+            });
+
+            gameScoreController.getBackButton().setOnAction(value -> {
+
+                mainWindowController.applyScene(primaryStage);
+
+            });
+
+
+
+            mainWindowController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();

@@ -18,27 +18,17 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.util.Objects;
+
 public class GameScoreController extends AbstractSceneController {
 
     TableView<scoreInfo> playerHistoryTable;
 
-    //region Table config
-    /*
-    TableColumn<scoreInfo, String> idColumn = new TableColumn<>("ID");
-        idColumn.setMinWidth(100);
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("roomID"));
-
-    TableColumn<scoreInfo, Integer> lobbyStatColumn = new TableColumn<>("Room Status");
-        lobbyStatColumn.setMinWidth(200);
-        lobbyStatColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-    TableColumn<scoreInfo, Integer> player1Column = new TableColumn<>("Player1");
-        player1Column.setMinWidth(100);
-        player1Column.setCellValueFactory(new PropertyValueFactory<>("player1Name"));
-
-*/
+    private Button backButton;
 
     public GameScoreController() {
+
+        backButton = new Button("Back");
 
         TableColumn<scoreInfo, String> nameColumn = new TableColumn<>("Player Name");
         nameColumn.setMinWidth(100);
@@ -53,17 +43,46 @@ public class GameScoreController extends AbstractSceneController {
         gamesPlayedColumn.setCellValueFactory(new PropertyValueFactory<>("gamesPlayed"));
 
 
+
         playerHistoryTable = new TableView<>();
         playerHistoryTable.getColumns().addAll(nameColumn, gamesWonColumn, gamesPlayedColumn);
 
-        //endregion
+
+        VBox vbox = new VBox(playerHistoryTable, backButton);
 
 
-        VBox vbox = new VBox(playerHistoryTable);
-
-        //setMasterScene(new Scene(vbox, 200, 200));
         setRoot(vbox);
 
     }
+
+    public Button getBackButton() {
+        return backButton;
+    }
+
+    //region Object overrides
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        LobbySceneController that = (LobbySceneController) o;
+        return Objects.equals(getBackButton(), that.getBackButton());
+
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getBackButton());
+    }
+
+    @Override
+    public String toString() {
+        return "GameScoreController{" +
+                ", backButton=" + backButton +
+                '}';
+    }
+    //endregion
+
 
 }
