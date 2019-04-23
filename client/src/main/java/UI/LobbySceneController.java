@@ -233,7 +233,6 @@ public class LobbySceneController extends AbstractSceneController {
 
         dialog.getDialogPane().setContent(grid);
 
-        // Convert the result to a username-password-pair when the login button is clicked.
         dialog.setResultConverter(dialogButton -> {
             if(dialogButton == ButtonType.OK) {
                 return room.passwordMatches(password.getText());
@@ -261,6 +260,9 @@ public class LobbySceneController extends AbstractSceneController {
             }
         });
 
+        // We need to always clear the selection. Since our method for checking for a change
+        // is based on a selection change, we have to clear this in case the user hasn't moved
+        // on to another screen.
         clearSelection();
     }
 
