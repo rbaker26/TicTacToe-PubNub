@@ -1,4 +1,5 @@
-import Heartbeat.HeartbeatCallback;
+import Heartbeat.HeartbeatListener;
+
 import Messages.Channels;
 import Messages.Keys;
 import Messages.RoomInfo;
@@ -21,7 +22,7 @@ public class Engine {
     private RoomsListListener rml;
     private GameRequestListener grl;
     private MoveListener ml;
-    private HeartbeatCallback heartbeatCallback;
+    private HeartbeatListener heartbeatListener;
 
     public Engine() {
         pnConfiguration.setSubscribeKey(Keys.subKey);
@@ -50,10 +51,10 @@ public class Engine {
             myUuid = pnConfiguration.getUuid() + "engine";
         }
 
-        heartbeatCallback = new HeartbeatCallback(Channels.clientHeartbeatChannel, true);
+        heartbeatListener = new HeartbeatListener(Channels.clientHeartbeatChannel, true);
         pb = new PubNub(pnConfiguration);
         rml = new RoomsListListener(RoomList, myUuid);
-        grl = new GameRequestListener(RoomList, Lobbies, myUuid, heartbeatCallback);
+        grl = new GameRequestListener(RoomList, Lobbies, myUuid, heartbeatListener);
         ml = new MoveListener(Lobbies);
         Subscribe();
     }
@@ -68,7 +69,7 @@ public class Engine {
         pb.addListener(rml);
         pb.addListener(grl);
         pb.addListener(ml);
-        pb.addListener(heartbeatCallback);
+        pb.addListener(heartbeatListener);
 
     }
 

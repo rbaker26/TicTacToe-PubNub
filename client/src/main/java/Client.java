@@ -22,6 +22,11 @@ public class Client extends Application {
     private WaitingForOpponentScene waitingController;
     private PlayAgainController playAgainController;
     private GameViewController gameViewController;
+    private loginController loginController;
+    private GameScoreController gameScoreController;
+    private mainWindowController mainWindowController;
+
+    private LoginUserController loginUserController;
     //private ISceneController mainWindowController;
 
     public static void main(String[] args) {
@@ -48,8 +53,10 @@ public class Client extends Application {
             playAgainController = new PlayAgainController();
             waitingController = new WaitingForOpponentScene();
             //gameViewController = new GameViewController();
+            gameScoreController = new GameScoreController();
+            loginController = new loginController();
+            mainWindowController = new mainWindowController();
 
-            //mainWindowController mainObject = new mainWindowController();
 
 
             lobbyController.setOpenHandler(() -> {
@@ -102,11 +109,77 @@ public class Client extends Application {
 
 
             waitingController.setOnCancel(value -> {
-                NetworkManager.getInstance().stopWaitingForRoom();
+                NetworkManager.getInstance().clear();
                 lobbyController.applySceneAsync(primaryStage);
             });
 
-            lobbyController.applyScene(primaryStage);
+            /**
+             * Starting from the main window, when the user selects
+             * Multiplayer button, they get transferred to the
+             * lobby window.
+             */
+            mainWindowController.getMultiPlayerButton().setOnAction(value -> {
+
+                lobbyController.applyScene(primaryStage);
+
+            });
+
+            /**
+             * Both the easyAI and hardAI buttons will switch to the board ui
+             */
+            mainWindowController.getEasyAIButton().setOnAction(value -> {
+
+                //TAKE TO BOARD UI
+                System.out.println("Easy AI Button works!");
+
+                gameViewController.applyScene(primaryStage);
+
+            });
+
+            mainWindowController.getHardAIButton().setOnAction(value -> {
+
+                //TAKE TO BOARD UI
+                System.out.println("Hard AI Button works!");
+
+                gameViewController.applyScene(primaryStage);
+
+            });
+
+            lobbyController.getBackButton().setOnAction(value -> {
+
+                mainWindowController.applyScene(primaryStage);
+
+            });
+
+            mainWindowController.getGameHistoryButton().setOnAction(value -> {
+
+                gameScoreController.applyScene(primaryStage);
+
+            });
+
+            gameScoreController.getBackButton().setOnAction(value -> {
+
+                mainWindowController.applyScene(primaryStage);
+
+            });
+
+            loginController.getCreateButton().setOnAction(value ->  {
+
+                System.out.println("Creating new player");
+
+            });
+
+            loginController.getEnterButton().setOnAction(value -> {
+
+                boolean playerInDatabase;
+
+                System.out.println("Welcome player");
+
+            });
+
+
+
+            mainWindowController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();
@@ -126,7 +199,6 @@ public class Client extends Application {
     public void stop() throws Exception {
         NetworkManager.dieIfNeeded();
 
-        // TODO We shouldn't be forcing an exit, but... we have no other choice
         System.exit(0);
     }
 
@@ -154,7 +226,7 @@ public class Client extends Application {
      * @param message Message to show in the warning box.
      */
     private void respondToFailedConnection(Stage primaryStage, String message) {
-        NetworkManager.getInstance().stopWaitingForRoom();
+        NetworkManager.getInstance().clear();
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");

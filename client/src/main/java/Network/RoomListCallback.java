@@ -17,8 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class RoomListCallback extends SubscribeCallback{
-    //List<RoomInfo> roomList = new ArrayList<>();
+public class RoomListCallback extends SubscribeCallback {
 
     Consumer<List<RoomInfo>> onUpdateCallback;
 

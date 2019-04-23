@@ -26,6 +26,7 @@ public class LobbySceneController extends AbstractSceneController {
     private TextField roomField;
     private Button openButton;
     private Button joinButton;
+    private Button backButton;
 
 
     private Consumer<RoomInfo> joinHandler;
@@ -42,6 +43,7 @@ public class LobbySceneController extends AbstractSceneController {
 
         openButton = new Button("Open");
         joinButton = new Button("Join");
+        backButton = new Button ("Back");
 
         //region Table config
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
@@ -88,7 +90,7 @@ public class LobbySceneController extends AbstractSceneController {
         //endregion
 
 
-        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
+        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, roomLabel, roomField, openButton, joinButton, backButton);
 
         //setMasterScene(new Scene(vbox, 200, 200));
         setRoot(vbox);
@@ -197,6 +199,10 @@ public class LobbySceneController extends AbstractSceneController {
         return joinButton;
     }
 
+    public Button getBackButton() {
+        return backButton;
+    }
+
     public void setOpenHandler(Runnable handler) {
         openButton.setOnAction(value -> handler.run());
     }
@@ -217,6 +223,7 @@ public class LobbySceneController extends AbstractSceneController {
                 Objects.equals(getRoomField(), that.getRoomField()) &&
                 Objects.equals(getOpenButton(), that.getOpenButton()) &&
                 Objects.equals(getJoinButton(), that.getJoinButton());
+
     }
 
     @Override
@@ -231,6 +238,7 @@ public class LobbySceneController extends AbstractSceneController {
                 ", roomField=" + roomField +
                 ", openButton=" + openButton +
                 ", joinButton=" + joinButton +
+                ", backButton=" + backButton +
                 '}';
     }
     //endregion
