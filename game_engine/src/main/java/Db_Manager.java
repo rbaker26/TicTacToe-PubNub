@@ -58,16 +58,16 @@ public class Db_Manager {
 
 
     //******************************************************************************************
-    boolean UserExists(String playerIU) throws SQLException {
+    boolean UserExists(String playerID) throws SQLException {
         PreparedStatement preparedStatement =  connection
-                .prepareStatement(  "    SELECT CASE WHEN EXISTS ( SELECT *  FROM  players  WHERE user_id = (:user_id)  LIMIT  1 )\n" +
+                .prepareStatement(  "    SELECT CASE WHEN EXISTS ( SELECT *  FROM  players  WHERE user_id = ?  LIMIT  1 )" +
                                          "    THEN                " +
                                          "    CAST ( 1 AS BIT)    " +
                                          "    ELSE                " +
                                          "    CAST ( 0 AS BIT)    " +
                                          "    END  );             ");
 
-        preparedStatement.setString(1,"user_id");
+        preparedStatement.setString(1,playerID);
 
 
         ResultSet rs =  preparedStatement.executeQuery();
@@ -77,10 +77,45 @@ public class Db_Manager {
         return rs.getBoolean(0);
 
     }
-
-
     //******************************************************************************************
 
 
 
+
+    //******************************************************************************************
+    boolean ValidateUser(String playerID, String password ) throws SQLException {
+        PreparedStatement preparedStatement =  connection
+                .prepareStatement(  "    SELECT CASE WHEN EXISTS ( SELECT *  FROM  players  WHERE user_id = ? AND password = ? LIMIT  1 )" +
+                                         "    THEN                " +
+                                         "    CAST ( 1 AS BIT)    " +
+                                         "    ELSE                " +
+                                         "    CAST ( 0 AS BIT)    " +
+                                         "    END  );             ");
+
+        preparedStatement.setString(1,playerID);
+        preparedStatement.setString(2,password);
+
+
+        ResultSet rs =  preparedStatement.executeQuery();
+
+        rs.first();
+
+        return rs.getBoolean(0);
+    }
+    //******************************************************************************************
+
+
+
+
+    //******************************************************************************************
+    void AddUser(int playerID, String username, String password) throws SQLException {
+        PreparedStatement preparedStatement =  connection
+                .prepareStatement("insert into  tictactoe.players (player_id, player_name, password) values (?, ?, ?)");
+
+        preparedStatement.setInt(1,playerID);
+        preparedStatement.setString(2,username);
+        preparedStatement.setString(3,password);
+        preparedStatement.executeUpdate();
+    }
+    //******************************************************************************************
 }
