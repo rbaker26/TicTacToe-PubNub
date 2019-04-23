@@ -69,7 +69,7 @@ public class LobbySceneController extends AbstractSceneController {
     private TextField nameField;
     //private TextField roomField;
     private Button openButton;
-    //private Button joinButton;
+    private Button backButton;
 
 
     private Consumer<RoomInfo> joinHandler;
@@ -92,6 +92,7 @@ public class LobbySceneController extends AbstractSceneController {
         openButton = new Button("Open");
         openButton.setOnAction(event -> { CreateRoomDialog(); });
 
+        backButton = new Button("Back");
 
         //region Table config
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
@@ -158,7 +159,7 @@ public class LobbySceneController extends AbstractSceneController {
         //endregion
 
 
-        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, openButton);
+        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, openButton, backButton);
 
         //setMasterScene(new Scene(vbox, 200, 200));
         setRoot(vbox);
@@ -336,9 +337,8 @@ public class LobbySceneController extends AbstractSceneController {
         return nameField;
     }
 
-    @Deprecated
-    public void setOpenHandler(Runnable handler) {
-        //openButton.setOnAction(value -> handler.run());
+    public Button getBackButton() {
+        return backButton;
     }
 
     public void setOpenHandler(Consumer<OpenRequest> handler) {
@@ -356,9 +356,12 @@ public class LobbySceneController extends AbstractSceneController {
         return "LobbySceneController{" +
                 "nameField=" + nameField +
                 ", openButton=" + openButton +
+                ", backButton=" + backButton +
                 ", joinHandler=" + joinHandler +
                 ", openHandler=" + openHandler +
+                ", sceneApplyHandler=" + sceneApplyHandler +
                 ", lobbyTable=" + lobbyTable +
+                ", latestRoomList=" + latestRoomList +
                 '}';
     }
 
@@ -370,15 +373,19 @@ public class LobbySceneController extends AbstractSceneController {
         LobbySceneController that = (LobbySceneController) o;
         return Objects.equals(getNameField(), that.getNameField()) &&
                 Objects.equals(openButton, that.openButton) &&
+                Objects.equals(getBackButton(), that.getBackButton()) &&
                 Objects.equals(joinHandler, that.joinHandler) &&
                 Objects.equals(openHandler, that.openHandler) &&
-                Objects.equals(lobbyTable, that.lobbyTable);
+                Objects.equals(sceneApplyHandler, that.sceneApplyHandler) &&
+                Objects.equals(lobbyTable, that.lobbyTable) &&
+                Objects.equals(latestRoomList, that.latestRoomList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), openButton, joinHandler, openHandler, lobbyTable);
+        return Objects.hash(super.hashCode(), getNameField(), openButton, getBackButton(), joinHandler, openHandler, sceneApplyHandler, lobbyTable, latestRoomList);
     }
+
     //endregion
 
 }
