@@ -6,6 +6,8 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
+import java.net.NetworkInterface;
+
 
 // NOTE: To change the uuid, go to the launch configurations and add this to the "Arguments" field
 //   -Pargs=Something
@@ -45,8 +47,7 @@ public class Client extends Application {
             lobbyController = new LobbySceneController();
             playAgainController = new PlayAgainController();
             waitingController = new WaitingForOpponentScene();
-            gameViewController = new GameViewController();
-
+            //gameViewController = new GameViewController();
 
             //mainWindowController mainObject = new mainWindowController();
 
@@ -137,8 +138,13 @@ public class Client extends Application {
      * @param room The room to join.
      */
     private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room) {
+        gameViewController = new GameViewController(room, ourUserID);
+
+        NetworkManager.getInstance().joinRoom(ourUserID, room, (board) -> {
+            gameViewController.updateBoard(board);
+            gameViewController.toggleTurn();
+        });
         gameViewController.applySceneAsync(primaryStage);
-        NetworkManager.getInstance().joinRoom(ourUserID, room);
     }
 
     /**
