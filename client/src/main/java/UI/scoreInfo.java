@@ -2,32 +2,42 @@ package UI;
 
 public class scoreInfo {
 
-    private String opponent;
-    private String status;
+    private String username;
+    private Integer gamesWon;
+    private Integer gamesPlayed;
 
-    public scoreInfo(String opponent, String status) {
+    public scoreInfo(String username, Integer gamesWon, Integer gamesPlayed) {
 
         super();
 
-        this.opponent = opponent;
-        this.status = status;
+        this.username = username;
+        this.gamesWon = gamesWon;
+        this.gamesPlayed = gamesPlayed;
 
     }
 
-    public String getOpponent() {
-        return opponent;
+    public String getName() {
+        return username;
     }
 
-    public void setOpponent(String opponent) {
-        this.opponent = opponent;
+    public void setName(String username) {
+        this.username = username;
     }
 
-    public String getStatus() {
-        return status;
+    public Integer getGamesWon() {
+        return gamesWon;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setGamesWon(Integer gamesWon) {
+        this.gamesWon = gamesWon;
+    }
+
+    public Integer getGamesPlayed() {
+        return gamesPlayed;
+    }
+
+    public void setGamesPlayed(Integer gamesPlayed) {
+        this.gamesPlayed = gamesPlayed;
     }
 
 }
