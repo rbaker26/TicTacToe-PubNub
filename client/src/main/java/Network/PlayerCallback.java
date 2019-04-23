@@ -83,7 +83,19 @@ public class PlayerCallback extends SubscribeCallback {
         if(message.getChannel().equals(room.getRoomChannel())) {
             System.out.println("Move request received" + message.getMessage());
             MoveRequest requestMessage = Converter.fromJson(message.getMessage(), MoveRequest.class);
-            if(requestMessage.getCurrentPlayer().equals(name)) {
+            if(requestMessage.getCurrentPlayer() == null) {
+                System.out.println("Game Over!");
+                if(requestMessage.getBoard().isWinner('X')) {
+                    System.out.println("X Player: " + requestMessage.getRoomInfo().getPlayer1().getId() + " won!");
+                }
+                else if(requestMessage.getBoard().isWinner('O')) {
+                    System.out.println("O Player: " + requestMessage.getRoomInfo().getPlayer2().getId() + " won!");
+                }
+                else {
+                    System.out.println("Tie game!");
+                }
+            }
+            else if(requestMessage.getCurrentPlayer().equals(name)) {
                 requestResponse.accept(requestMessage.getBoard());
                 System.out.println("Your turn");
             }

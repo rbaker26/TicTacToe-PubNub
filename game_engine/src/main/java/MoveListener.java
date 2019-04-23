@@ -1,3 +1,4 @@
+import EngineLib.Board;
 import EngineLib.Lobby;
 import Messages.Channels;
 import Messages.Converter;
@@ -42,6 +43,11 @@ public class MoveListener extends SubscribeCallback {
         }
         return false;
     }
+
+    public boolean playerWon(Board board, char token){
+        return board.isWinner(token);
+    }
+
     @Override
     public void status(PubNub pb, PNStatus status) {
         if(status.getCategory().equals(PNStatusCategory.PNConnectedCategory)) {
@@ -65,21 +71,38 @@ public class MoveListener extends SubscribeCallback {
                     token = 'O';
                 lobby.getBoard().setPos(move.getRow(), move.getCol(), token);
                 System.out.println("Room " + roomID + "'s board:\n " + lobby.getBoard());
-                lobby.toggleCurrentPlayer();
-                // will need to publish the next move request at the end of this
-                System.out.printf("Sending move request to: %s%n Current Board: %s%n", lobby.getCurrentPlayer(), lobby.getBoard());
-                pb.publish() // Notifying player 1 that game has started
-                        .message(new MoveRequest(lobby.getBoard(), lobby.getRoomInfo(), lobby.getCurrentPlayer()))
-                        .channel(lobby.getRoomInfo().getRoomChannel())
-                        .async(new PNCallback<PNPublishResult>() {
-                            @Override
-                            public void onResponse(PNPublishResult result, PNStatus status) {
-                                // handle publish result, status always present, result if successful
-                                // status.isError() to see if error happened
-                                if (!status.isError()) {
+                if(playerWon(lobby.getBoard(), token)) {
+                    pb.publish() // Sending move request to next player
+                            .message(new MoveRequest(lobby.getBoard(), lobby.getRoomInfo(), null))
+                            .channel(lobby.getRoomInfo().getRoomChannel())
+                            .async(new PNCallback<PNPublishResult>() {
+                                @Override
+                                public void onResponse(PNPublishResult result, PNStatus status) {
+                                    // handle publish result, status always present, result if successful
+                                    // status.isError() to see if error happened
+                                    if (!status.isError()) {
+                                    }
                                 }
-                            }
-                        });
+                            });
+                    lobby.endGame();
+                }
+                else {
+                    lobby.toggleCurrentPlayer();
+                    // will need to publish the next move request at the end of this
+                    System.out.printf("Sending move request to: %s%n Current Board: %s%n", lobby.getCurrentPlayer(), lobby.getBoard());
+                    pb.publish() // Sending move request to next player
+                            .message(new MoveRequest(lobby.getBoard(), lobby.getRoomInfo(), lobby.getCurrentPlayer()))
+                            .channel(lobby.getRoomInfo().getRoomChannel())
+                            .async(new PNCallback<PNPublishResult>() {
+                                @Override
+                                public void onResponse(PNPublishResult result, PNStatus status) {
+                                    // handle publish result, status always present, result if successful
+                                    // status.isError() to see if error happened
+                                    if (!status.isError()) {
+                                    }
+                                }
+                            });
+                }
             }
         }
     }
