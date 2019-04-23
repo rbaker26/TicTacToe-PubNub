@@ -1,3 +1,5 @@
+import Messages.MoveInfo;
+
 import java.sql.*;
 
 
@@ -57,7 +59,7 @@ class Db_Manager {
 
 
     //******************************************************************************************
-    public void WriteMove( int roomID, int row, int col, int playerID) throws SQLException {
+    public void WriteMove( int roomID, int row, int col, String playerID) throws SQLException {
         //    private Statement statement = null;
         //    private PreparedStatement preparedStatement = null;
         //    private ResultSet resultSet = null;
@@ -69,16 +71,23 @@ class Db_Manager {
         preparedStatement.setInt(1,roomID);
         preparedStatement.setInt(2,row);
         preparedStatement.setInt(3,col);
-        preparedStatement.setInt(4,playerID);
+        preparedStatement.setString(4,playerID);
         preparedStatement.executeUpdate();
     }
     //******************************************************************************************
     //******************************************************************************************
-    public void WriteMove(Move move) throws SQLException {
-        WriteMove( move.roomID, move.row, move.col, move.playerID);
+    public void WriteMove(MoveInfo move) throws SQLException {
+        WriteMove( move.getRoomID(), move.getRow(), move.getCol(), move.getPlayerID());
     }
     //******************************************************************************************
 
+
+//    public void WriteWinner(MoveInfo move) {
+//        if(move.getRow() == -1 && move.Get) {
+//
+//        }
+//    }
+//
 
 
     //******************************************************************************************
