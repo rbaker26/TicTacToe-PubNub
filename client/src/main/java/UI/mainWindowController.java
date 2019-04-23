@@ -4,9 +4,11 @@ package UI;
 // between its elements, set an alignment
 // and add it to the stage
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -36,27 +38,31 @@ public class mainWindowController extends AbstractSceneController{
     private Button easyAIButton;
     private Button hardAIButton;
     private Button gameHistoryButton;
+    private TextFlow textTitle;
 
     public mainWindowController() {
 
 
-        VBox vbox = new VBox(10);
 
-        Label tic = new Label("TIC");
-        Label tac = new Label("TAC");
-        Label toe = new Label("TOE");
+        VBox vbox = new VBox(22);
 
-        vbox.getChildren().addAll(tic, tac, toe);
+        Label title = new Label("TIC TAC TOE");
+
 
         multiPlayerButton = new Button("Multiplayer");
         easyAIButton = new Button("Against Computer - Easy");
         hardAIButton = new Button("Against Computer - Hard");
         gameHistoryButton = new Button("Game History");
 
-        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton, gameHistoryButton);
+
+        title.setStyle("-fx-font: normal bold 20px 'impact'; -fx-text-fill: #3EC5F3 ");
+
+        vbox.getChildren().addAll(title, multiPlayerButton, easyAIButton, hardAIButton, gameHistoryButton);
 
 
         vbox.setAlignment(Pos.CENTER);
+
+
 
         setRoot(vbox);
 
