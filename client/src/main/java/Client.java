@@ -164,9 +164,21 @@ public class Client extends Application {
 
             });
 
+            loginController.getCreateButton().setOnAction(value ->  {
+
+                System.out.println("Creating new player");
+
+            });
+
+            loginController.getEnterButton().setOnAction(value -> {
+
+                System.out.println("Welcome player");
+
+            });
 
 
-            mainWindowController.applyScene(primaryStage);
+
+            loginController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();

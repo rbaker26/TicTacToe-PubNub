@@ -11,6 +11,7 @@ public class loginController extends AbstractSceneController{
     private TextField usernameField;
     private TextField passwordField;
     private Button enterButton;
+    private Button createButton;
 
     public loginController() {
 
@@ -25,6 +26,8 @@ public class loginController extends AbstractSceneController{
         passwordField.setPrefColumnCount(10);
 
         enterButton = new Button("Login");
+
+        createButton = new Button("Create");
 
         GridPane grid = new GridPane();
 
@@ -56,18 +59,31 @@ public class loginController extends AbstractSceneController{
 
        GridPane.setConstraints(enterButton, 0, 2);
 
-
        grid.getChildren().add(enterButton);
+
+       GridPane.setConstraints(createButton, 1, 2);
+       grid.getChildren().add(createButton);
 
 
        setRoot(grid);
 
     }
 
+    public Button getEnterButton() {
+        return enterButton;
+    }
 
+    public Button getCreateButton() {
+        return createButton;
+    }
 
+    public String getUsernameField() {
+        return usernameField.getText();
+    }
 
-
+    public String getPasswordField() {
+        return passwordField.getText();
+    }
 
 
 }
