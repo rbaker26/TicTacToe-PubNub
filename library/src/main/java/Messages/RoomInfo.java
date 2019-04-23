@@ -93,7 +93,7 @@ public class RoomInfo {
         return requestMode;
     }
 
-    public void setRequestMode(RequestType requestMode) {
+    void setRequestMode(RequestType requestMode) {
         this.requestMode = requestMode;
     }
 
