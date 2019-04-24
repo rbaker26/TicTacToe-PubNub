@@ -21,8 +21,4 @@ gradle-app.setting
 
 *.idea
 *.iml
-<<<<<<< HEAD
 *.jar
-=======
-
->>>>>>> recorder-pubnub
