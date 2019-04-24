@@ -29,10 +29,11 @@ public class Db_Manager {
                 connection =  DriverManager.getConnection("jdbc:mysql://"+IP+":"+PORT +"?" + "user="+USERNAME+"&password="+PASSWORD);
             }
             catch (SQLException sqle) {
-
+                System.out.println("sqle exception");
             }
             catch (Exception e) {
-                System.out.println("");
+                e.printStackTrace();
+                System.out.println("other exception");
             }
         }
         return instance;
@@ -129,11 +130,11 @@ public class Db_Manager {
 
 
     //******************************************************************************************
-    void AddUser(int playerID, String username, String password) throws SQLException {
+    void AddUser(String playerID, String username, String password) throws SQLException {
         PreparedStatement preparedStatement =  connection
                 .prepareStatement("insert into  tictactoe.players (player_id, player_name, password) values (?, ?, ?)");
 
-        preparedStatement.setInt(1,playerID);
+        preparedStatement.setString(1,playerID);
         preparedStatement.setString(2,username);
         preparedStatement.setString(3,password);
         preparedStatement.executeUpdate();

@@ -22,6 +22,7 @@ public class Engine {
     private RoomsListListener rml;
     private GameRequestListener grl;
     private MoveListener ml;
+    private AuthorizationListener al;
     private HeartbeatListener heartbeatListener;
 
     public Engine() {
@@ -56,6 +57,7 @@ public class Engine {
         rml = new RoomsListListener(RoomList, myUuid);
         grl = new GameRequestListener(RoomList, Lobbies, myUuid, heartbeatListener);
         ml = new MoveListener(Lobbies);
+        al = new AuthorizationListener();
         Subscribe();
     }
 
@@ -65,11 +67,14 @@ public class Engine {
                         Channels.roomListChannel,
                         Channels.roomRequestChannel,
                         Channels.roomMoveChannel,
-                        Channels.clientHeartbeatChannel)).execute();
+                        Channels.clientHeartbeatChannel,
+                        Channels.authCheckChannel,
+                        Channels.authCreateChannel)).execute();
         pb.addListener(rml);
         pb.addListener(grl);
         pb.addListener(ml);
         pb.addListener(heartbeatListener);
+        pb.addListener(al);
 
     }
 
