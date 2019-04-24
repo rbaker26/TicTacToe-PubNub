@@ -64,10 +64,9 @@ public class AI_Client {
         String outgoingChannel = Channels.roomMoveChannel;
         String incomingChannel = Channels.moveRequestChannelSet;
 
-        PlayerInfo easyAIPlayer = new PlayerInfo(pn.getConfiguration().getUuid(), "EasyAI", "");
         NPCBehaviour easyAIBehaviour = new NPCEasy();
 
-        pn.addListener(new AICallback(easyAIPlayer, easyAIBehaviour, incomingChannel, outgoingChannel));
+        pn.addListener(new AICallback(PlayerInfo.easyAI(), easyAIBehaviour, incomingChannel, outgoingChannel));
         pn.subscribe().channels(Arrays.asList(incomingChannel + "*")).execute();
 
         System.out.println("done. Hit CTRL-C to close.");

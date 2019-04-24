@@ -66,16 +66,17 @@ public class AICallback extends SubscribeCallback {
                 : message.getSubscription()
         );
 
-        System.out.println(message.getMessage());
-        System.out.println(sourceChannel);
-
         if(sourceChannel.startsWith(incomingChannelSet)) {
-            // TODO This is where we receive a request for a move.
-            //      After making the move request, we will then shoot back a move.
-
             MoveRequest request = Converter.fromJson(message.getMessage(), MoveRequest.class);
 
-            System.out.println(request);
+            //System.out.println(request);
+
+            String currentPlayerID = request.getCurrentPlayer();
+
+            if(currentPlayerID != null && currentPlayerID.equals(player.getId()))
+            {
+                System.out.println("It's for us!");
+            }
         }
     }
 

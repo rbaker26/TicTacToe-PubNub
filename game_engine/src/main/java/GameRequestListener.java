@@ -48,18 +48,34 @@ public class GameRequestListener extends SubscribeCallback {
 
     public void createRoom(PubNub pb, RoomInfo roomMsg) {
         System.out.println("Create room request received: " + roomMsg);
+
         final int roomID = Engine.getNewRoomID();
         roomMsg.setRoomID(roomID);
         roomMsg.setRoomChannel(Channels.moveRequestChannelSet + roomID);
-        roomInfoList.add(roomMsg);
-        lobbyList.put(roomID, new Lobby(roomMsg));
-        publishUpdatedRoomList(pb);
 
-        PlayerInfo player = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
-        hbCallback.setExpireCallback(
-                player.getUuid(),
-                value -> hideRoom(pb, roomID)
-        );
+        // Put the room into the set of rooms.
+        // Note that, even if the room is full and we can start up immediately,
+        // we still need to add the room to both lists and then send this off.
+        lobbyList.put(roomID, new Lobby(roomMsg));
+        roomInfoList.add(roomMsg);
+
+        // Check if the room they sent us is full. If it isn't, they probably are trying to play
+        // against the AI.
+        if(roomMsg.isOpen()) {
+
+            publishUpdatedRoomList(pb);
+
+            // We'll need to track if the player goes offline. If we do, then we kick them.
+            PlayerInfo player = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
+            hbCallback.setExpireCallback(
+                    player.getUuid(),
+                    value -> deleteRoom(pb, player)
+            );
+        }
+        else {
+            // The room is somehow full? This must mean that they want to play with AI or something.
+            joinRoom(pb, roomMsg);
+        }
     }
 
     public void joinRoom(PubNub pb, RoomInfo roomMsg) {
@@ -112,7 +128,7 @@ public class GameRequestListener extends SubscribeCallback {
                     .message(new MoveRequest(lobbyList.get(roomID).getBoard(),
                             room,
                             room.getPlayer1Name()))
-                    .channel(Channels.roomChannelSet + room.getRoomID())
+                    .channel(room.getRoomChannel())
                     .async(new PNCallback<PNPublishResult>() {
                         @Override
                         public void onResponse(PNPublishResult result, PNStatus status) {

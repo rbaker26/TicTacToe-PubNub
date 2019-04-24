@@ -3,12 +3,34 @@ package Messages;
 import java.util.Objects;
 
 public class PlayerInfo implements Cloneable {
+    public static enum PlayerType {
+        HUMAN, AI_EASY, AI_HARD
+    }
+
     private String uuid = null;
     private String id = null;
     private String channel = null;
+    private PlayerType type = PlayerType.HUMAN;
+
+    public static PlayerInfo easyAI() {
+        PlayerInfo result = new PlayerInfo();
+        result.setId("Easy AI");
+        result.type = PlayerType.AI_EASY;
+        result.channel = Channels.AI.easyChannel;
+
+        return result;
+    }
+
+    public static PlayerInfo hardAI() {
+        PlayerInfo result = new PlayerInfo();
+        result.setId("Hard AI");
+        result.type = PlayerType.AI_HARD;
+        result.channel = Channels.AI.hardChannel;
+
+        return result;
+    }
 
     public PlayerInfo() {
-
     }
 
     public PlayerInfo(String uuid, String id, String channel) {
@@ -45,12 +67,17 @@ public class PlayerInfo implements Cloneable {
         this.channel = channel;
     }
 
+    public PlayerType getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
         return "PlayerInfo{" +
                 "uuid='" + uuid + '\'' +
                 ", id='" + id + '\'' +
                 ", channel='" + channel + '\'' +
+                ", type=" + type +
                 '}';
     }
 
@@ -61,12 +88,13 @@ public class PlayerInfo implements Cloneable {
         PlayerInfo that = (PlayerInfo) o;
         return Objects.equals(getUuid(), that.getUuid()) &&
                 Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getChannel(), that.getChannel());
+                Objects.equals(getChannel(), that.getChannel()) &&
+                getType() == that.getType();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUuid(), getId(), getChannel());
+        return Objects.hash(getUuid(), getId(), getChannel(), getType());
     }
 
     @Override
