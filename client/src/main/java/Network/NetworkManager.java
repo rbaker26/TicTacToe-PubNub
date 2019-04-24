@@ -202,12 +202,14 @@ public final class NetworkManager {
     //region Account management
     public void userLogin(LoginInfo login, Runnable successResponse, Runnable failureResponse) {
         String incomingChannel = "blah";
-        //pn.publish().message(new LoginInfo(username, password, screenName));
+        String outgoingChannel = Channels.authCheckChannel;
+
+        // TODO Fix channels
 
         LoginRequestCallback lrc = new LoginRequestCallback(
                 login,
-                Channels.authCheckChannel,
-                Channels.authCheckChannel,
+                incomingChannel,
+                incomingChannel,
                 successResponse, failureResponse
         );
 

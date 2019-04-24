@@ -196,7 +196,7 @@ public class Client extends Application {
                         () -> {
                             System.out.println("Successful Login");
                             // TODO SUCCESS CODE GOES HERE
-                            mainWindowController.applyScene(primaryStage);
+                            Platform.runLater(() -> mainWindowController.applyScene(primaryStage));
                         },
                         () -> {
                             // TODO FAIL CODE GOES HERE
