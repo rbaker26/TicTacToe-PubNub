@@ -96,24 +96,12 @@ public class SingletonCallback extends SubscribeCallback {
 
 
     //region Getters and setters
-    public Runnable getIsMasterCallback() {
-        return isMasterCallback;
-    }
-
     public void setIsMasterCallback(Runnable isMasterCallback) {
         this.isMasterCallback = isMasterCallback;
     }
 
-    public Runnable getNotMasterCallback() {
-        return notMasterCallback;
-    }
-
     public void setNotMasterCallback(Runnable notMasterCallback) {
         this.notMasterCallback = notMasterCallback;
-    }
-
-    public Runnable getInterruptedCallback() {
-        return interruptedCallback;
     }
 
     public void setInterruptedCallback(Runnable interruptedCallback) {
@@ -168,7 +156,7 @@ public class SingletonCallback extends SubscribeCallback {
                     notMasterCallback.run();
                 }
             }
-            else {
+            else if(msg.spawnTime > spawnTime) {
                 // We're older than them, so we win! We need to let them
                 // know so that they can clean themselves up.
                 pubnub.publish().channel(outgoingChannel).message(createStatusMessage()).async(new PNCallback<PNPublishResult>() {
@@ -194,42 +182,43 @@ public class SingletonCallback extends SubscribeCallback {
             // Or just use the connected event to confirm you are subscribed for
             // UI / internal notifications, etc
 
-            pubnub.publish().channel(outgoingChannel).message(createStatusMessage()).async(new PNCallback<PNPublishResult>() {
-                @Override
-                public void onResponse(PNPublishResult result, PNStatus status) {
-                    if (!status.isError()) {
-                        // We've just asked if we're the master. If no one responds to our request within
-                        // the time limit, we'll assume we are the only ones. This can potentially get interrupted
-                        // by another message coming to us.
-                        try {
-                            Thread.sleep(waitTime);
+            if(state != UniquenessState.UNIQUE) {
 
-                            if(makeMaster()) {
-                                // If we are successful in becoming master, then... we've done it!
-                                // We can continue to do... whatever it was we were trying to do.
-                                if(isMasterCallback != null) {
-                                    isMasterCallback.run();
+                pubnub.publish().channel(outgoingChannel).message(createStatusMessage()).async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        if (!status.isError()) {
+                            // We've just asked if we're the master. If no one responds to our request within
+                            // the time limit, we'll assume we are the only ones. This can potentially get interrupted
+                            // by another message coming to us.
+                            try {
+                                Thread.sleep(waitTime);
+
+                                if (makeMaster()) {
+                                    // If we are successful in becoming master, then... we've done it!
+                                    // We can continue to do... whatever it was we were trying to do.
+                                    if (isMasterCallback != null) {
+                                        isMasterCallback.run();
+                                    }
+                                }
+                            } catch (java.lang.InterruptedException ex) {
+                                /**
+                                 * If we get interrupted, we're probably killing the thread. Thus, we failed?
+                                 */
+                                if (interruptedCallback != null) {
+                                    interruptedCallback.run();
                                 }
                             }
-                        }
-                        catch(java.lang.InterruptedException ex) {
-                            /**
-                             * If we get interrupted, we're probably killing the thread. Thus, we failed?
-                             */
-                            if(interruptedCallback != null) {
-                                interruptedCallback.run();
-                            }
-                        }
-                    }
-                    else {
+                        } else {
 
-                        // Handle message publish error. Check 'category' property to find out possible issue
-                        // because of which request did fail.
-                        //
-                        // Request can be resent using: [status retry];
+                            // Handle message publish error. Check 'category' property to find out possible issue
+                            // because of which request did fail.
+                            //
+                            // Request can be resent using: [status retry];
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 

@@ -1,25 +1,26 @@
 package AI;
 
+import Messages.MoveInfo;
 import javafx.util.Pair;
 
 import java.util.Random;
 import java.util.ArrayList;
 
 /**
- * This is a stupid NPC which just selects a space randomly. Garunteed to
+ * This is a stupid NPC which just selects a space randomly. Guaranteed to
  * pick an empty space, though.
  *
  * @author Daniel Edwards
  */
-public class NPCEasy implements PlayerBehavior {
+public class NPCEasy implements NPCBehaviour {
 
     public NPCEasy() {
     }
 
     @Override
-    public void getMove(EngineLib.Board b, char token) {
+    public MoveInfo getMove(EngineLib.Board b, char token) {
 
-        Pair<Integer, Integer> result = null;
+        MoveInfo result = null;
         char[][] boardArray = b.getBoardArray();
 
         ArrayList<Pair<Integer, Integer>> emptySpaces = new ArrayList<>();
@@ -37,15 +38,18 @@ public class NPCEasy implements PlayerBehavior {
         if(emptySpaces.size() > 0) {
             Random r = new Random();
 
-            result = emptySpaces.get(r.nextInt(emptySpaces.size()));
+            Pair<Integer, Integer> selectedMove = emptySpaces.get( r.nextInt(emptySpaces.size()) );
+
+            result = new MoveInfo();
+            result.setRow(selectedMove.getKey());
+            result.setCol(selectedMove.getValue());
         }
         else {
             throw new IllegalStateException("If we hit this, there is a big problem!!!");
             // This state should not be possible.
         }
 
-        //b.setPos(result.getKey(),result.getValue(),token);
-
+        return result;
     }
 
 

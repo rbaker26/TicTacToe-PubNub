@@ -7,6 +7,10 @@ public class MoveInfo {
     private int row;
     private int col;
 
+    public MoveInfo() {
+
+    }
+
     public MoveInfo(int roomID, String playerID, int row, int col) {
         this.roomID = roomID;
         this.playerID = playerID;
@@ -28,6 +32,22 @@ public class MoveInfo {
 
     public int getCol() {
         return col;
+    }
+
+    public void setRoomID(int roomID) {
+        this.roomID = roomID;
+    }
+
+    public void setPlayerID(String playerID) {
+        this.playerID = playerID;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public void setCol(int col) {
+        this.col = col;
     }
 
     @Override

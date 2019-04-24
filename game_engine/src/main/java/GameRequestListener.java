@@ -50,7 +50,7 @@ public class GameRequestListener extends SubscribeCallback {
         System.out.println("Create room request received: " + roomMsg);
         final int roomID = Engine.getNewRoomID();
         roomMsg.setRoomID(roomID);
-        roomMsg.setRoomChannel(Channels.roomChannelSet + roomID);
+        roomMsg.setRoomChannel(Channels.moveRequestChannelSet + roomID);
         roomInfoList.add(roomMsg);
         lobbyList.put(roomID, new Lobby(roomMsg));
         publishUpdatedRoomList(pb);
@@ -73,6 +73,7 @@ public class GameRequestListener extends SubscribeCallback {
             RoomInfo room = lobbyList.get(roomID).getRoomInfo();
             System.out.println(room);
 
+            // TODO This should probably get a refactor
             if(!room.hasPlayer1()) {
                 room.setPlayer1(roomMsg.getPlayer1());
             }

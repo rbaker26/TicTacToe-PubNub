@@ -1,9 +1,11 @@
 package AI;
 
+import Messages.MoveInfo;
 import javafx.util.Pair;
 
 import java.util.Map;
 import java.util.TreeMap;
+import EngineLib.Board;
 
 /**
  * The AI Behavior for the getMove functionality in the Player Class
@@ -11,7 +13,7 @@ import java.util.TreeMap;
  * moves based on a given game state by assuming optimal moves for both players.
  * @author Bobby Baker
  */
-public class NPCHard implements PlayerBehavior {
+public class NPCHard implements NPCBehaviour {
 
     /**
      * Player1's Character
@@ -51,8 +53,8 @@ public class NPCHard implements PlayerBehavior {
 
 
         Board b = new Board();
-        MAX_SCORE =  ((b.BOARD_SIZE_X*b.BOARD_SIZE_Y) + 1);
-        MIN_SCORE = -((b.BOARD_SIZE_X*b.BOARD_SIZE_Y) + 1);
+        MAX_SCORE =  ((b.ROW_COUNT*b.COL_COUNT) + 1);
+        MIN_SCORE = -((b.ROW_COUNT*b.COL_COUNT) + 1);
 
     }
     //***************************************************************************
@@ -73,7 +75,7 @@ public class NPCHard implements PlayerBehavior {
      * @autor Bobby Baker
      */
     @Override
-    public void getMove(Board b, char token) {
+    public MoveInfo getMove(Board b, char token) {
 
         // Default will minimize
         boolean isMax = false;
@@ -91,8 +93,8 @@ public class NPCHard implements PlayerBehavior {
         // be the first element in the TreeMap
         Map<Integer, Pair<Integer,Integer>> moveMap = new TreeMap<>();
         // Try all possible moves and run minimax on those moves
-        for(int i = 0; i < b.BOARD_SIZE_X; i++) {
-            for(int j = 0; j < b.BOARD_SIZE_Y; j++) {
+        for(int i = 0; i < b.ROW_COUNT; i++) {
+            for(int j = 0; j < b.COL_COUNT; j++) {
                 if(b.getPos(i,j) == b.DEFAULT_VALUE) {
                     // Make the move
                     b.setPos(i,j,token);
@@ -124,10 +126,15 @@ public class NPCHard implements PlayerBehavior {
         // System.out.println("Suggested Move:\t" + xBest + "\t\t" + yBest);
         System.out.println("Suggested Move:\t" + i + "\t\t" + j);
         System.out.println("*****************************************");
+
         // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         // Using the Observer Pattern, make the move using i,j
-        SubjectController.triggerUpdate(this, new PlayerBehavior.MoveInfo(i, j));
+        //SubjectController.triggerUpdate(this, new NPCBehaviour.MoveInfo(i, j));
         System.out.println(b);
+        MoveInfo move = new MoveInfo();
+        move.setCol(i);
+        move.setRow(j);
+        return move;
 
     }
     //***************************************************************************
@@ -172,8 +179,8 @@ public class NPCHard implements PlayerBehavior {
         if(isMax) {
             // Find the move with the high score
             int best = Integer.MIN_VALUE;
-            for(int i =0; i < b.BOARD_SIZE_X; i++) {
-                for(int j = 0; j < b.BOARD_SIZE_Y; j++) {
+            for(int i =0; i < b.ROW_COUNT; i++) {
+                for(int j = 0; j < b.COL_COUNT; j++) {
                     if(b.getPos(i,j) == b.DEFAULT_VALUE) {
                         // Make the move for Player1
                         b.setPos(i,j,player1Char);
@@ -191,8 +198,8 @@ public class NPCHard implements PlayerBehavior {
         else {
             // Find the move with the lowest score
             int worst = Integer.MAX_VALUE;
-            for(int i =0; i < b.BOARD_SIZE_X; i++) {
-                for(int j = 0; j < b.BOARD_SIZE_Y; j++) {
+            for(int i =0; i < b.ROW_COUNT; i++) {
+                for(int j = 0; j < b.COL_COUNT; j++) {
                     if(b.getPos(i,j) == b.DEFAULT_VALUE) {
                         // Make the move for Player1
                         b.setPos(i,j,player2Char);
@@ -221,8 +228,8 @@ public class NPCHard implements PlayerBehavior {
      */
     boolean isBoardFull(Board b) {
         int defaultSpaceCount = 0;
-        for(int i = 0; i < b.BOARD_SIZE_X; i++) {
-            for(int j = 0; j < b.BOARD_SIZE_Y; j++) {
+        for(int i = 0; i < b.ROW_COUNT; i++) {
+            for(int j = 0; j < b.COL_COUNT; j++) {
                 if(b.getPos(i,j) == b.DEFAULT_VALUE) {
                     defaultSpaceCount++;
                 }
@@ -300,7 +307,7 @@ public class NPCHard implements PlayerBehavior {
     private Integer checkColWin(Board b) {
         // CheckWinCol
         char[][] array = b.getBoardArray();
-        for(int j = 0; j < b.BOARD_SIZE_Y ;j++) {
+        for(int j = 0; j < b.COL_COUNT ;j++) {
             if(array[0][j] == array[1][j] && array[1][j] == array[2][j]) {
                 if(array[0][j] == player1Char) {
                     return MAX_SCORE;
@@ -325,7 +332,7 @@ public class NPCHard implements PlayerBehavior {
     private Integer checkRowWin(Board b) {
         // CheckWin Rows
         char[][] array = b.getBoardArray();
-        for(int i = 0; i < b.BOARD_SIZE_X; i++) {
+        for(int i = 0; i < b.ROW_COUNT; i++) {
             if(array[i][0] == array[i][1] && array[i][1] ==array [i][2]) {
                 if(array[i][0] == player1Char) {
                     return MAX_SCORE;

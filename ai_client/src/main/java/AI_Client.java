@@ -5,7 +5,11 @@
 //   -Pargs=Something
 // This will tack on "Something" to the UUID. Make several launch configs if you want.
 
+import AI.NPCBehaviour;
+import AI.NPCEasy;
 import Messages.Channels;
+import Messages.PlayerInfo;
+import Network.AICallback;
 import Network.SingletonCallback;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
@@ -57,7 +61,14 @@ public class AI_Client {
         System.out.println("Response timeout; elevating self to master.");
         System.out.print("Spinning up AI callbacks...");
 
-        // Do things
+        String outgoingChannel = Channels.roomMoveChannel;
+        String incomingChannel = Channels.moveRequestChannelSet;
+
+        PlayerInfo easyAIPlayer = new PlayerInfo(pn.getConfiguration().getUuid(), "EasyAI", "");
+        NPCBehaviour easyAIBehaviour = new NPCEasy();
+
+        pn.addListener(new AICallback(easyAIPlayer, easyAIBehaviour, incomingChannel, outgoingChannel));
+        pn.subscribe().channels(Arrays.asList(incomingChannel + "*")).execute();
 
         System.out.println("done. Hit CTRL-C to close.");
     }
