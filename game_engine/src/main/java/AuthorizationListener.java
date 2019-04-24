@@ -17,6 +17,8 @@ public class AuthorizationListener extends SubscribeCallback {
 
     @Override
     public void message(PubNub pb, PNMessageResult message) {
+
+
         if(message.getChannel().equals(authChannel) || message.getChannel().equals(createChannel)) {
             LoginInfo loginRequest = Converter.fromJson(message.getMessage(), LoginInfo.class);
             System.out.println("Message received: " + message.getMessage());
