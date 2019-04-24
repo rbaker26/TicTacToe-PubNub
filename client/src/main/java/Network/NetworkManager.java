@@ -5,6 +5,8 @@ import Messages.Channels;
 import Messages.MoveInfo;
 import Messages.PlayerInfo;
 import Messages.RoomInfo;
+import TaskThreads.TaskThread;
+import TaskThreads.TaskThreadFactory;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
@@ -80,13 +82,29 @@ public final class NetworkManager {
 
     //endregion
 
-
+    /**
+     * This is our instance of the PubNub object... of course.
+     */
     private PubNub pn;
-    private SubscribeCallback currentListener = null;
+
+    /**
+     * This is the current callback.
+     */
+    private SubscribeCallback currentCallback = null;
+
+    /**
+     * This is the list of incoming channels we are subscribed to.
+     */
     private List<String> currentChannels = null;
 
+    /**
+     * This callback is used for repeatedly sending out heartbeats.
+     */
+    /*
     private HeartbeatThreadCallback heartbeatCallback;
     private Thread heartbeatThread;
+     */
+    private TaskThread heartbeatThread;
 
     /**
      * When you're using this, call getBasePlayer, which makes a clone of this.
@@ -107,8 +125,12 @@ public final class NetworkManager {
         pn = new PubNub(pnConfiguration);
 
         // Now to set up the heartbeat thread.
+        /*
         heartbeatCallback = new HeartbeatThreadCallback(pn, Channels.clientHeartbeatChannel);
         heartbeatThread = new Thread(heartbeatCallback);
+        heartbeatThread.start();
+         */
+        heartbeatThread = TaskThreadFactory.makeHeartbeatThread(pn, Channels.clientHeartbeatChannel);
         heartbeatThread.start();
 
         basePlayer = new PlayerInfo(pnConfiguration.getUuid());
@@ -149,8 +171,12 @@ public final class NetworkManager {
             pn.addListener(newListener);
         }
 
-        if(currentListener != null) {
-            pn.removeListener(currentListener);
+        if(currentCallback != null) {
+            if(currentCallback instanceof InterruptibleListener) {
+                ((InterruptibleListener) currentCallback).interrupt(pn);
+            }
+
+            pn.removeListener(currentCallback);
         }
 
         // Now do channels
@@ -163,14 +189,14 @@ public final class NetworkManager {
         }
 
         // Aaaaand we can finally save stuff.
-        currentListener = newListener;
+        currentCallback = newListener;
         currentChannels = newChannels;
     }
 
     /**
-     * Removes current listener and unsubscribes from all channels.
+     * Makes the NetworkManager stop whatever it was doing.
      */
-    private void removeListener() {
+    public void clear() {
         changeListener(null, null);
     }
 
@@ -219,12 +245,12 @@ public final class NetworkManager {
 
         if(successResponse == null) {
             successResponse = (info) -> {
-                removeListener();
+                clear();
             };
         }
         if(failureResponse == null) {
             failureResponse = (info) -> {
-                removeListener();
+                clear();
             };
         }
 
@@ -261,12 +287,12 @@ public final class NetworkManager {
 
         if(successResponse == null) {
             successResponse = (info) -> {
-                removeListener();
+                clear();
             };
         }
         if(failureResponse == null) {
             failureResponse = (info) -> {
-                removeListener();
+                clear();
             };
         }
 
@@ -283,23 +309,6 @@ public final class NetworkManager {
         PlayerCallback callback = new PlayerCallback(ourUserID, outgoingChannel, room, response);
 
         changeListener(callback, Arrays.asList(incomingChannel));
-    }
-
-    public boolean isWaitingForRoom() {
-        return currentListener.getClass().equals(RoomRequesterCallback.class);
-    }
-
-    public void stopWaitingForRoom() {
-        // TODO Make this instead check for an interface.
-        if(isWaitingForRoom()) {
-            RoomRequesterCallback callback = (RoomRequesterCallback)currentListener;
-            callback.cancelRequest(pn);
-            removeListener();
-        }
-        else {
-            System.out.println("Cannot cancel; not using RoomRequesterCallback");
-        }
-
     }
 
     /**
@@ -328,12 +337,10 @@ public final class NetworkManager {
     private void dieHorribly() {
         System.out.println("Going down");
 
-        if(isWaitingForRoom()) {
-            stopWaitingForRoom();
-        }
-        removeListener();
+        clear();
 
-        heartbeatCallback.setAlive(false);
+        //heartbeatCallback.setAlive(false);
+        heartbeatThread.stop();
         try {
             System.out.print("My heart...");
             heartbeatThread.join();

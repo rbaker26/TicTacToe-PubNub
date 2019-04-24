@@ -13,36 +13,80 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.geometry.Pos;
 
+
+import Messages.PlayerInfo;
+import Messages.RoomInfo;
+import Network.NetworkManager;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.scene.control.cell.PropertyValueFactory;
+
+import java.util.Objects;
+
 public class mainWindowController extends AbstractSceneController{
+
+    private Button multiPlayerButton;
+    private Button easyAIButton;
+    private Button hardAIButton;
+    private Button gameHistoryButton;
 
     public mainWindowController() {
 
-        try {
 
-            VBox vbox = new VBox(10);
+        VBox vbox = new VBox(10);
 
-            Label tic = new Label("TIC");
-            Label tac = new Label("TAC");
-            Label toe = new Label("TOE");
+        Label tic = new Label("TIC");
+        Label tac = new Label("TAC");
+        Label toe = new Label("TOE");
 
-            vbox.getChildren().addAll(tic, tac, toe);
+        vbox.getChildren().addAll(tic, tac, toe);
 
-            Button multiPlayerButton = new Button("Multiplayer");
-            Button easyAIButton = new Button("Against Computer - Easy");
-            Button hardAIButton = new Button("Against Computer - Hard");
+        multiPlayerButton = new Button("Multiplayer");
+        easyAIButton = new Button("Against Computer - Easy");
+        hardAIButton = new Button("Against Computer - Hard");
+        gameHistoryButton = new Button("Game History");
 
-            vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton);
+        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton, gameHistoryButton);
 
-            vbox.setAlignment(Pos.CENTER);
 
-            setRoot(vbox);
+        vbox.setAlignment(Pos.CENTER);
 
-        }
+        setRoot(vbox);
 
-        catch(Exception ex) {
-            System.out.println(ex.getMessage());
-        }
     }
+
+
+
+    public Button getMultiPlayerButton() {
+        return multiPlayerButton;
+    }
+    public Button getEasyAIButton() { return easyAIButton; }
+    public Button getHardAIButton() { return hardAIButton; }
+    public Button getGameHistoryButton() { return gameHistoryButton; }
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton(), getGameHistoryButton());
+    }
+
+    @Override
+    public String toString() {
+        return "mainWindowController {" +
+                "multiPlayerButton = " + multiPlayerButton +
+                "easyAIButton = " + easyAIButton +
+                "hardAIButton = " + hardAIButton +
+                "gameHistoryButton = " + gameHistoryButton +
+                '}';
+    }
+
 
 
 }

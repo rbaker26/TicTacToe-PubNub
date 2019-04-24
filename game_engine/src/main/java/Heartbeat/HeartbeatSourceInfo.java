@@ -5,13 +5,13 @@ import Messages.Heartbeat;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class HeartbeatSource {
-    private Consumer<HeartbeatSource> expiredCallback;
+public class HeartbeatSourceInfo {
+    private Consumer<HeartbeatSourceInfo> expiredCallback;
     private long timeOfLastHeartbeat;
     private String uuid;
     private Heartbeat previousBeat;
 
-    public HeartbeatSource(String uuid, long timeOfLastHeartbeat) {
+    public HeartbeatSourceInfo(String uuid, long timeOfLastHeartbeat) {
         this.uuid = uuid;
         this.timeOfLastHeartbeat = timeOfLastHeartbeat;
     }
@@ -23,11 +23,11 @@ public class HeartbeatSource {
     }
 
     //region Getters and setters
-    public synchronized Consumer<HeartbeatSource> getExpiredCallback() {
+    public synchronized Consumer<HeartbeatSourceInfo> getExpiredCallback() {
         return expiredCallback;
     }
 
-    public synchronized void setExpiredCallback(Consumer<HeartbeatSource> expiredCallback) {
+    public synchronized void setExpiredCallback(Consumer<HeartbeatSourceInfo> expiredCallback) {
         this.expiredCallback = expiredCallback;
     }
 
@@ -57,7 +57,7 @@ public class HeartbeatSource {
 
     @Override
     public String toString() {
-        return "Heartbeat.HeartbeatSource{" +
+        return "Heartbeat.HeartbeatSourceInfo{" +
                 "expiredCallback=" + expiredCallback +
                 ", timeOfLastHeartbeat=" + timeOfLastHeartbeat +
                 ", uuid='" + uuid + '\'' +
@@ -69,7 +69,7 @@ public class HeartbeatSource {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        HeartbeatSource that = (HeartbeatSource) o;
+        HeartbeatSourceInfo that = (HeartbeatSourceInfo) o;
         return getTimeOfLastHeartbeat() == that.getTimeOfLastHeartbeat() &&
                 Objects.equals(getExpiredCallback(), that.getExpiredCallback()) &&
                 Objects.equals(getUuid(), that.getUuid()) &&
