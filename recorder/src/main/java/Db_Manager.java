@@ -1,7 +1,5 @@
-<<<<<<< HEAD
+
 import Messages.PlayerInfo;
-=======
->>>>>>> f9e164b41deeacd63a1ff97bc7634b8470c4204a
 import Messages.MoveInfo;
 
 import java.sql.*;
