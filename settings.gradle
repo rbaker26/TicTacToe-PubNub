@@ -4,4 +4,5 @@ include 'db_manager'
 include 'client'
 include 'library'
 include 'ai_client'
+include 'recorder'
 

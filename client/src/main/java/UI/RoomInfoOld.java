@@ -1,7 +1,9 @@
 package UI;
 
-public class RoomInfo {
+@Deprecated
+public class RoomInfoOld {
 
+    //instance variables
     private String id; //5 digit ID number
     private String lobbyStatus; //open or closed
     private String player1; //name
@@ -9,7 +11,7 @@ public class RoomInfo {
     private String player1Token; //X or O
     private String player2Token; //X or O
 
-    public RoomInfo(String id, String lobbyStatus, String player1, String player2,
+    public RoomInfoOld(String id, String lobbyStatus, String player1, String player2,
                     String player1Token, String player2Token) {
 
         super();

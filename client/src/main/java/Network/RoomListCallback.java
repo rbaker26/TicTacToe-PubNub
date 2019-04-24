@@ -1,3 +1,5 @@
+package Network;
+
 import Messages.Channels;
 import Messages.Converter;
 import Messages.RoomInfo;
@@ -13,9 +15,15 @@ import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class RoomsListCallback extends SubscribeCallback{
-    List<RoomInfo> roomList = new ArrayList<>();
+public class RoomListCallback extends SubscribeCallback {
+
+    Consumer<List<RoomInfo>> onUpdateCallback;
+
+    public RoomListCallback(Consumer<List<RoomInfo>> onUpdateCallback) {
+        this.onUpdateCallback = onUpdateCallback;
+    }
 
     @Override
     public void status(PubNub pubnub, PNStatus status) {
@@ -42,6 +50,10 @@ public class RoomsListCallback extends SubscribeCallback{
             for (int room = 0; room < rooms.size(); room++) {
                 System.out.println("Room " + room);
                 System.out.println(rooms.get(room));
+            }
+
+            if(onUpdateCallback != null) {
+                onUpdateCallback.accept(rooms);
             }
         }
     }

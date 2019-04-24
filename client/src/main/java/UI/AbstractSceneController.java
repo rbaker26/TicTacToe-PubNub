@@ -69,14 +69,21 @@ abstract public class AbstractSceneController implements ISceneController {
 
         // This is needed and it is dumb...
 
-
-        Scene newScene = new Scene(root, targetWidth, targetHeight);
+        Scene newScene;
+        if(oldScene == null) {
+            newScene = new Scene(root, targetWidth, targetHeight);
+        }
+        else {
+            newScene = oldScene;
+            newScene.setRoot(root);
+        }
         targetStage.setScene(newScene);
 
         //targetStage.setWidth(targetWidth);
         //targetStage.setHeight(targetHeight);
 
         root.resize(targetWidth, targetHeight);    // This is needed so that layouts update correctly
+
     }
 
 

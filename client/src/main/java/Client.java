@@ -1,8 +1,13 @@
-
-
+import Messages.RoomFactory;
+import Messages.RoomInfo;
+import Network.NetworkManager;
 import UI.*;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+
+import java.net.NetworkInterface;
 
 
 // NOTE: To change the uuid, go to the launch configurations and add this to the "Arguments" field
@@ -14,15 +19,16 @@ public class Client extends Application {
     private static final double initWidth = 800;
     private static final double initHeight = 600;
 
-    private ISceneController lobbyController;
-    private ISceneController waitingController;
+    private LobbySceneController lobbyController;
+    private WaitingForOpponentScene waitingController;
+    private PlayAgainController playAgainController;
+    private GameViewController gameViewController;
+    private loginController loginController;
+    private GameScoreController gameScoreController;
+    private mainWindowController mainWindowController;
 
-    //I'm testing out my tableview
-    private ISceneController roomListController;
-
-    private ISceneController playAgainController;
-
-    private ISceneController mainWindowController;
+    private LoginUserController loginUserController;
+    //private ISceneController mainWindowController;
 
     public static void main(String[] args) {
 
@@ -40,112 +46,195 @@ public class Client extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        primaryStage.setTitle("SABRCATST TicTacToe");
+        try {
 
-        LobbySceneController lobby = new LobbySceneController();
-        lobbyController = lobby;
-        //NetworkManager.getInstance();
+            primaryStage.setTitle("SABRCATST TicTacToe");
 
-        playAgainController paObject = new playAgainController();
-        playAgainController = paObject;
-
-        RoomListController roomlistObject = new RoomListController();
-        roomListController = roomlistObject;
-
-        mainWindowController mainObject = new mainWindowController();
-        mainWindowController = mainObject;
-
-        waitingController = new WaitingForOpponentScene();
+            lobbyController = new LobbySceneController();
+            playAgainController = new PlayAgainController();
+            waitingController = new WaitingForOpponentScene();
+            //gameViewController = new GameViewController();
+            gameScoreController = new GameScoreController();
+            loginController = new loginController();
+            mainWindowController = new mainWindowController();
 
 
-        lobby.getOpenButton().setOnAction(value ->  {
-            System.out.println("Opening");
+            lobbyController.setOpenHandler(requestInfo -> {
+                System.out.println("Opening " + requestInfo);
 
-            waitingController.applyScene(primaryStage);
+                waitingController.applyScene(primaryStage);
 
-            //NetworkManager.forceUUID(nameField.getText());
-            NetworkManager.getInstance().requestNewRoom(
-                    lobby.getName(),
-                    true,
-                    responseRoomInfo -> {
-                        /*
-                        System.out.println("Hi");
+                //Network.NetworkManager.forceUUID(nameField.getText());
+                NetworkManager.getInstance().requestNewRoom(
+                        lobbyController.getName(),
+                        RoomFactory.makeCreateRequest(requestInfo.isGoingFirst(), requestInfo.getPassword()),
+                        responseRoom -> {
+                            System.out.println("Connected (creating): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                        },
+                        responseRoom -> {
+                            Platform.runLater(() -> {
+                                respondToFailedConnection(
+                                        primaryStage,
+                                        "Failed to create room"
+                                );
+                            });
+                        }
+                );
+            });
 
-                        Platform.runLater(() ->
-                            primaryStage.setScene(new Scene(new HBox(), 100, 100))
-                        );
-                         */
+            lobbyController.setJoinHandler(room -> {
+                System.out.println("Selected room: " + room.toString());
+                waitingController.applyScene(primaryStage);
 
-                    },
-                    null
-            );
-        });
+                //try { Thread.sleep(5000); } catch(InterruptedException ex) {}
 
-        lobby.getJoinButton().setOnAction(value -> {
-            System.out.println("Joining " + lobby.getRoomID());
-
-            // TODO This should we where we plug the room from the other player.
-            Messages.RoomInfo roomInfo = new Messages.RoomInfo();
-            roomInfo.setRoomID(lobby.getRoomID());
-            NetworkManager.getInstance().joinRoom(lobby.getName(), roomInfo);
-        });
-	/*
-        Label turnOrder = new Label("Go first?");
-        CheckBox goFirst = new CheckBox();
-
-        Button openButton = new Button("Open");
-        Button joinButton = new Button("Join");
-        Button refreshButton = new Button("Get Room List");
-
-        openButton.setOnAction(value ->  {
-            System.out.println("Opening");
+                NetworkManager.getInstance().requestJoinRoom(
+                        lobbyController.getName(),
+                        room,
+                        responseRoom -> {
+                            System.out.println("Connected (joining): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                        },
+                        responseRoom -> {
+                            Platform.runLater(() -> {
+                                respondToFailedConnection(
+                                        primaryStage,
+                                        "The room either no longer exists or is now full."
+                                );
+                            });
+                        }
+                );
+            });
 
 
-            NetworkManager.getInstance().requestNewRoom(nameField.getText(), goFirst.isSelected());
-        });
+            waitingController.setOnCancel(value -> {
+                NetworkManager.getInstance().clear();
+                lobbyController.applySceneAsync(primaryStage);
+            });
 
-        joinButton.setOnAction(e -> {
-            System.out.println("Joining");
-            RoomInfo room = new RoomInfo(Integer.parseInt(roomField.getText()), nameField.getText());
-            System.out.println(room);
-            NetworkManager.getInstance().joinLobby(room);
-        });
+            /**
+             * Starting from the main window, when the user selects
+             * Multiplayer button, they get transferred to the
+             * lobby window.
+             */
+            mainWindowController.getMultiPlayerButton().setOnAction(value -> {
 
-        refreshButton.setOnAction(e -> {
-            System.out.println("Getting rooms");
-            NetworkManager.getInstance().getRoomList();
-        });
+                lobbyController.applyScene(primaryStage);
 
-        // FOLLOWING FOR TESTING
-        Label rowLabel = new Label("Row: ");
-        TextField rowField = new TextField();
-        Label colLabel = new Label("Col: ");
-        TextField colField = new TextField();
-        Button moveButton = new Button("Send Move");
+            });
 
-        moveButton.setOnAction(e -> {
-            NetworkManager.getInstance().sendMove(Integer.parseInt(rowField.getText()), Integer.parseInt(colField.getText()), 100000, nameField.getText());
-        });
+            /**
+             * Both the easyAI and hardAI buttons will switch to the board ui
+             */
+            mainWindowController.getEasyAIButton().setOnAction(value -> {
 
-        HBox hbox = new HBox(rowLabel, rowField, colLabel, colField);
-        VBox vbox = new VBox(nameLabel, nameField, roomLabel, roomField, turnOrder, goFirst, openButton, joinButton, refreshButton, hbox, moveButton);
->>>>>>> Engine
-	*/
+                //TAKE TO BOARD UI
+                System.out.println("Easy AI Button works!");
 
-        roomlistObject.applyScene(primaryStage);
-        primaryStage.setWidth(initWidth);
-        primaryStage.setHeight(initHeight);
-        primaryStage.show();
+                gameViewController.applyScene(primaryStage);
 
+            });
+
+            mainWindowController.getHardAIButton().setOnAction(value -> {
+
+                //TAKE TO BOARD UI
+                System.out.println("Hard AI Button works!");
+
+                gameViewController.applyScene(primaryStage);
+
+            });
+
+            lobbyController.getBackButton().setOnAction(value -> {
+
+                mainWindowController.applyScene(primaryStage);
+
+            });
+
+            mainWindowController.getGameHistoryButton().setOnAction(value -> {
+
+                gameScoreController.applyScene(primaryStage);
+
+            });
+
+            gameScoreController.getBackButton().setOnAction(value -> {
+
+                mainWindowController.applyScene(primaryStage);
+
+            });
+
+            loginController.getCreateButton().setOnAction(value ->  {
+
+                System.out.println("Creating new player");
+
+            });
+
+            loginController.getEnterButton().setOnAction(value -> {
+
+                boolean playerInDatabase;
+
+                System.out.println("Welcome player");
+
+            });
+
+
+
+            mainWindowController.applyScene(primaryStage);
+            primaryStage.setWidth(initWidth);
+            primaryStage.setHeight(initHeight);
+            primaryStage.show();
+
+
+        }
+        catch(Exception ex) {
+            // This is so that we get better information on exceptions. By default,
+            // JavaFX swallows the exception and closes without saying anything useful.
+            System.out.println(ex);
+            throw ex;
+        }
 
     }
 
     @Override
     public void stop() throws Exception {
-        NetworkManager.getInstance().dieHorribly();
+        NetworkManager.dieIfNeeded();
 
-        // TODO We shouldn't be forcing an exit, but... we have no other choice
         System.exit(0);
+    }
+
+    /**
+     * Connects to the given game. This can be called whether we created the room or
+     * are joining someone else's room.
+     * @param primaryStage The main JavaFX stage.
+     * @param ourUserID The user's ID.
+     * @param room The room to join.
+     */
+    private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room) {
+        gameViewController = new GameViewController(room, ourUserID);
+
+        NetworkManager.getInstance().joinRoom(ourUserID, room, (board) -> {
+            gameViewController.updateBoard(board);
+            gameViewController.toggleTurn();
+        });
+        gameViewController.applySceneAsync(primaryStage);
+    }
+
+    /**
+     * Does various cleanup if failed to connect to a game. Note that this MUST be
+     * run asynchronously.
+     * @param primaryStage Stage to draw to.
+     * @param message Message to show in the warning box.
+     */
+    private void respondToFailedConnection(Stage primaryStage, String message) {
+        NetworkManager.getInstance().clear();
+
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Failed to join the room");
+        alert.setContentText(message);
+        alert.showAndWait();
+
+        lobbyController.applyScene(primaryStage);
     }
 }
 

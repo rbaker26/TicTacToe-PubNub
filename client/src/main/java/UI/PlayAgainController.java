@@ -6,12 +6,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 
-public class playAgainController extends AbstractSceneController {
+public class PlayAgainController extends AbstractSceneController {
 
     Button yesButton = new Button();
     Button noButton = new Button();
 
-    public playAgainController() {
+    public PlayAgainController() {
 
         Label playAgainLabel = new Label("Play Game Again?");
 

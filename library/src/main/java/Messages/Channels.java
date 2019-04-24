@@ -3,19 +3,10 @@ package Messages;
 public final class Channels {
     private Channels() {}
 
-
-    //region Sets
-    /**
-     * These are channels for discussing room-related things.
-     */
-    public static final String roomChannelSet = "Rooms::";
-
-    /**
-     * These are channels which are meant to be specific to a given user.
-     */
-    public static final String privateChannelSet = "Private::";
-    //endregion
-
+    public static final String roomChannelSet = "Rooms.";
+    public static final String privateChannelSet = "Private.";
+    public static final String heartbeatChannelSet = "Heartbeat.";
+    public static final String userAuthChannelSet = "Authorization.";
 
     //region Room channels
     /**
@@ -35,6 +26,11 @@ public final class Channels {
     //endregion
 
 
+    public static final String authCreateChannel = userAuthChannelSet + "Create";
+    public static final String authCheckChannel = userAuthChannelSet + "Check";
+
+    public static final String clientHeartbeatChannel = heartbeatChannelSet + "Client";
+
     /**
      * Channels used by the AI system.
      */
@@ -44,7 +40,7 @@ public final class Channels {
         /**
          * These channels are used for AI things.
          */
-        public static final String channelSet = "AI::";
+        public static final String channelSet = "AI.";
 
         /**
          * This channel is used by the AI system to ensure that only one instance is online at once.
@@ -61,5 +57,4 @@ public final class Channels {
          */
         public static final String hardChannel = channelSet + "Hard";
     }
-
 }
