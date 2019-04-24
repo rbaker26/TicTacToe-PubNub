@@ -21,16 +21,15 @@ public class AICallback extends SubscribeCallback {
     private Runnable onSetupCallback;
 
     /**
-     * Creates a new AI callback.
+     * Creates a new AI callback. We will be listening on the player's channel.
      * @param player This is the player which we consider ourselves to be. We do not respond unless this matches our player.
      * @param behaviour The behaviour which decides the moves.
-     * @param incomingChannelSet The set of channels which we listen on. Should NOT include the '*'.
      * @param outgoingChannel The channel which we publish our moves to.
      */
-    public AICallback(PlayerInfo player, NPCBehaviour behaviour, String incomingChannelSet, String outgoingChannel) {
+    public AICallback(PlayerInfo player, NPCBehaviour behaviour, String outgoingChannel) {
         this.player = player;
         this.behaviour = behaviour;
-        this.incomingChannelSet = incomingChannelSet;
+        this.incomingChannelSet = player.getChannel();
         this.outgoingChannel = outgoingChannel;
     }
 

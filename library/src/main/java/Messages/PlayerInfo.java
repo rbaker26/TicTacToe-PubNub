@@ -3,6 +3,7 @@ package Messages;
 import java.util.Objects;
 
 public class PlayerInfo implements Cloneable {
+
     public static enum PlayerType {
         HUMAN, AI_EASY, AI_HARD
     }
@@ -37,6 +38,10 @@ public class PlayerInfo implements Cloneable {
         this.uuid = uuid;
         this.id = id;
         this.channel = channel;
+    }
+
+    public boolean isAI() {
+        return type.equals(PlayerType.AI_HARD) || type.equals(PlayerType.AI_EASY);
     }
 
     public PlayerInfo(String uuid) {

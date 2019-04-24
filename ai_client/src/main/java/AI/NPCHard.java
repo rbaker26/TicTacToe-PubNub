@@ -46,7 +46,7 @@ public class NPCHard implements NPCBehaviour {
      * @param p2 Player2's Character
      * @author Bobby Baker
      */
-    NPCHard(char p1, char p2){
+    public NPCHard(char p1, char p2){
 
         player1Char = p1;
         player2Char = p2;

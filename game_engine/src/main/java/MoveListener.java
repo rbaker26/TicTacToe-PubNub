@@ -1,9 +1,6 @@
 import EngineLib.Board;
 import EngineLib.Lobby;
-import Messages.Channels;
-import Messages.Converter;
-import Messages.MoveInfo;
-import Messages.MoveRequest;
+import Messages.*;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
@@ -12,6 +9,10 @@ import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -72,7 +73,7 @@ public class MoveListener extends SubscribeCallback {
                 lobby.getBoard().setPos(move.getRow(), move.getCol(), token);
                 System.out.println("Room " + roomID + "'s board:\n " + lobby.getBoard());
                 if(playerWon(lobby.getBoard(), token)) {
-                    pb.publish() // Sending move request to next player
+                    pb.publish() // Let both ends know that a player won.
                             .message(new MoveRequest(lobby.getBoard(), lobby.getRoomInfo(), null))
                             .channel(lobby.getRoomInfo().getRoomChannel())
                             .async(new PNCallback<PNPublishResult>() {
@@ -90,18 +91,28 @@ public class MoveListener extends SubscribeCallback {
                     lobby.toggleCurrentPlayer();
                     // will need to publish the next move request at the end of this
                     System.out.printf("Sending move request to: %s%n Current Board: %s%n", lobby.getCurrentPlayer(), lobby.getBoard());
-                    pb.publish() // Sending move request to next player
-                            .message(new MoveRequest(lobby.getBoard(), lobby.getRoomInfo(), lobby.getCurrentPlayer()))
-                            .channel(lobby.getRoomInfo().getRoomChannel())
-                            .async(new PNCallback<PNPublishResult>() {
-                                @Override
-                                public void onResponse(PNPublishResult result, PNStatus status) {
-                                    // handle publish result, status always present, result if successful
-                                    // status.isError() to see if error happened
-                                    if (!status.isError()) {
+
+                    List<String> outgoingChannels = new LinkedList();
+                    outgoingChannels.add(lobby.getRoomInfo().getRoomChannel());
+                    if(lobby.getRoomInfo().getPlayer2().isAI()) {
+                        outgoingChannels.add(lobby.getRoomInfo().getPlayer2().getChannel());
+                    }
+
+                    for(String channelName : outgoingChannels) {
+                        pb.publish() // Sending move request to next player
+                                .message(new MoveRequest(lobby.getBoard(), lobby.getRoomInfo(), lobby.getCurrentPlayer()))
+                                .channel(channelName)
+                                .async(new PNCallback<PNPublishResult>() {
+                                    @Override
+                                    public void onResponse(PNPublishResult result, PNStatus status) {
+                                        // handle publish result, status always present, result if successful
+                                        // status.isError() to see if error happened
+                                        if (!status.isError()) {
+                                        }
                                     }
-                                }
-                            });
+                                });
+                    }
+
                 }
             }
         }

@@ -7,6 +7,7 @@
 
 import AI.NPCBehaviour;
 import AI.NPCEasy;
+import AI.NPCHard;
 import Messages.Channels;
 import Messages.PlayerInfo;
 import Network.AICallback;
@@ -62,12 +63,16 @@ public class AI_Client {
         System.out.print("Spinning up AI callbacks...");
 
         String outgoingChannel = Channels.roomMoveChannel;
-        String incomingChannel = Channels.moveRequestChannelSet;
+
+        PlayerInfo easyAIPlayer = PlayerInfo.easyAI();
+        PlayerInfo hardAIPlayer = PlayerInfo.hardAI();
 
         NPCBehaviour easyAIBehaviour = new NPCEasy();
+        NPCBehaviour hardAIBehaviour = new NPCHard('X', 'O');       // TODO THIS IS NOT GOING TO WORK
 
-        pn.addListener(new AICallback(PlayerInfo.easyAI(), easyAIBehaviour, incomingChannel, outgoingChannel));
-        pn.subscribe().channels(Arrays.asList(incomingChannel + "*")).execute();
+        pn.addListener(new AICallback(easyAIPlayer, easyAIBehaviour, outgoingChannel));
+        pn.addListener(new AICallback(hardAIPlayer, hardAIBehaviour, outgoingChannel));
+        pn.subscribe().channels(Arrays.asList(easyAIPlayer.getChannel(), hardAIPlayer.getChannel())).execute();
 
         System.out.println("done. Hit CTRL-C to close.");
     }
