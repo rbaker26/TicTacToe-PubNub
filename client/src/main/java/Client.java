@@ -1,10 +1,20 @@
+import Messages.Channels;
+import Messages.LoginInfo;
+import Messages.MoveRequest;
 import Messages.RoomInfo;
+import Network.LoginRequestCallback;
 import Network.NetworkManager;
 import UI.*;
+import com.pubnub.api.callbacks.PNCallback;
+import com.pubnub.api.models.consumer.PNPublishResult;
+import com.pubnub.api.models.consumer.PNStatus;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import com.pubnub.api.PNConfiguration;
+import com.pubnub.api.PubNub;
+import EngineLib.Lobby;
 
 import java.net.NetworkInterface;
 
@@ -17,6 +27,8 @@ public class Client extends Application {
 
     private static final double initWidth = 800;
     private static final double initHeight = 600;
+
+    private PubNub pb;
 
     private LobbySceneController lobbyController;
     private WaitingForOpponentScene waitingController;
@@ -49,6 +61,24 @@ public class Client extends Application {
 
             primaryStage.setTitle("SABRCATST TicTacToe");
 
+            LoginRequestCallback lrc = new LoginRequestCallback(
+                    new LoginInfo("username", "password", "screenname"),
+                    Channels.authCheckChannel,
+                    Channels.authCheckChannel,
+                    () -> {
+                        System.out.println("Successful Login");
+                        /*
+                         * SUCCESS CODE GOES HERE
+                         */
+                        //lobbyController.applyScene(primaryStage);
+                    },
+                    () -> {
+                        /*
+                         * FAIL CODE GOES HERE
+                         */
+                        System.out.println("Failed Login");
+                    }
+            );
             lobbyController = new LobbySceneController();
             playAgainController = new PlayAgainController();
             waitingController = new WaitingForOpponentScene();
@@ -170,9 +200,14 @@ public class Client extends Application {
             });
 
             loginController.getEnterButton().setOnAction(value -> {
+                String usr;
+                String psw;
+                String scn;
 
-                boolean playerInDatabase;
-
+                usr = loginController.getUsernameField();
+                psw = loginController.getPasswordField();
+                // scn = loginController.getScreenNameField();
+                //NetworkManager.getInstance().userLogin(username, password, screenName);
                 System.out.println("Welcome player");
 
             });

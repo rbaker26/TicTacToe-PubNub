@@ -15,11 +15,15 @@ public class loginController extends AbstractSceneController{
 
     private TextField usernameField;
     private TextField passwordField;
+    private TextField screenNameField;
     private Button enterButton;
     private Button createButton;
 
     public loginController() {
 
+        Label screenNameLabel = new Label("Screen Name: ");
+        screenNameField = new TextField();
+        screenNameField.setPrefColumnCount(10);
 
         Label nameLabel = new Label("Username: ");
         usernameField = new TextField();
@@ -29,6 +33,7 @@ public class loginController extends AbstractSceneController{
         Label passwordLabel = new Label("Password: ");
         passwordField = new TextField();
         passwordField.setPrefColumnCount(10);
+
 
         enterButton = new Button("Login");
 
@@ -41,32 +46,37 @@ public class loginController extends AbstractSceneController{
         grid.setVgap(5);
         grid.setAlignment(Pos.CENTER);
 
+        GridPane.setConstraints(screenNameLabel, 0, 0);
+        grid.getChildren().add(screenNameLabel);
 
-       GridPane.setConstraints(nameLabel, 0, 0);
+        GridPane.setConstraints(screenNameField, 1, 0);
+        grid.getChildren().add(screenNameField);
+
+       GridPane.setConstraints(nameLabel, 0, 1);
 
        grid.getChildren().add(nameLabel);
 
 
-       GridPane.setConstraints(usernameField, 1, 0);
+       GridPane.setConstraints(usernameField, 1, 1);
 
        grid.getChildren().add(usernameField);
 
 
-       GridPane.setConstraints(passwordLabel, 0, 1);
+       GridPane.setConstraints(passwordLabel, 0, 2);
 
        grid.getChildren().add(passwordLabel);
 
 
-       GridPane.setConstraints(passwordField, 1, 1);
+       GridPane.setConstraints(passwordField, 1, 2);
 
        grid.getChildren().add(passwordField);
 
 
-       GridPane.setConstraints(enterButton, 0, 2);
+       GridPane.setConstraints(enterButton, 0, 3);
 
        grid.getChildren().add(enterButton);
 
-       GridPane.setConstraints(createButton, 1, 2);
+       GridPane.setConstraints(createButton, 1, 3);
        grid.getChildren().add(createButton);
 
 

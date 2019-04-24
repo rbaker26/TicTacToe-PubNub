@@ -1,10 +1,7 @@
 package Network;
 
 import EngineLib.Board;
-import Messages.Channels;
-import Messages.MoveInfo;
-import Messages.PlayerInfo;
-import Messages.RoomInfo;
+import Messages.*;
 import TaskThreads.TaskThread;
 import TaskThreads.TaskThreadFactory;
 import com.pubnub.api.PNConfiguration;
@@ -300,6 +297,12 @@ public final class NetworkManager {
         callback.setFailureCallback(failureResponse);
 
         changeListener(callback, Arrays.asList(incomingChannel));
+    }
+
+   // public static final String authCreateChannel = userAuthChannelSet + "Create";
+
+    public void userLogin(String username, String password, String screenName) {
+        pn.publish().message(new LoginInfo(username, password, screenName));
     }
 
     public void joinRoom(String ourUserID, RoomInfo room, Consumer<Board> response) {

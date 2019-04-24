@@ -31,7 +31,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'Main'
+        attributes 'Main-Class': 'Client'
     }
 
     from {
@@ -39,7 +39,7 @@ jar {
     }
 }
 
-mainClassName = 'Main'
+mainClassName = 'Client'
 
 // This is necessary to make System.in work correctly
 run{
