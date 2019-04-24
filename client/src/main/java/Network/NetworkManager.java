@@ -17,6 +17,7 @@ import com.pubnub.api.models.consumer.PNStatus;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -64,7 +65,20 @@ public final class NetworkManager {
         String myUuid = "";
 
         try {
-            byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+            byte[] mac = NetworkInterface.getNetworkInterfaces().nextElement().getHardwareAddress();
+
+            if(mac == null) {
+                System.out.println("Couldn't get MAC address using the Linux approach, trying Windows approach.");
+                mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+            }
+
+            /*
+            Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces();
+            while(list.hasMoreElements()) {
+                System.out.println(list.nextElement());
+            }
+            */
+            //System.out.println(NetworkInterface.getNetworkInterfaces().);
             StringBuilder uuid = new StringBuilder();
             for (int i = 0; i < mac.length; i++) {
                 uuid.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
@@ -74,6 +88,7 @@ public final class NetworkManager {
         }
         catch(Exception ex) {
             System.out.println("Cannot get local host... Creating default UUID");
+            System.out.println(ex);
         }
 
 
@@ -205,18 +220,21 @@ public final class NetworkManager {
      * @param onUpdateCallback Gets fired whenever there is a new room list.
      */
     public void listenForRooms(Consumer<List<RoomInfo>> onUpdateCallback) {
-
         changeListener(new RoomListCallback(onUpdateCallback), Arrays.asList(Channels.roomListChannel));
+    }
+
+    public boolean isListeningForRooms() {
+        return (currentCallback instanceof RoomListCallback);
     }
 
     /**
      * Asks the engine for a new room.
      * @param userID Our ID.
-     * @param goingFirst If true, we'll be going first.
+     * @param room Info on room we're requesting.
      * @param successResponse Is called upon successfully getting a room. If null, the listeners will be cleared.
      * @param failureResponse Is called upon unsuccessfully getting a room. If null, the listeners will be cleared.
      */
-    public void requestNewRoom(String userID, boolean goingFirst,
+    public void requestNewRoom(String userID, RoomInfo room,
                                Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
 
         //clearCurrentListener();
@@ -225,21 +243,14 @@ public final class NetworkManager {
         //String outgoingChannel = Channels.privateChannelSet + userID;
         String outgoingChannel = Channels.roomRequestChannel;
 
-        RoomInfo room = new RoomInfo();
+        //RoomInfo room = new RoomInfo();
         //roomInfo.setPlayer(userID, incomingChannel, goingFirst);
         PlayerInfo player = getPlayerInfo(userID, incomingChannel);
-
-        if(goingFirst) {
-            room.setPlayer1(player);
-        }
-        else {
-            room.setPlayer2(player);
-        }
-
+        room.setPlayer1(player);    // Set the creator
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo
-                userID, outgoingChannel, incomingChannel, room
+                userID, outgoingChannel, incomingChannel, room, player
         );
 
 
@@ -277,11 +288,11 @@ public final class NetworkManager {
         // If player2 is already around, then we'll be going first.
         // Otherwise, we'll go second.
         PlayerInfo player = getPlayerInfo(ourUserID, incomingChannel);
-        roomInfo.addPlayer(player);
+        roomInfo.addPlayer(player); // TODO We should just do setPlayer2
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo
-                ourUserID, outgoingChannel, incomingChannel, roomInfo
+                ourUserID, outgoingChannel, incomingChannel, roomInfo, player
         );
 
 
