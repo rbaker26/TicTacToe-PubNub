@@ -31,15 +31,15 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'Main'
+        attributes 'Main-Class': 'Client'
     }
 
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        compileJava.classpath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
-mainClassName = 'Main'
+mainClassName = 'Client'
 
 // This is necessary to make System.in work correctly
 run{
