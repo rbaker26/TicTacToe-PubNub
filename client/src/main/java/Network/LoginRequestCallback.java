@@ -32,7 +32,7 @@ public class LoginRequestCallback extends SubscribeCallback {
         this.failResponse = fail;
 
 
-
+        fail.run();
     }
 
 

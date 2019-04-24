@@ -61,24 +61,7 @@ public class Client extends Application {
 
             primaryStage.setTitle("SABRCATST TicTacToe");
 
-            LoginRequestCallback lrc = new LoginRequestCallback(
-                    new LoginInfo("username", "password", "screenname"),
-                    Channels.authCheckChannel,
-                    Channels.authCheckChannel,
-                    () -> {
-                        System.out.println("Successful Login");
-                        /*
-                         * SUCCESS CODE GOES HERE
-                         */
-                        //lobbyController.applyScene(primaryStage);
-                    },
-                    () -> {
-                        /*
-                         * FAIL CODE GOES HERE
-                         */
-                        System.out.println("Failed Login");
-                    }
-            );
+
             lobbyController = new LobbySceneController();
             playAgainController = new PlayAgainController();
             waitingController = new WaitingForOpponentScene();
@@ -203,18 +186,34 @@ public class Client extends Application {
                 String usr;
                 String psw;
                 String scn;
-
                 usr = loginController.getUsernameField();
                 psw = loginController.getPasswordField();
-                // scn = loginController.getScreenNameField();
-                //NetworkManager.getInstance().userLogin(username, password, screenName);
+                scn = loginController.getScreenNameField();
+
+                LoginInfo loginObject = new LoginInfo(usr, psw, scn);
+
+                NetworkManager.getInstance().userLogin(loginObject,
+                        () -> {
+                            System.out.println("Successful Login");
+                            // TODO SUCCESS CODE GOES HERE
+                            mainWindowController.applyScene(primaryStage);
+                        },
+                        () -> {
+                            // TODO FAIL CODE GOES HERE
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Failed login");
+                            alert.setHeaderText("Username and Password Do Not Match!");
+                            alert.setContentText("Try again, or create new user.");
+
+                            alert.showAndWait();
+                        });
                 System.out.println("Welcome player");
 
             });
 
 
 
-            mainWindowController.applyScene(primaryStage);
+            loginController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();

@@ -100,7 +100,9 @@ public class loginController extends AbstractSceneController{
     public String getPasswordField() {
         return passwordField.getText();
     }
-
+public String getScreenNameField() {
+        return  screenNameField.getText();
+}
 
 
 

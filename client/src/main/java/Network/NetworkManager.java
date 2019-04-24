@@ -11,6 +11,7 @@ import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 
+import javax.swing.event.ChangeListener;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Arrays;
@@ -197,6 +198,24 @@ public final class NetworkManager {
         changeListener(null, null);
     }
 
+
+    //region Account management
+    public void userLogin(LoginInfo login, Runnable successResponse, Runnable failureResponse) {
+        String incomingChannel = "blah";
+        //pn.publish().message(new LoginInfo(username, password, screenName));
+
+        LoginRequestCallback lrc = new LoginRequestCallback(
+                login,
+                Channels.authCheckChannel,
+                Channels.authCheckChannel,
+                successResponse, failureResponse
+        );
+
+        changeListener(lrc, Arrays.asList(incomingChannel));
+    }
+    //endregion
+
+    //region Room requests and connections
     /**
      * Starts listening for rooms.
      * @param onUpdateCallback Gets fired whenever there is a new room list.
@@ -301,10 +320,6 @@ public final class NetworkManager {
 
    // public static final String authCreateChannel = userAuthChannelSet + "Create";
 
-    public void userLogin(String username, String password, String screenName) {
-        pn.publish().message(new LoginInfo(username, password, screenName));
-    }
-
     public void joinRoom(String ourUserID, RoomInfo room, Consumer<Board> response) {
         String outgoingChannel = Channels.roomMoveChannel;
         String incomingChannel = room.getRoomChannel();
@@ -313,7 +328,9 @@ public final class NetworkManager {
 
         changeListener(callback, Arrays.asList(incomingChannel));
     }
+    //endregion
 
+    //region Gameplay
     /**
      * Sends move info out
      */
@@ -333,6 +350,7 @@ public final class NetworkManager {
                     }
                 });
     }
+    //endregion
 
     /**
      * Do anything possible to end this instance at all costs instantaneously without regrets.
