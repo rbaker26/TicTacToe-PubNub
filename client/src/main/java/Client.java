@@ -125,10 +125,9 @@ public class Client extends Application {
             });
 
 
-            // TODO This is gross, refactor so we aren't duplicating code.
             mainWindowController.getEasyAIButton().setOnAction(value -> {
 
-                waitingController.applyScene(primaryStage);
+                //waitingController.applyScene(primaryStage);
 
                 NetworkManager.getInstance().requestEasyAIRoom(
                         lobbyController.getName(),
@@ -151,7 +150,7 @@ public class Client extends Application {
 
             mainWindowController.getHardAIButton().setOnAction(value -> {
 
-                waitingController.applyScene(primaryStage);
+                //waitingController.applyScene(primaryStage);
 
                 NetworkManager.getInstance().requestHardAIRoom(
                         lobbyController.getName(),
@@ -170,8 +169,8 @@ public class Client extends Application {
                         }
                 );
 
-
             });
+
 
             lobbyController.getBackButton().setOnAction(value -> {
 
