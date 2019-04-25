@@ -31,4 +31,13 @@ dependencies {
     compile project(':library')
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'Engine'
+    }
+
+    from {
+        compileJava.classpath.collect {it.isDirectory() ? it : zipTree(it)}
+    }
+}
 mainClassName = 'Engine'
