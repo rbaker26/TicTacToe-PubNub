@@ -84,6 +84,7 @@ public class PlayerCallback extends SubscribeCallback {
             System.out.println("Move request received" + message.getMessage());
             MoveRequest requestMessage = Converter.fromJson(message.getMessage(), MoveRequest.class);
             if(requestMessage.getCurrentPlayer() == null) {
+                requestResponse.accept(requestMessage.getBoard());
                 System.out.println("Game Over!");
                 if(requestMessage.getBoard().isWinner('X')) {
                     System.out.println("X Player: " + requestMessage.getRoomInfo().getPlayer1().getId() + " won!");
