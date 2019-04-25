@@ -17,7 +17,7 @@ import java.sql.SQLException;
 public class loginController extends AbstractSceneController{
 
     private TextField usernameField;
-    private TextField passwordField;
+    private PasswordField passwordField;
     private TextField screenNameField;
     private Button enterButton;
     private Button createButton;
@@ -34,7 +34,7 @@ public class loginController extends AbstractSceneController{
 
 
         Label passwordLabel = new Label("Password: ");
-        passwordField = new TextField();
+        passwordField = new PasswordField();
         passwordField.setPrefColumnCount(10);
 
         Label windowTitle = new Label("Welcome! Please login!");
@@ -149,14 +149,18 @@ public class loginController extends AbstractSceneController{
         return  screenNameField.getText();
 }
 
-
+    public void clearFields() {
+        usernameField.clear();
+        passwordField.clear();
+        screenNameField.clear();
+    }
     public void setUsernameField(TextField usernameField) {
 
         this.usernameField = usernameField;
 
     }
 
-    public void setPasswordField(TextField passwordField) {
+    public void setPasswordField(PasswordField passwordField) {
 
         this.passwordField = passwordField;
     }
@@ -166,7 +170,5 @@ public class loginController extends AbstractSceneController{
         this.screenNameField = screenNameField;
 
     }
-
-
 
 }

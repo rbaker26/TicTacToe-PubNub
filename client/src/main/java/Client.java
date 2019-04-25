@@ -270,9 +270,7 @@ public class Client extends Application {
 
                 userName = null;
                 playerName = null;
-               // loginController.setPasswordField().set;
-               // loginController.
-               // loginController.setUsernameField(null);
+                loginController.clearFields();
                 loginController.applyScene(primaryStage);
 
             });
