@@ -65,13 +65,17 @@ class Db_Manager {
         //    private ResultSet resultSet = null;
 
         PreparedStatement preparedStatement =  connection
-                .prepareStatement("insert into  tictactoe.moves (room_id, row_val, col_val, player_id) values (?, ?, ?, ?)");
+                .prepareStatement("insert into  tictactoe.moves (room_id, row_val, col_val, username, datetime) " +
+                                      "values (?, ?, ?, ?, ?)");
 
 
         preparedStatement.setInt(1,roomID);
         preparedStatement.setInt(2,row);
         preparedStatement.setInt(3,col);
         preparedStatement.setString(4,playerID);
+        java.util.Date d = new java.util.Date();
+        long ms = d.getTime();
+        preparedStatement.setString(5,Long.toString(ms));
         preparedStatement.executeUpdate();
     }
     //******************************************************************************************
@@ -91,20 +95,20 @@ class Db_Manager {
 
 
     //******************************************************************************************
-    public void WritePlayer(String name, int playerID)  throws SQLException{
+    public void WritePlayer(String name, String username)  throws SQLException{
 
         PreparedStatement preparedStatement =  connection
-                .prepareStatement("insert into  tictactoe.players (player_name, player_id) values (?, ?)");
+                .prepareStatement("insert into  tictactoe.players (player_name, username) values (?, ?)");
 
         preparedStatement.setString(1,name);
-        preparedStatement.setInt(2,playerID);
+        preparedStatement.setString(2,username);
         preparedStatement.executeUpdate();
     }
     //******************************************************************************************
     //******************************************************************************************
-    public void WritePlayer(Player player)  throws SQLException{
-        WritePlayer(player.name, player.playerID);
-    }
+//    public void WritePlayer(Player player)  throws SQLException{
+//        WritePlayer(player.name, player.playerID);
+//    }
     //******************************************************************************************
 
 
@@ -114,4 +118,28 @@ class Db_Manager {
     //******************************************************************************************
     public void WriteLobby(Lobby lobby) { }
     //******************************************************************************************
+
+
+    public void UpdateScore(String username,boolean wonGame) throws SQLException {
+        PreparedStatement preparedStatement =  connection
+                .prepareStatement("insert into  tictactoe.players (win_count, game_count) values (?, ?) where username = ?");
+
+
+
+        PreparedStatement innerPreparedStatement =  connection
+                .prepareStatement("SELECT win_count, game_count FROM tictactoe.players where username = ?");
+        innerPreparedStatement.setString(1,username);
+
+        ResultSet innerRs = innerPreparedStatement.executeQuery();
+        innerRs.next();
+        int winCount = innerRs.getInt(1);
+        int gameCount = innerRs.getInt(2);
+
+
+
+        preparedStatement.setInt(1,(wonGame ? winCount + 1 : winCount));
+        preparedStatement.setInt(2,gameCount+1);
+        preparedStatement.setString(3,username);
+        preparedStatement.executeUpdate();
+    }
 }
