@@ -108,6 +108,7 @@ public class LobbySceneController extends AbstractSceneController {
             }
         });
 
+        /*
         TableColumn<RoomInfo, String> player2Column = new TableColumn<>("Player2");
         player2Column.setMinWidth(150);
         player2Column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<RoomInfo, String>, ObservableValue<String>>() {
@@ -116,6 +117,7 @@ public class LobbySceneController extends AbstractSceneController {
                 return new SimpleObjectProperty<>(r.getValue().getPlayer2().getName());
             }
         });
+         */
 
         TableColumn<RoomInfo, String> player1TokenColumn = new TableColumn<>("P1 Token");
         player1TokenColumn.setMinWidth(50);
@@ -138,7 +140,7 @@ public class LobbySceneController extends AbstractSceneController {
 
 
         lobbyTable = new TableView<>();
-        lobbyTable.getColumns().addAll(lobbyStatColumn, player1Column, player2Column,
+        lobbyTable.getColumns().addAll(lobbyStatColumn, player1Column,
                 player1TokenColumn, player2TokenColumn, hasPasswordColumn);
 
         /*
