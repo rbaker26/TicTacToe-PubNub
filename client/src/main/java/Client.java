@@ -80,10 +80,9 @@ public class Client extends Application {
 
                 waitingController.applyScene(primaryStage);
 
-                //Network.NetworkManager.forceUUID(nameField.getText());
                 NetworkManager.getInstance().requestNewRoom(
                         userName,
-                        true,
+                        RoomFactory.makeCreateRequest(requestInfo.isGoingFirst(), requestInfo.getPassword()),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
                             connectToGame(primaryStage, userName, responseRoom);
@@ -146,11 +145,11 @@ public class Client extends Application {
                 //waitingController.applyScene(primaryStage);
 
                 NetworkManager.getInstance().requestEasyAIRoom(
-                        lobbyController.getName(),
+                        userName,
                         RoomFactory.makeCreateRequest(true, ""),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                            connectToGame(primaryStage, userName, responseRoom);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -169,11 +168,11 @@ public class Client extends Application {
                 //waitingController.applyScene(primaryStage);
 
                 NetworkManager.getInstance().requestHardAIRoom(
-                        lobbyController.getName(),
+                        userName,
                         RoomFactory.makeCreateRequest(true, ""),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                            connectToGame(primaryStage, userName, responseRoom);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
