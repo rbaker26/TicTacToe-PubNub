@@ -150,7 +150,7 @@ public class GameRequestListener extends SubscribeCallback {
         pb.publish() // Sending initial move request
                 .message(new MoveRequest(lobbyList.get(roomID).getBoard(),
                         room,
-                        room.getPlayer1Name()))
+                        room.getPlayer1().getId()))
                 .channel(room.getRoomChannel())
                 .async(new PNCallback<PNPublishResult>() {
                     @Override

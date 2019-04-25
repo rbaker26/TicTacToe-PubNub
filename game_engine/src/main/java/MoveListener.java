@@ -66,7 +66,7 @@ public class MoveListener extends SubscribeCallback {
                 Lobby lobby = lobbyList.get(roomID);
                 char token;
                 System.out.println("Valid move received");
-                if (move.getPlayerID().equals(lobby.getRoomInfo().getPlayer1Name()))
+                if (move.getPlayerID().equals(lobby.getRoomInfo().getPlayer1().getId()))
                     token = 'X';
                 else
                     token = 'O';

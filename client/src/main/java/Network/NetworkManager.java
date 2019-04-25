@@ -141,10 +141,9 @@ public final class NetworkManager {
         basePlayer = new PlayerInfo(pnConfiguration.getUuid());
     }
 
-    private PlayerInfo getPlayerInfo(String userID, String privateChannel) {
+    private PlayerInfo getPlayerInfo(String privateChannel) {
         try {
             PlayerInfo result = (PlayerInfo) basePlayer.clone();
-            result.setId(userID);
             result.setChannel(privateChannel);
             return result;
         }
@@ -207,8 +206,11 @@ public final class NetworkManager {
         changeListener(null, null);
     }
 
-
     //region Account management
+    public String getUserID() {
+        return basePlayer.getId();
+    }
+
     public void userLogin(LoginInfo login, Consumer<String> successResponse, Consumer<String> failureResponse) {
         String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         String outgoingChannel = Channels.authCheckChannel;
@@ -225,10 +227,6 @@ public final class NetworkManager {
         changeListener(lrc, Arrays.asList(incomingChannel));
     }
 
-    //endregion
-
-
-    //region Create User Account
     public void createLogin(LoginInfo login, Consumer<String> successResponse, Consumer<String> failureResponse) {
         String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         String outgoingChannel = Channels.authCreateChannel;
@@ -248,6 +246,11 @@ public final class NetworkManager {
 
     //endregion
 
+    public void setName(String userId, String screenName) {
+        basePlayer.setId(userId);
+        basePlayer.setName(screenName);
+    }
+
     //region Room requests and connections
     /**
      * Starts listening for rooms.
@@ -263,34 +266,29 @@ public final class NetworkManager {
 
     /**
      * Ask for an easy AI room.
-     * @param userID
      * @param room
      * @param successResponse
      * @param failureResponse
      */
-    public void requestEasyAIRoom(String userID, RoomInfo room,
-                                  Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+    public void requestEasyAIRoom(RoomInfo room, Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
         room.setPlayer2(PlayerInfo.easyAI());
 
-        requestNewRoom(userID, room, successResponse, failureResponse);
+        requestNewRoom(room, successResponse, failureResponse);
     }
 
-    public void requestHardAIRoom(String userID, RoomInfo room,
-                                  Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+    public void requestHardAIRoom(RoomInfo room, Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
         room.setPlayer2(PlayerInfo.hardAI());
 
-        requestNewRoom(userID, room, successResponse, failureResponse);
+        requestNewRoom(room, successResponse, failureResponse);
     }
 
     /**
      * Asks the engine for a new room.
-     * @param userID Our ID.
      * @param room Info on room we're requesting.
      * @param successResponse Is called upon successfully getting a room. If null, the listeners will be cleared.
      * @param failureResponse Is called upon unsuccessfully getting a room. If null, the listeners will be cleared.
      */
-    public void requestNewRoom(String userID, RoomInfo room,
-                               Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+    public void requestNewRoom(RoomInfo room, Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
 
         //clearCurrentListener();
 
@@ -301,12 +299,12 @@ public final class NetworkManager {
 
         //RoomInfo room = new RoomInfo();
         //roomInfo.setPlayer(userID, incomingChannel, goingFirst);
-        PlayerInfo player = getPlayerInfo(userID, incomingChannel);
+        PlayerInfo player = getPlayerInfo(incomingChannel);
         room.setPlayer1(player);    // Set the creator
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo
-                userID, outgoingChannel, incomingChannel, room, player
+                outgoingChannel, incomingChannel, room, player
         );
 
 
@@ -330,25 +328,23 @@ public final class NetworkManager {
 
     /**
      * Joins a room.
-     * @param ourUserID Our user ID.
      * @param roomInfo Info on the room. (Probably should have come as a result of listenForRooms.
      * @param successResponse Called upon successfully joining the room. If null, the listeners will be cleared.
      * @param failureResponse Called upon unsuccessfully joining the room. If null, the listeners will be cleared.
      */
-    public void requestJoinRoom(String ourUserID, RoomInfo roomInfo,
-                                Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+    public void requestJoinRoom(RoomInfo roomInfo, Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
 
         String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         String outgoingChannel = Channels.roomRequestChannel;
 
         // If player2 is already around, then we'll be going first.
         // Otherwise, we'll go second.
-        PlayerInfo player = getPlayerInfo(ourUserID, incomingChannel);
+        PlayerInfo player = getPlayerInfo(incomingChannel);
         roomInfo.addPlayer(player); // TODO We should just do setPlayer2
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo
-                ourUserID, outgoingChannel, incomingChannel, roomInfo, player
+                outgoingChannel, incomingChannel, roomInfo, player
         );
 
 

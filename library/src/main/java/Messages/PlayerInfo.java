@@ -11,6 +11,7 @@ public class PlayerInfo implements Cloneable {
     private String uuid = null;
     private String id = null;
     private String channel = null;
+    private String name = null;
     private PlayerType type = PlayerType.HUMAN;
 
     public static PlayerInfo easyAI() {
@@ -18,6 +19,7 @@ public class PlayerInfo implements Cloneable {
         result.setId("Easy AI");
         result.type = PlayerType.AI_EASY;
         result.channel = Channels.AI.easyChannel;
+        result.name = "Easy AI";
 
         return result;
     }
@@ -27,6 +29,7 @@ public class PlayerInfo implements Cloneable {
         result.setId("Hard AI");
         result.type = PlayerType.AI_HARD;
         result.channel = Channels.AI.hardChannel;
+        result.name = "Hard AI";
 
         return result;
     }
@@ -40,6 +43,7 @@ public class PlayerInfo implements Cloneable {
         this.channel = channel;
     }
 
+    //region Getters and setters
     public boolean isAI() {
         return type.equals(PlayerType.AI_HARD) || type.equals(PlayerType.AI_EASY);
     }
@@ -76,12 +80,24 @@ public class PlayerInfo implements Cloneable {
         return type;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    //endregion
+
+    //region Object overrides
+
     @Override
     public String toString() {
         return "PlayerInfo{" +
                 "uuid='" + uuid + '\'' +
                 ", id='" + id + '\'' +
                 ", channel='" + channel + '\'' +
+                ", name='" + name + '\'' +
                 ", type=" + type +
                 '}';
     }
@@ -94,16 +110,22 @@ public class PlayerInfo implements Cloneable {
         return Objects.equals(getUuid(), that.getUuid()) &&
                 Objects.equals(getId(), that.getId()) &&
                 Objects.equals(getChannel(), that.getChannel()) &&
+                Objects.equals(getName(), that.getName()) &&
                 getType() == that.getType();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUuid(), getId(), getChannel(), getType());
+        return Objects.hash(getUuid(), getId(), getChannel(), getName(), getType());
     }
+
+
+    //endregion
+
 
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 }
+
