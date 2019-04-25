@@ -1,3 +1,4 @@
+import EngineLib.Board;
 import Messages.Channels;
 import Messages.LoginInfo;
 import Messages.MoveRequest;
@@ -277,14 +278,29 @@ public class Client extends Application {
      */
     private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room) {
         gameViewController = new GameViewController(room, ourUserID);
-
         NetworkManager.getInstance().joinRoom(ourUserID, room, (board) -> {
             gameViewController.updateBoard(board);
             gameViewController.toggleTurn();
+            checkWin(primaryStage, board, room);
         });
         gameViewController.applySceneAsync(primaryStage);
     }
 
+    private void checkWin(Stage primaryStage, Board board, RoomInfo room) {
+        String endResult;
+        if(board.isWinner('X') || board.isWinner('O') || board.numEmptySpaces() == 0) {
+            if (board.isWinner('X')) {
+                endResult = "X Player: " + room.getPlayer1Name() + " won!";
+            } else if (board.isWinner('O')) {
+                endResult = "O Player: " + room.getPlayer2Name() + " won!";
+            } else {
+                endResult = "Tie game!";
+            }
+            Platform.runLater(() -> {
+                endGameAlert(primaryStage, endResult);
+            });
+        }
+    }
     /**
      * Does various cleanup if failed to connect to a game. Note that this MUST be
      * run asynchronously.
@@ -312,6 +328,16 @@ public class Client extends Application {
         alert.setHeaderText("Failed Authorization");
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void endGameAlert(Stage primaryStage, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Game Over!");
+        alert.setHeaderText("Game Winning Results");
+        alert.setContentText(message);
+        alert.showAndWait();
+
+        lobbyController.applyScene(primaryStage);
     }
 }
 

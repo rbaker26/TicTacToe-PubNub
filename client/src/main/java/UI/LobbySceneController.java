@@ -22,10 +22,7 @@ import java.util.function.Consumer;
 
 public class LobbySceneController extends AbstractSceneController {
 
-    private TextField nameField;
-    private TextField roomField;
     private Button openButton;
-    private Button joinButton;
     private Button backButton;
 
 
@@ -35,14 +32,7 @@ public class LobbySceneController extends AbstractSceneController {
     TableView<RoomInfo> lobbyTable;
 
     public LobbySceneController() {
-        Label nameLabel = new Label("Name");
-        nameField = new TextField();
-
-        Label roomLabel = new Label("Room");
-        roomField = new TextField();
-
         openButton = new Button("Open");
-        joinButton = new Button("Join");
         backButton = new Button ("Back");
 
         //region Table config
@@ -90,7 +80,7 @@ public class LobbySceneController extends AbstractSceneController {
         //endregion
 
 
-        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, roomLabel, roomField, openButton, joinButton, backButton);
+        VBox vbox = new VBox(lobbyTable, openButton, backButton);
 
         vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #66ccff, #ff9966)");
 
@@ -164,85 +154,13 @@ public class LobbySceneController extends AbstractSceneController {
 //    public String getName() {
 //        return nameField.getText();
 //    }
-
-    /**
-     * @deprecated This should NOT be used for serious code. Instead, the
-     *             user will be choosing rooms to join.
-     * @return
-     */
-    @Deprecated
-    public int getRoomID() {
-        return Integer.parseInt(roomField.getText());
-    }
-
-    @Deprecated
-    public TextField getNameField() {
-        return nameField;
-    }
-
-    /**
-     * @deprecated This is deprecated because we should NOT be using the
-     *             room field. This will eventually go away and be replaced
-     * by a full listing.
-     * @return
-     */
-    @Deprecated
-    public TextField getRoomField() {
-        return roomField;
-    }
-
-    @Deprecated
-    public Button getOpenButton() {
-        return openButton;
-    }
-
-    @Deprecated
-    public Button getJoinButton() {
-        return joinButton;
-    }
-
     public Button getBackButton() {
         return backButton;
     }
-
     public void setOpenHandler(Runnable handler) {
         openButton.setOnAction(value -> handler.run());
     }
-
     public void setJoinHandler(Consumer<RoomInfo> handler) {
         joinHandler = handler;
     }
-    //endregion
-
-    //region Object overrides
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        LobbySceneController that = (LobbySceneController) o;
-        return Objects.equals(getNameField(), that.getNameField()) &&
-                Objects.equals(getRoomField(), that.getRoomField()) &&
-                Objects.equals(getOpenButton(), that.getOpenButton()) &&
-                Objects.equals(getJoinButton(), that.getJoinButton());
-
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), getNameField(), getRoomField(), getOpenButton(), getJoinButton());
-    }
-
-    @Override
-    public String toString() {
-        return "LobbySceneController{" +
-                "nameField=" + nameField +
-                ", roomField=" + roomField +
-                ", openButton=" + openButton +
-                ", joinButton=" + joinButton +
-                ", backButton=" + backButton +
-                '}';
-    }
-    //endregion
-
 }
