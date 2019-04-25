@@ -243,6 +243,13 @@ public final class NetworkManager {
         requestNewRoom(userID, room, successResponse, failureResponse);
     }
 
+    public void requestHardAIRoom(String userID, RoomInfo room,
+                                  Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+        room.setPlayer2(PlayerInfo.hardAI());
+
+        requestNewRoom(userID, room, successResponse, failureResponse);
+    }
+
     /**
      * Asks the engine for a new room.
      * @param userID Our ID.
