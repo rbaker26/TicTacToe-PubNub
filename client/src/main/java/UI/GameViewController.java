@@ -21,9 +21,9 @@ public class GameViewController extends AbstractSceneController {
     private String myName;
     private boolean myTurn;
     private char myToken;
-    private Label leftLabel;
-    private Label rightLabel;
-    private Label centerLabel;
+    private Label leftLabel = new Label();
+    private Label rightLabel = new Label();
+    private Label centerLabel = new Label();
 
     public GameViewController(RoomInfo room, String myName) {
         this.room = room;
@@ -33,14 +33,14 @@ public class GameViewController extends AbstractSceneController {
 
             myToken = 'X';
             myTurn = true;
+            centerLabel.setText("Your turn");
         }
         else {
             myToken = 'O';
             myTurn = false;
         }
-        leftLabel = new Label(room.getPlayer1Name() + "\nPlayer X");
-        rightLabel = new Label(room.getPlayer2Name() + "\nPlayer O");
-        centerLabel = new Label();
+        leftLabel.setText(room.getPlayer1Name() + "\nPlayer X");
+        rightLabel.setText(room.getPlayer2Name() + "\nPlayer O");
 
         boardPane = new BoardGUIPane((row, col) -> {
             if(board.getPos(row, col) == ' ' && myTurn) {

@@ -78,6 +78,7 @@ public class LobbySceneController extends AbstractSceneController {
     List<RoomInfo> latestRoomList;
 
     public LobbySceneController() {
+
         openButton = new Button("Open");
         openButton.setOnAction(event -> { CreateRoomDialog(); });
 

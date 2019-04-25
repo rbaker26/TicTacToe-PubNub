@@ -141,7 +141,7 @@ public class Client extends Application {
 
 
             mainWindowController.getEasyAIButton().setOnAction(value -> {
-
+                System.out.println("Easy AI");
                 //waitingController.applyScene(primaryStage);
 
                 NetworkManager.getInstance().requestEasyAIRoom(
@@ -164,7 +164,7 @@ public class Client extends Application {
             });
 
             mainWindowController.getHardAIButton().setOnAction(value -> {
-
+                System.out.println("Hard AI");
                 //waitingController.applyScene(primaryStage);
 
                 NetworkManager.getInstance().requestHardAIRoom(
@@ -306,6 +306,7 @@ public class Client extends Application {
      * @param room The room to join.
      */
     private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room) {
+
         gameViewController = new GameViewController(room, ourUserID);
         NetworkManager.getInstance().joinRoom(ourUserID, room, (board) -> {
             gameViewController.updateBoard(board);
