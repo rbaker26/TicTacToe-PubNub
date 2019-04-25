@@ -85,7 +85,7 @@ public class Client extends Application {
                         RoomFactory.makeCreateRequest(requestInfo.isGoingFirst(), requestInfo.getPassword()),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, userName, responseRoom);
+                            connectToGame(primaryStage, userName, responseRoom, lobbyController);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -109,7 +109,7 @@ public class Client extends Application {
                         room,
                         responseRoom -> {
                             System.out.println("Connected (joining): " + responseRoom.toString());
-                            connectToGame(primaryStage, userName, responseRoom);
+                            connectToGame(primaryStage, userName, responseRoom, lobbyController);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -144,12 +144,14 @@ public class Client extends Application {
 
                 //waitingController.applyScene(primaryStage);
 
+                NetworkManager.getInstance().listenForRooms(null);
+
                 NetworkManager.getInstance().requestEasyAIRoom(
                         userName,
                         RoomFactory.makeCreateRequest(true, ""),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, userName, responseRoom);
+                            connectToGame(primaryStage, userName, responseRoom, mainWindowController);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -172,7 +174,7 @@ public class Client extends Application {
                         RoomFactory.makeCreateRequest(true, ""),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, userName, responseRoom);
+                            connectToGame(primaryStage, userName, responseRoom, mainWindowController);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -305,19 +307,19 @@ public class Client extends Application {
      * @param ourUserID The user's ID.
      * @param room The room to join.
      */
-    private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room) {
+    private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room, ISceneController conclusionScene) {
         gameViewController = new GameViewController(room, ourUserID);
         NetworkManager.getInstance().joinRoom(ourUserID, room, (board) -> {
             gameViewController.updateBoard(board);
             if(!board.isWinner('X') && !board.isWinner('O') && board.numEmptySpaces() != 0) {
                 gameViewController.toggleTurn();
             }
-            checkWin(primaryStage, board, room);
+            checkWin(primaryStage, board, room, conclusionScene);
         });
         gameViewController.applySceneAsync(primaryStage);
     }
 
-    private void checkWin(Stage primaryStage, Board board, RoomInfo room) {
+    private void checkWin(Stage primaryStage, Board board, RoomInfo room, ISceneController conclusionScene) {
         String endResult;
         if(board.isWinner('X') || board.isWinner('O') || board.numEmptySpaces() == 0) {
             if (board.isWinner('X')) {
@@ -328,7 +330,7 @@ public class Client extends Application {
                 endResult = "Tie game!";
             }
             Platform.runLater(() -> {
-                endGameAlert(primaryStage, endResult);
+                endGameAlert(primaryStage, endResult, conclusionScene);
             });
         }
     }
@@ -361,14 +363,14 @@ public class Client extends Application {
         alert.showAndWait();
     }
 
-    private void endGameAlert(Stage primaryStage, String message) {
+    private void endGameAlert(Stage primaryStage, String message, ISceneController conclusionScene) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Game Over!");
         alert.setHeaderText("Game Winning Results");
         alert.setContentText(message);
         alert.showAndWait();
 
-        lobbyController.applyScene(primaryStage);
+        conclusionScene.applyScene(primaryStage);
     }
 }
 

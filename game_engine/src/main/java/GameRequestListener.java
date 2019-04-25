@@ -215,6 +215,7 @@ public class GameRequestListener extends SubscribeCallback {
     public void message(PubNub pb, PNMessageResult message) {
         if(message.getChannel().equals(myChannel) && !message.getPublisher().equals(myUuid)) {
             RoomInfo roomMsg = Converter.fromJson(message.getMessage(), RoomInfo.class);
+            System.out.println(roomMsg);
             if(isDeleteRequest(roomMsg)) {
                 //PlayerInfo creator = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
                 // TODO We're assuming player 1 is the creator.

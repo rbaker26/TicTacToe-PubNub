@@ -30,6 +30,12 @@ public class RoomRequesterCallback extends SubscribeCallback implements Interrup
     private Consumer<RoomInfo> successCallback;
     private Consumer<RoomInfo> failureCallback;
 
+    /**
+     * If true, then we haven't heard back yet. If we have to stop and we haven't heard back yet, then we'll
+     * call the interrupted thing.
+     */
+    private boolean isWaiting;
+
     public RoomRequesterCallback(String ourUserID, String outgoingChannel, String incomingChannel, RoomInfo roomInfo, PlayerInfo ourPlayer) {
         this.ourUserID = ourUserID;
         this.outgoingChannel = outgoingChannel;
@@ -37,6 +43,7 @@ public class RoomRequesterCallback extends SubscribeCallback implements Interrup
         this.ourPlayer = ourPlayer;
 
         this.request = roomInfo;
+        isWaiting = false;
     }
 
     /**
@@ -65,16 +72,23 @@ public class RoomRequesterCallback extends SubscribeCallback implements Interrup
      */
     public void interrupt(PubNub pubnub) {
         //request.setRequestMode(RoomInfo.RequestType.DISCONNECT);
-        RoomInfo deleteRequest = RoomFactory.makeDisconnectRoom(ourPlayer);
-        pubnub.publish().channel(outgoingChannel).message(deleteRequest).async(new PNCallback<PNPublishResult>() {
-            @Override
-            public void onResponse(PNPublishResult result, PNStatus status) { }
-        });
+        if(isWaiting) {
+            RoomInfo deleteRequest = RoomFactory.makeDisconnectRoom(ourPlayer);
+            pubnub.publish().channel(outgoingChannel).message(deleteRequest).async(new PNCallback<PNPublishResult>() {
+                @Override
+                public void onResponse(PNPublishResult result, PNStatus status) {
+                }
+            });
+
+            isWaiting = false;
+        }
     }
 
     @Override
     public void status(PubNub pubnub, PNStatus status) {
 
+
+        System.out.println("Starting " + status.getCategory());
 
         if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
             // This event happens when radio / connectivity is lost
@@ -91,8 +105,10 @@ public class RoomRequesterCallback extends SubscribeCallback implements Interrup
                 public void onResponse(PNPublishResult result, PNStatus status) {
                     // Check whether request successfully completed or not.
                     if (!status.isError()) {
-
                         // Message successfully published to specified channel.
+                        isWaiting = true;
+
+                        System.out.println("Waiting on a response to " + request);
                     }
                     // Request processing failed.
                     else {
@@ -101,6 +117,7 @@ public class RoomRequesterCallback extends SubscribeCallback implements Interrup
                         // because of which request did fail.
                         //
                         // Request can be resent using: [status retry];
+                        System.out.println("Failed to send " + request);
                     }
                 }
             });
@@ -133,8 +150,9 @@ public class RoomRequesterCallback extends SubscribeCallback implements Interrup
                 successCallback.accept(response);
             }
 
+            isWaiting = false;
         }
-    } // End message(PubNube pubnub, PNMessageResult message)
+    } // End message(PubNub pubnub, PNMessageResult message)
 
     @Override
     public void presence(PubNub pubnub, PNPresenceEventResult presence) {

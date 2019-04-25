@@ -294,6 +294,7 @@ public final class NetworkManager {
 
         //clearCurrentListener();
 
+
         String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         //String outgoingChannel = Channels.privateChannelSet + userID;
         String outgoingChannel = Channels.roomRequestChannel;
