@@ -1,11 +1,22 @@
+import EngineLib.Board;
+import Messages.Channels;
+import Messages.LoginInfo;
+import Messages.MoveRequest;
 import Messages.RoomFactory;
 import Messages.RoomInfo;
+import Network.LoginRequestCallback;
 import Network.NetworkManager;
 import UI.*;
+import com.pubnub.api.callbacks.PNCallback;
+import com.pubnub.api.models.consumer.PNPublishResult;
+import com.pubnub.api.models.consumer.PNStatus;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import com.pubnub.api.PNConfiguration;
+import com.pubnub.api.PubNub;
+import EngineLib.Lobby;
 
 import java.net.NetworkInterface;
 
@@ -19,6 +30,8 @@ public class Client extends Application {
     private static final double initWidth = 800;
     private static final double initHeight = 600;
 
+    private PubNub pb;
+
     private LobbySceneController lobbyController;
     private WaitingForOpponentScene waitingController;
     private PlayAgainController playAgainController;
@@ -26,6 +39,8 @@ public class Client extends Application {
     private loginController loginController;
     private GameScoreController gameScoreController;
     private mainWindowController mainWindowController;
+    private String userName;
+    private String playerName;
 
     private LoginUserController loginUserController;
     //private ISceneController mainWindowController;
@@ -50,6 +65,7 @@ public class Client extends Application {
 
             primaryStage.setTitle("SABRCATST TicTacToe");
 
+
             lobbyController = new LobbySceneController();
             playAgainController = new PlayAgainController();
             waitingController = new WaitingForOpponentScene();
@@ -66,20 +82,20 @@ public class Client extends Application {
 
                 //Network.NetworkManager.forceUUID(nameField.getText());
                 NetworkManager.getInstance().requestNewRoom(
-                        lobbyController.getName(),
-                        RoomFactory.makeCreateRequest(requestInfo.isGoingFirst(), requestInfo.getPassword()),
-                            responseRoom -> {
-                                System.out.println("Connected (creating): " + responseRoom.toString());
-                                connectToGame(primaryStage, lobbyController.getName(), responseRoom);
-                            },
-                            responseRoom -> {
-                                Platform.runLater(() -> {
-                                    respondToFailedConnection(
-                                            primaryStage,
-                                            "Failed to create room"
-                                    );
-                                });
-                            }
+                        userName,
+                        true,
+                        responseRoom -> {
+                            System.out.println("Connected (creating): " + responseRoom.toString());
+                            connectToGame(primaryStage, userName, responseRoom);
+                        },
+                        responseRoom -> {
+                            Platform.runLater(() -> {
+                                respondToFailedConnection(
+                                        primaryStage,
+                                        "Failed to create room"
+                                );
+                            });
+                        }
                 );
             });
 
@@ -90,11 +106,11 @@ public class Client extends Application {
                 //try { Thread.sleep(5000); } catch(InterruptedException ex) {}
 
                 NetworkManager.getInstance().requestJoinRoom(
-                        lobbyController.getName(),
+                        userName,
                         room,
                         responseRoom -> {
                             System.out.println("Connected (joining): " + responseRoom.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                            connectToGame(primaryStage, userName, responseRoom);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -190,23 +206,71 @@ public class Client extends Application {
 
             });
 
+            //User enters their credentials - creates account
             loginController.getCreateButton().setOnAction(value ->  {
+
+                String usr; //username
+                String psw; //password
+                String scn; //screenName
+                usr = loginController.getUsernameField();
+                psw = loginController.getPasswordField();
+                scn = loginController.getScreenNameField();
+
+                LoginInfo loginObject = new LoginInfo(usr, psw, scn);
+                System.out.println("Sending creation request");
+                NetworkManager.getInstance().createLogin(loginObject,
+                        (unused) -> {
+                                System.out.println("New user created");
+                                userName = usr;
+                                playerName = scn;
+                                Platform.runLater(() -> mainWindowController.applyScene(primaryStage));
+
+                        },
+
+                        (reason) -> {
+                            //IF CREATING A USER FAILS
+//                            Alert alert = new Alert(Alert.AlertType.ERROR);
+//                            alert.setTitle("Failed to create new player");
+//                            alert.setHeaderText("Username already taken!");
+//                            alert.setContentText("Try a different username.");
+//
+//                            alert.showAndWait();
+                            Platform.runLater(() -> respondToFailedAuthorization(reason));
+
+                        });
 
                 System.out.println("Creating new player");
 
             });
 
+            //User enters their credentials - login check
             loginController.getEnterButton().setOnAction(value -> {
+                String usr;
+                String psw;
+                String scn;
+                usr = loginController.getUsernameField();
+                psw = loginController.getPasswordField();
+                scn = loginController.getScreenNameField();
+                userName = usr;
+                LoginInfo loginObject = new LoginInfo(usr, psw, scn);
 
-                boolean playerInDatabase;
-
+                NetworkManager.getInstance().userLogin(loginObject,
+                        (pnm) -> {
+                            System.out.println("Successful Login");
+                            // TODO SUCCESS CODE GOES HERE
+                            playerName = pnm;
+                            System.out.println("Username: " + userName);
+                            System.out.println("Screenname: " + playerName);
+                            Platform.runLater(() -> mainWindowController.applyScene(primaryStage));
+                        },
+                        (reason) -> {
+                            // TODO FAIL CODE GOES HERE
+                            Platform.runLater(() -> respondToFailedAuthorization(reason));
+                        });
                 System.out.println("Welcome player");
 
             });
-
-
-            lobbyController.applyScene(primaryStage);
-            //mainWindowController.applyScene(primaryStage);
+            loginController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();
@@ -216,7 +280,7 @@ public class Client extends Application {
         catch(Exception ex) {
             // This is so that we get better information on exceptions. By default,
             // JavaFX swallows the exception and closes without saying anything useful.
-            System.out.println(ex);
+            ex.printStackTrace();
             throw ex;
         }
 
@@ -238,16 +302,31 @@ public class Client extends Application {
      */
     private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room) {
         gameViewController = new GameViewController(room, ourUserID);
-
         NetworkManager.getInstance().joinRoom(ourUserID, room, (board) -> {
             gameViewController.updateBoard(board);
             if(!board.isWinner('X') && !board.isWinner('O') && board.numEmptySpaces() != 0) {
                 gameViewController.toggleTurn();
             }
+            checkWin(primaryStage, board, room);
         });
         gameViewController.applySceneAsync(primaryStage);
     }
 
+    private void checkWin(Stage primaryStage, Board board, RoomInfo room) {
+        String endResult;
+        if(board.isWinner('X') || board.isWinner('O') || board.numEmptySpaces() == 0) {
+            if (board.isWinner('X')) {
+                endResult = "X Player: " + room.getPlayer1Name() + " won!";
+            } else if (board.isWinner('O')) {
+                endResult = "O Player: " + room.getPlayer2Name() + " won!";
+            } else {
+                endResult = "Tie game!";
+            }
+            Platform.runLater(() -> {
+                endGameAlert(primaryStage, endResult);
+            });
+        }
+    }
     /**
      * Does various cleanup if failed to connect to a game. Note that this MUST be
      * run asynchronously.
@@ -260,6 +339,27 @@ public class Client extends Application {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText("Failed to join the room");
+        alert.setContentText(message);
+        alert.showAndWait();
+
+        lobbyController.applyScene(primaryStage);
+    }
+
+    /**
+     * This method will display an error message on a failed login/auth creation
+     */
+    private void respondToFailedAuthorization(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Failed Authorization");
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void endGameAlert(Stage primaryStage, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Game Over!");
+        alert.setHeaderText("Game Winning Results");
         alert.setContentText(message);
         alert.showAndWait();
 

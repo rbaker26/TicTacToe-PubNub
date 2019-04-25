@@ -22,5 +22,6 @@ gradle-app.setting
 
 *.idea
 *.iml
+**/*.jar
 *.kotlin_module
 *.jar

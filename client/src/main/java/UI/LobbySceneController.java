@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class LobbySceneController extends AbstractSceneController {
-
     public static class OpenRequest {
 
         private String password;
@@ -66,8 +65,6 @@ public class LobbySceneController extends AbstractSceneController {
         }
     }
 
-    private TextField nameField;
-    //private TextField roomField;
     private Button openButton;
     private Button backButton;
 
@@ -81,14 +78,6 @@ public class LobbySceneController extends AbstractSceneController {
     List<RoomInfo> latestRoomList;
 
     public LobbySceneController() {
-        Label nameLabel = new Label("Name");
-        nameField = new TextField();
-
-        /*
-        Label roomLabel = new Label("Room");
-        roomField = new TextField();
-         */
-
         openButton = new Button("Open");
         openButton.setOnAction(event -> { CreateRoomDialog(); });
 
@@ -96,27 +85,27 @@ public class LobbySceneController extends AbstractSceneController {
 
         //region Table config
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
-        idColumn.setMinWidth(100);
+        idColumn.setMinWidth(150);
         idColumn.setCellValueFactory(new PropertyValueFactory<>("roomID"));
 
         TableColumn<RoomInfo, String> lobbyStatColumn = new TableColumn<>("Room Status");
-        lobbyStatColumn.setMinWidth(200);
+        lobbyStatColumn.setMinWidth(150);
         lobbyStatColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 
         TableColumn<RoomInfo, String> player1Column = new TableColumn<>("Player1");
-        player1Column.setMinWidth(100);
+        player1Column.setMinWidth(150);
         player1Column.setCellValueFactory(new PropertyValueFactory<>("player1Name"));
 
         TableColumn<RoomInfo, String> player2Column = new TableColumn<>("Player2");
-        player2Column.setMinWidth(100);
+        player2Column.setMinWidth(150);
         player2Column.setCellValueFactory(new PropertyValueFactory<>("player2Name"));
 
         TableColumn<RoomInfo, String> player1TokenColumn = new TableColumn<>("Player1 Token");
-        player1TokenColumn.setMinWidth(100);
+        player1TokenColumn.setMinWidth(150);
         player1TokenColumn.setCellValueFactory(new PropertyValueFactory<>("player1Token"));
 
         TableColumn<RoomInfo, String> player2TokenColumn = new TableColumn<>("Player2 Token");
-        player2TokenColumn.setMinWidth(100);
+        player2TokenColumn.setMinWidth(150);
         player2TokenColumn.setCellValueFactory(new PropertyValueFactory<>("player2Token"));
 
         TableColumn<RoomInfo, Boolean> hasPasswordColumn = new TableColumn<>("Password?");
@@ -158,8 +147,9 @@ public class LobbySceneController extends AbstractSceneController {
         });
         //endregion
 
+        VBox vbox = new VBox(lobbyTable, openButton, backButton);
+        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #66ccff, #ff9966)");
 
-        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, openButton, backButton);
 
         //setMasterScene(new Scene(vbox, 200, 200));
         setRoot(vbox);
@@ -327,65 +317,14 @@ public class LobbySceneController extends AbstractSceneController {
         }
     }
 
-    //region Getters and setters
-    public String getName() {
-        return nameField.getText();
-    }
-
-    @Deprecated
-    public TextField getNameField() {
-        return nameField;
-    }
-
     public Button getBackButton() {
         return backButton;
     }
-
+  
     public void setOpenHandler(Consumer<OpenRequest> handler) {
         openHandler = handler;
     }
-
     public void setJoinHandler(Consumer<RoomInfo> handler) {
         joinHandler = handler;
     }
-    //endregion
-
-    //region Object overrides
-    @Override
-    public String toString() {
-        return "LobbySceneController{" +
-                "nameField=" + nameField +
-                ", openButton=" + openButton +
-                ", backButton=" + backButton +
-                ", joinHandler=" + joinHandler +
-                ", openHandler=" + openHandler +
-                ", sceneApplyHandler=" + sceneApplyHandler +
-                ", lobbyTable=" + lobbyTable +
-                ", latestRoomList=" + latestRoomList +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        LobbySceneController that = (LobbySceneController) o;
-        return Objects.equals(getNameField(), that.getNameField()) &&
-                Objects.equals(openButton, that.openButton) &&
-                Objects.equals(getBackButton(), that.getBackButton()) &&
-                Objects.equals(joinHandler, that.joinHandler) &&
-                Objects.equals(openHandler, that.openHandler) &&
-                Objects.equals(sceneApplyHandler, that.sceneApplyHandler) &&
-                Objects.equals(lobbyTable, that.lobbyTable) &&
-                Objects.equals(latestRoomList, that.latestRoomList);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), getNameField(), openButton, getBackButton(), joinHandler, openHandler, sceneApplyHandler, lobbyTable, latestRoomList);
-    }
-
-    //endregion
-
 }

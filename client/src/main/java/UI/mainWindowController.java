@@ -36,27 +36,39 @@ public class mainWindowController extends AbstractSceneController{
     private Button easyAIButton;
     private Button hardAIButton;
     private Button gameHistoryButton;
+    private Button logoutButton;
 
     public mainWindowController() {
 
 
-        VBox vbox = new VBox(10);
+        VBox vbox = new VBox(30);
 
-        Label tic = new Label("TIC");
-        Label tac = new Label("TAC");
-        Label toe = new Label("TOE");
+        Label gameTitle = new Label("TIC    TAC    TOE");
 
-        vbox.getChildren().addAll(tic, tac, toe);
+        vbox.getChildren().addAll(gameTitle);
 
         multiPlayerButton = new Button("Multiplayer");
         easyAIButton = new Button("Against Computer - Easy");
         hardAIButton = new Button("Against Computer - Hard");
         gameHistoryButton = new Button("Game History");
+        logoutButton = new Button("Logout");
 
-        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton, gameHistoryButton);
+        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton, gameHistoryButton, logoutButton);
 
 
         vbox.setAlignment(Pos.CENTER);
+
+        vbox.setMinSize(200, 500);
+
+        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #66ccff, #ff9966)");
+
+
+        gameTitle.setStyle("-fx-font: bold 30px 'impact'; -fx-text-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, #ff6600 0%, #0099ff 50%)");
+        multiPlayerButton.setStyle("-fx-text-fill: #ff6600 ; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
+        easyAIButton.setStyle("-fx-text-fill: #0066ff; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
+        hardAIButton.setStyle("-fx-text-fill: #cc3300; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
+        gameHistoryButton.setStyle("-fx-text-fill: #0099ff; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
+
 
         setRoot(vbox);
 
@@ -70,11 +82,12 @@ public class mainWindowController extends AbstractSceneController{
     public Button getEasyAIButton() { return easyAIButton; }
     public Button getHardAIButton() { return hardAIButton; }
     public Button getGameHistoryButton() { return gameHistoryButton; }
+    public Button getLogoutButton() { return logoutButton; }
 
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton(), getGameHistoryButton());
+        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton(), getGameHistoryButton(), getLogoutButton());
     }
 
     @Override
@@ -84,6 +97,7 @@ public class mainWindowController extends AbstractSceneController{
                 "easyAIButton = " + easyAIButton +
                 "hardAIButton = " + hardAIButton +
                 "gameHistoryButton = " + gameHistoryButton +
+                "logoutButton = " + logoutButton +
                 '}';
     }
 

@@ -20,7 +20,9 @@ public class GameViewController extends AbstractSceneController {
     public GameViewController(RoomInfo room, String myName) {
         this.room = room;
         this.myName = myName;
+        System.out.println(room);
         if(room.getPlayer1().getId().equals(myName)) {
+
             myToken = 'X';
             myTurn = true;
         }

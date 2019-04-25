@@ -1,10 +1,7 @@
 package Network;
 
 import EngineLib.Board;
-import Messages.Channels;
-import Messages.MoveInfo;
-import Messages.PlayerInfo;
-import Messages.RoomInfo;
+import Messages.*;
 import TaskThreads.TaskThread;
 import TaskThreads.TaskThreadFactory;
 import com.pubnub.api.PNConfiguration;
@@ -14,6 +11,7 @@ import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 
+import javax.swing.event.ChangeListener;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Arrays;
@@ -65,20 +63,12 @@ public final class NetworkManager {
         String myUuid = "";
 
         try {
-            byte[] mac = NetworkInterface.getNetworkInterfaces().nextElement().getHardwareAddress();
-
-            if(mac == null) {
-                System.out.println("Couldn't get MAC address using the Linux approach, trying Windows approach.");
-                mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
-            }
-
-            /*
             Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces();
-            while(list.hasMoreElements()) {
-                System.out.println(list.nextElement());
+            NetworkInterface network = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
+            if(network == null) {
+                network = list.nextElement();
             }
-            */
-            //System.out.println(NetworkInterface.getNetworkInterfaces().);
+            byte[] mac = network.getHardwareAddress();
             StringBuilder uuid = new StringBuilder();
             for (int i = 0; i < mac.length; i++) {
                 uuid.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
@@ -217,6 +207,48 @@ public final class NetworkManager {
         changeListener(null, null);
     }
 
+
+    //region Account management
+    public void userLogin(LoginInfo login, Consumer<String> successResponse, Consumer<String> failureResponse) {
+        String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
+        String outgoingChannel = Channels.authCheckChannel;
+
+        // TODO Fix channels
+
+        LoginRequestCallback lrc = new LoginRequestCallback(
+                login,
+                outgoingChannel,
+                incomingChannel,
+                successResponse, failureResponse
+        );
+        clear();
+        changeListener(lrc, Arrays.asList(incomingChannel));
+    }
+
+    //endregion
+
+
+    //region Create User Account
+    public void createLogin(LoginInfo login, Consumer<String> successResponse, Consumer<String> failureResponse) {
+        String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
+        String outgoingChannel = Channels.authCreateChannel;
+
+
+        LoginRequestCallback lrc = new LoginRequestCallback(
+                    login,
+                    outgoingChannel,
+                    incomingChannel,
+                    successResponse, failureResponse
+
+        );
+        clear();
+        changeListener(lrc, Arrays.asList(incomingChannel));
+
+    }
+
+    //endregion
+
+    //region Room requests and connections
     /**
      * Starts listening for rooms.
      * @param onUpdateCallback Gets fired whenever there is a new room list.
@@ -336,6 +368,8 @@ public final class NetworkManager {
         changeListener(callback, Arrays.asList(incomingChannel));
     }
 
+   // public static final String authCreateChannel = userAuthChannelSet + "Create";
+
     public void joinRoom(String ourUserID, RoomInfo room, Consumer<Board> response) {
         String outgoingChannel = Channels.roomMoveChannel;
         String incomingChannel = room.getRoomChannel();
@@ -344,7 +378,9 @@ public final class NetworkManager {
 
         changeListener(callback, Arrays.asList(incomingChannel));
     }
+    //endregion
 
+    //region Gameplay
     /**
      * Sends move info out
      */
@@ -364,6 +400,7 @@ public final class NetworkManager {
                     }
                 });
     }
+    //endregion
 
     /**
      * Do anything possible to end this instance at all costs instantaneously without regrets.
