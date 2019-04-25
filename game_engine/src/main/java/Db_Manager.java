@@ -92,6 +92,16 @@ public class Db_Manager {
         return rs.getString(1);
     }
 
+    int GetLastGameID() throws SQLException {
+        PreparedStatement prepareStatement = connection
+                .prepareStatement("SELECT max(room_id) FROM tictactoe.moves;");
+
+        ResultSet rs = prepareStatement.executeQuery();
+
+        rs.next();
+
+        return rs.getInt(1);
+    }
     //******************************************************************************************
     boolean ValidateUser(String playerID, String password ) throws SQLException {
         PreparedStatement preparedStatement =  connection

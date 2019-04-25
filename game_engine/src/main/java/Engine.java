@@ -52,6 +52,13 @@ public class Engine {
             myUuid = pnConfiguration.getUuid() + "engine";
         }
 
+        try {
+            System.out.println("Last ID: " + Db_Manager.GetInstance().GetLastGameID());
+            newRoomID = Db_Manager.GetInstance().GetLastGameID() + 1;
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
         heartbeatListener = new HeartbeatListener(Channels.clientHeartbeatChannel, true);
         pb = new PubNub(pnConfiguration);
         rml = new RoomsListListener(RoomList, myUuid);
