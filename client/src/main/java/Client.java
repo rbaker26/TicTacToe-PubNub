@@ -68,18 +68,18 @@ public class Client extends Application {
                 NetworkManager.getInstance().requestNewRoom(
                         lobbyController.getName(),
                         RoomFactory.makeCreateRequest(requestInfo.isGoingFirst(), requestInfo.getPassword()),
-                        responseRoom -> {
-                            System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
-                        },
-                        responseRoom -> {
-                            Platform.runLater(() -> {
-                                respondToFailedConnection(
-                                        primaryStage,
-                                        "Failed to create room"
-                                );
-                            });
-                        }
+                            responseRoom -> {
+                                System.out.println("Connected (creating): " + responseRoom.toString());
+                                connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                            },
+                            responseRoom -> {
+                                Platform.runLater(() -> {
+                                    respondToFailedConnection(
+                                            primaryStage,
+                                            "Failed to create room"
+                                    );
+                                });
+                            }
                 );
             });
 
@@ -124,26 +124,53 @@ public class Client extends Application {
 
             });
 
-            /**
-             * Both the easyAI and hardAI buttons will switch to the board ui
-             */
+
             mainWindowController.getEasyAIButton().setOnAction(value -> {
 
-                //TAKE TO BOARD UI
-                System.out.println("Easy AI Button works!");
+                //waitingController.applyScene(primaryStage);
 
-                gameViewController.applyScene(primaryStage);
+                NetworkManager.getInstance().requestEasyAIRoom(
+                        lobbyController.getName(),
+                        RoomFactory.makeCreateRequest(true, ""),
+                        responseRoom -> {
+                            System.out.println("Connected (creating): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                        },
+                        responseRoom -> {
+                            Platform.runLater(() -> {
+                                respondToFailedConnection(
+                                        primaryStage,
+                                        "Failed to create room"
+                                );
+                            });
+                        }
+                );
 
             });
 
             mainWindowController.getHardAIButton().setOnAction(value -> {
 
-                //TAKE TO BOARD UI
-                System.out.println("Hard AI Button works!");
+                //waitingController.applyScene(primaryStage);
 
-                gameViewController.applyScene(primaryStage);
+                NetworkManager.getInstance().requestHardAIRoom(
+                        lobbyController.getName(),
+                        RoomFactory.makeCreateRequest(true, ""),
+                        responseRoom -> {
+                            System.out.println("Connected (creating): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                        },
+                        responseRoom -> {
+                            Platform.runLater(() -> {
+                                respondToFailedConnection(
+                                        primaryStage,
+                                        "Failed to create room"
+                                );
+                            });
+                        }
+                );
 
             });
+
 
             lobbyController.getBackButton().setOnAction(value -> {
 

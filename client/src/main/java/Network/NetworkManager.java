@@ -187,6 +187,8 @@ public final class NetworkManager {
         }
 
         if(currentCallback != null) {
+            // Before we remove the old listener, we need to check if they have anything they want to do when
+            // they get interrupted.
             if(currentCallback instanceof InterruptibleListener) {
                 ((InterruptibleListener) currentCallback).interrupt(pn);
             }
@@ -225,6 +227,27 @@ public final class NetworkManager {
 
     public boolean isListeningForRooms() {
         return (currentCallback instanceof RoomListCallback);
+    }
+
+    /**
+     * Ask for an easy AI room.
+     * @param userID
+     * @param room
+     * @param successResponse
+     * @param failureResponse
+     */
+    public void requestEasyAIRoom(String userID, RoomInfo room,
+                                  Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+        room.setPlayer2(PlayerInfo.easyAI());
+
+        requestNewRoom(userID, room, successResponse, failureResponse);
+    }
+
+    public void requestHardAIRoom(String userID, RoomInfo room,
+                                  Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+        room.setPlayer2(PlayerInfo.hardAI());
+
+        requestNewRoom(userID, room, successResponse, failureResponse);
     }
 
     /**
