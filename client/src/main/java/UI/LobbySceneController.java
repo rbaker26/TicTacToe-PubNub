@@ -6,6 +6,9 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -17,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.StageStyle;
+import javafx.util.Callback;
 
 import java.util.List;
 import java.util.Objects;
@@ -85,9 +89,11 @@ public class LobbySceneController extends AbstractSceneController {
         backButton = new Button("Back");
 
         //region Table config
+        /*
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
         idColumn.setMinWidth(150);
         idColumn.setCellValueFactory(new PropertyValueFactory<>("roomID"));
+         */
 
         TableColumn<RoomInfo, String> lobbyStatColumn = new TableColumn<>("Room Status");
         lobbyStatColumn.setMinWidth(150);
@@ -95,18 +101,28 @@ public class LobbySceneController extends AbstractSceneController {
 
         TableColumn<RoomInfo, String> player1Column = new TableColumn<>("Player1");
         player1Column.setMinWidth(150);
-        player1Column.setCellValueFactory(new PropertyValueFactory<>("player1Name"));
+        player1Column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<RoomInfo, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<RoomInfo, String> r) {
+                // p.getValue() returns the Person instance for a particular TableView row
+                return new SimpleObjectProperty<>(r.getValue().getPlayer1().getName());
+            }
+        });
 
         TableColumn<RoomInfo, String> player2Column = new TableColumn<>("Player2");
         player2Column.setMinWidth(150);
-        player2Column.setCellValueFactory(new PropertyValueFactory<>("player2Name"));
+        player2Column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<RoomInfo, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<RoomInfo, String> r) {
+                // p.getValue() returns the Person instance for a particular TableView row
+                return new SimpleObjectProperty<>(r.getValue().getPlayer2().getName());
+            }
+        });
 
-        TableColumn<RoomInfo, String> player1TokenColumn = new TableColumn<>("Player1 Token");
-        player1TokenColumn.setMinWidth(150);
+        TableColumn<RoomInfo, String> player1TokenColumn = new TableColumn<>("P1 Token");
+        player1TokenColumn.setMinWidth(50);
         player1TokenColumn.setCellValueFactory(new PropertyValueFactory<>("player1Token"));
 
-        TableColumn<RoomInfo, String> player2TokenColumn = new TableColumn<>("Player2 Token");
-        player2TokenColumn.setMinWidth(150);
+        TableColumn<RoomInfo, String> player2TokenColumn = new TableColumn<>("P2 Token");
+        player2TokenColumn.setMinWidth(50);
         player2TokenColumn.setCellValueFactory(new PropertyValueFactory<>("player2Token"));
 
         TableColumn<RoomInfo, Boolean> hasPasswordColumn = new TableColumn<>("Password?");
@@ -122,7 +138,7 @@ public class LobbySceneController extends AbstractSceneController {
 
 
         lobbyTable = new TableView<>();
-        lobbyTable.getColumns().addAll(idColumn, lobbyStatColumn, player1Column, player2Column,
+        lobbyTable.getColumns().addAll(lobbyStatColumn, player1Column, player2Column,
                 player1TokenColumn, player2TokenColumn, hasPasswordColumn);
 
         /*

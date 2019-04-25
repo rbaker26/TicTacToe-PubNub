@@ -39,8 +39,8 @@ public class GameViewController extends AbstractSceneController {
             myToken = 'O';
             myTurn = false;
         }
-        leftLabel.setText(room.getPlayer1Name() + "\nPlayer X");
-        rightLabel.setText(room.getPlayer2Name() + "\nPlayer O");
+        leftLabel.setText(room.getPlayer1().getName() + "\nPlayer X");
+        rightLabel.setText(room.getPlayer2().getName() + "\nPlayer O");
 
         boardPane = new BoardGUIPane((row, col) -> {
             if(board.getPos(row, col) == ' ' && myTurn) {

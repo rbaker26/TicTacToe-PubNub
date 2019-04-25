@@ -33,11 +33,11 @@ public class Lobby {
     public String getCurrentPlayer() { return currentPlayer; }
 
     public void toggleCurrentPlayer() {
-        if(currentPlayer == "" || currentPlayer == roomInfo.getPlayer2Name()) {
-            currentPlayer = roomInfo.getPlayer1Name();
+        if(currentPlayer == "" || currentPlayer == roomInfo.getPlayer2().getId()) {
+            currentPlayer = roomInfo.getPlayer1().getId();
         }
         else {
-            currentPlayer = roomInfo.getPlayer2Name();
+            currentPlayer = roomInfo.getPlayer2().getId();
         }
     }
 

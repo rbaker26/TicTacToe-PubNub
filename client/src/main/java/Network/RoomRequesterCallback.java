@@ -22,7 +22,6 @@ import java.util.function.Consumer;
  */
 public class RoomRequesterCallback extends SubscribeCallback implements InterruptibleListener {
 
-    private String ourUserID;
     private String outgoingChannel;
     private String incomingChannel;
     private RoomInfo request;
@@ -36,8 +35,7 @@ public class RoomRequesterCallback extends SubscribeCallback implements Interrup
      */
     private boolean isWaiting;
 
-    public RoomRequesterCallback(String ourUserID, String outgoingChannel, String incomingChannel, RoomInfo roomInfo, PlayerInfo ourPlayer) {
-        this.ourUserID = ourUserID;
+    public RoomRequesterCallback(String outgoingChannel, String incomingChannel, RoomInfo roomInfo, PlayerInfo ourPlayer) {
         this.outgoingChannel = outgoingChannel;
         this.incomingChannel = incomingChannel;
         this.ourPlayer = ourPlayer;

@@ -81,7 +81,6 @@ public class Client extends Application {
                 waitingController.applyScene(primaryStage);
 
                 NetworkManager.getInstance().requestNewRoom(
-                        userName,
                         RoomFactory.makeCreateRequest(requestInfo.isGoingFirst(), requestInfo.getPassword()),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
@@ -105,7 +104,6 @@ public class Client extends Application {
                 //try { Thread.sleep(5000); } catch(InterruptedException ex) {}
 
                 NetworkManager.getInstance().requestJoinRoom(
-                        userName,
                         room,
                         responseRoom -> {
                             System.out.println("Connected (joining): " + responseRoom.toString());
@@ -148,7 +146,6 @@ public class Client extends Application {
                 NetworkManager.getInstance().listenForRooms(null);
 
                 NetworkManager.getInstance().requestEasyAIRoom(
-                        userName,
                         RoomFactory.makeCreateRequest(true, ""),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
@@ -174,7 +171,6 @@ public class Client extends Application {
                 NetworkManager.getInstance().listenForRooms(null);
 
                 NetworkManager.getInstance().requestHardAIRoom(
-                        userName,
                         RoomFactory.makeCreateRequest(true, ""),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
@@ -223,6 +219,7 @@ public class Client extends Application {
                                 System.out.println("New user created");
                                 userName = usr;
                                 playerName = scn;
+                                NetworkManager.getInstance().setName(userName, playerName);
                                 Platform.runLater(() -> mainWindowController.applyScene(primaryStage));
 
                         },
@@ -261,6 +258,7 @@ public class Client extends Application {
                             playerName = pnm;
                             System.out.println("Username: " + userName);
                             System.out.println("Screenname: " + playerName);
+                            NetworkManager.getInstance().setName(userName, playerName);
                             Platform.runLater(() -> mainWindowController.applyScene(primaryStage));
                         },
                         (reason) -> {
@@ -329,9 +327,9 @@ public class Client extends Application {
         String endResult;
         if(board.isWinner('X') || board.isWinner('O') || board.numEmptySpaces() == 0) {
             if (board.isWinner('X')) {
-                endResult = "X Player: " + room.getPlayer1Name() + " won!";
+                endResult = "X Player: " + room.getPlayer1().getName() + " won!";
             } else if (board.isWinner('O')) {
-                endResult = "O Player: " + room.getPlayer2Name() + " won!";
+                endResult = "O Player: " + room.getPlayer2().getName() + " won!";
             } else {
                 endResult = "Tie game!";
             }

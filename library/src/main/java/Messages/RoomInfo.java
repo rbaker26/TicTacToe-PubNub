@@ -113,6 +113,7 @@ public class RoomInfo {
         this.player2 = player2;
     }
 
+    @Deprecated
     public String getPlayer1Name() {
         if(hasPlayer1()) {
             return player1.getId();
@@ -122,6 +123,7 @@ public class RoomInfo {
         }
     }
 
+    @Deprecated
     public String getPlayer2Name() {
         if(hasPlayer2()) {
             return player2.getId();
