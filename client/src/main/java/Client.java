@@ -37,6 +37,8 @@ public class Client extends Application {
     private loginController loginController;
     private GameScoreController gameScoreController;
     private mainWindowController mainWindowController;
+    private String userName;
+    private String playerName;
 
     private LoginUserController loginUserController;
     //private ISceneController mainWindowController;
@@ -176,12 +178,44 @@ public class Client extends Application {
 
             });
 
+            //User enters their credentials - creates account
             loginController.getCreateButton().setOnAction(value ->  {
+
+                String usr; //username
+                String psw; //password
+                String scn; //screenName
+                usr = loginController.getUsernameField();
+                psw = loginController.getPasswordField();
+                scn = loginController.getScreenNameField();
+
+                LoginInfo loginObject = new LoginInfo(usr, psw, scn);
+                System.out.println("Sending creation request");
+                NetworkManager.getInstance().createLogin(loginObject,
+                        (unused) -> {
+                                System.out.println("New user created");
+                                userName = usr;
+                                playerName = scn;
+                                Platform.runLater(() -> mainWindowController.applyScene(primaryStage));
+
+                        },
+
+                        (reason) -> {
+                            //IF CREATING A USER FAILS
+//                            Alert alert = new Alert(Alert.AlertType.ERROR);
+//                            alert.setTitle("Failed to create new player");
+//                            alert.setHeaderText("Username already taken!");
+//                            alert.setContentText("Try a different username.");
+//
+//                            alert.showAndWait();
+                            Platform.runLater(() -> respondToFailedAuthorization(reason));
+
+                        });
 
                 System.out.println("Creating new player");
 
             });
 
+            //User enters their credentials - login check
             loginController.getEnterButton().setOnAction(value -> {
                 String usr;
                 String psw;
@@ -189,30 +223,28 @@ public class Client extends Application {
                 usr = loginController.getUsernameField();
                 psw = loginController.getPasswordField();
                 scn = loginController.getScreenNameField();
-
+                userName = usr;
                 LoginInfo loginObject = new LoginInfo(usr, psw, scn);
 
                 NetworkManager.getInstance().userLogin(loginObject,
-                        () -> {
+                        (pnm) -> {
                             System.out.println("Successful Login");
                             // TODO SUCCESS CODE GOES HERE
+                            playerName = pnm;
+                            System.out.println("Username: " + userName);
+                            System.out.println("Screenname: " + playerName);
                             Platform.runLater(() -> mainWindowController.applyScene(primaryStage));
                         },
-                        () -> {
+                        (reason) -> {
                             // TODO FAIL CODE GOES HERE
-                            Alert alert = new Alert(Alert.AlertType.ERROR);
-                            alert.setTitle("Failed login");
-                            alert.setHeaderText("Username and Password Do Not Match!");
-                            alert.setContentText("Try again, or create new user.");
-
-                            alert.showAndWait();
+                            Platform.runLater(() -> respondToFailedAuthorization(reason));
                         });
                 System.out.println("Welcome player");
 
             });
 
 
-
+           // mainWindowController.applyScene(primaryStage);
             loginController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
@@ -269,6 +301,17 @@ public class Client extends Application {
         alert.showAndWait();
 
         lobbyController.applyScene(primaryStage);
+    }
+
+    /**
+     * This method will display an error message on a failed login/auth creation
+     */
+    private void respondToFailedAuthorization(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Failed Authorization");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
 

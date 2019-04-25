@@ -200,21 +200,43 @@ public final class NetworkManager {
 
 
     //region Account management
-    public void userLogin(LoginInfo login, Runnable successResponse, Runnable failureResponse) {
-        String incomingChannel = "blah";
+    public void userLogin(LoginInfo login, Consumer<String> successResponse, Consumer<String> failureResponse) {
+        String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         String outgoingChannel = Channels.authCheckChannel;
 
         // TODO Fix channels
 
         LoginRequestCallback lrc = new LoginRequestCallback(
                 login,
-                incomingChannel,
+                outgoingChannel,
                 incomingChannel,
                 successResponse, failureResponse
         );
-
+        clear();
         changeListener(lrc, Arrays.asList(incomingChannel));
     }
+
+    //endregion
+
+
+    //region Create User Account
+    public void createLogin(LoginInfo login, Consumer<String> successResponse, Consumer<String> failureResponse) {
+        String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
+        String outgoingChannel = Channels.authCreateChannel;
+
+
+        LoginRequestCallback lrc = new LoginRequestCallback(
+                    login,
+                    outgoingChannel,
+                    incomingChannel,
+                    successResponse, failureResponse
+
+        );
+        clear();
+        changeListener(lrc, Arrays.asList(incomingChannel));
+
+    }
+
     //endregion
 
     //region Room requests and connections

@@ -1,9 +1,6 @@
 package Network;
 
-import Messages.Channels;
-import Messages.Converter;
-import Messages.LoginInfo;
-import Messages.MoveRequest;
+import Messages.*;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
@@ -13,6 +10,8 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
+import java.util.function.Consumer;
+
 public class LoginRequestCallback extends SubscribeCallback {
 
     LoginInfo loginInfo;
@@ -20,13 +19,13 @@ public class LoginRequestCallback extends SubscribeCallback {
     private LoginInfo info;
     private String outgoingChannel;
     private String incomingChannel;
-    private Runnable successResponse;
-    private Runnable failResponse;
+    private Consumer<String> successResponse;
+    private Consumer<String> failResponse;
 
     public LoginRequestCallback(
             LoginInfo info,
             String outgoingChannel, String incomingChannel,
-            Runnable success, Runnable fail) {
+            Consumer<String> success, Consumer<String> fail) {
         this.info = info;
         this.incomingChannel = incomingChannel;
         this.outgoingChannel = outgoingChannel;
@@ -44,8 +43,8 @@ public class LoginRequestCallback extends SubscribeCallback {
             //Event for when the radio/connectivity is lost
         }
 
-        else if (status.getCategory() == PNStatusCategory.PNAccessDeniedCategory.PNConnectedCategory) {
-
+        else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
+            System.out.println("Publishing message on " + outgoingChannel);
             // Runs when we are ready to receive responses
             pubnub.publish().message(info).channel(outgoingChannel).async(new PNCallback<PNPublishResult>() {
                 @Override
@@ -80,11 +79,26 @@ public class LoginRequestCallback extends SubscribeCallback {
             if (sourceChannel.equals(incomingChannel)) {
                 // code to handle login response
                 // code that converts our message to the appropriate object
-                LoginInfo response = Converter.fromJson(message.getMessage(), LoginInfo.class);
 
-                //TODO need to be modifed
+                //loginrequest
+                LoginResponse response = Converter.fromJson(message.getMessage(), LoginResponse.class);
 
-                successResponse.run();
+                //TODO need to be fixed
+
+                if(response.isLoginSuccess()) {
+                    successResponse.accept(response.getLoginRequest().getScreenName());
+                }
+                else {
+                    failResponse.accept(response.getInformation());
+                }
+//                if(failResponse != null) {
+//                    failResponse.run();
+//                }
+//
+//                else if(successResponse != null) {
+//                    successResponse.run();
+//                }
+
             }
         //}
 

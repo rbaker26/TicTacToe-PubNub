@@ -40,13 +40,11 @@ public class mainWindowController extends AbstractSceneController{
     public mainWindowController() {
 
 
-        VBox vbox = new VBox(10);
+        VBox vbox = new VBox(30);
 
-        Label tic = new Label("TIC");
-        Label tac = new Label("TAC");
-        Label toe = new Label("TOE");
+        Label gameTitle = new Label("TIC    TAC    TOE");
 
-        vbox.getChildren().addAll(tic, tac, toe);
+        vbox.getChildren().addAll(gameTitle);
 
         multiPlayerButton = new Button("Multiplayer");
         easyAIButton = new Button("Against Computer - Easy");
@@ -57,6 +55,18 @@ public class mainWindowController extends AbstractSceneController{
 
 
         vbox.setAlignment(Pos.CENTER);
+
+        vbox.setMinSize(200, 500);
+
+        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #66ccff, #ff9966)");
+
+
+        gameTitle.setStyle("-fx-font: bold 30px 'impact'; -fx-text-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, #ff6600 0%, #0099ff 50%)");
+        multiPlayerButton.setStyle("-fx-text-fill: #ff6600 ; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
+        easyAIButton.setStyle("-fx-text-fill: #0066ff; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
+        hardAIButton.setStyle("-fx-text-fill: #cc3300; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
+        gameHistoryButton.setStyle("-fx-text-fill: #0099ff; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
+
 
         setRoot(vbox);
 
