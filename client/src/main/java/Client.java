@@ -244,9 +244,8 @@ public class Client extends Application {
             });
 
 
-            //mainWindowController.applyScene(primaryStage);
-            //gameScoreController.applyScene(primaryStage);
             loginController.applyScene(primaryStage);
+
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();
@@ -256,7 +255,7 @@ public class Client extends Application {
         catch(Exception ex) {
             // This is so that we get better information on exceptions. By default,
             // JavaFX swallows the exception and closes without saying anything useful.
-            System.out.println(ex);
+            ex.printStackTrace();
             throw ex;
         }
 
