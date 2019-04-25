@@ -206,8 +206,11 @@ public final class NetworkManager {
         changeListener(null, null);
     }
 
-
     //region Account management
+    public String getUserID() {
+        return basePlayer.getId();
+    }
+
     public void userLogin(LoginInfo login, Consumer<String> successResponse, Consumer<String> failureResponse) {
         String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         String outgoingChannel = Channels.authCheckChannel;
@@ -224,10 +227,6 @@ public final class NetworkManager {
         changeListener(lrc, Arrays.asList(incomingChannel));
     }
 
-    //endregion
-
-
-    //region Create User Account
     public void createLogin(LoginInfo login, Consumer<String> successResponse, Consumer<String> failureResponse) {
         String incomingChannel = Channels.privateChannelSet + pn.getConfiguration().getUuid();
         String outgoingChannel = Channels.authCreateChannel;

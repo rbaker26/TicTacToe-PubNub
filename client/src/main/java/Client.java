@@ -39,8 +39,6 @@ public class Client extends Application {
     private loginController loginController;
     private GameScoreController gameScoreController;
     private mainWindowController mainWindowController;
-    private String userName;
-    private String playerName;
 
     private LoginUserController loginUserController;
     //private ISceneController mainWindowController;
@@ -84,7 +82,7 @@ public class Client extends Application {
                         RoomFactory.makeCreateRequest(requestInfo.isGoingFirst(), requestInfo.getPassword()),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, userName, responseRoom, lobbyController);
+                            connectToGame(primaryStage, responseRoom, lobbyController);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -107,7 +105,7 @@ public class Client extends Application {
                         room,
                         responseRoom -> {
                             System.out.println("Connected (joining): " + responseRoom.toString());
-                            connectToGame(primaryStage, userName, responseRoom, lobbyController);
+                            connectToGame(primaryStage, responseRoom, lobbyController);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -149,7 +147,7 @@ public class Client extends Application {
                         RoomFactory.makeCreateRequest(true, ""),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, userName, responseRoom, mainWindowController);
+                            connectToGame(primaryStage, responseRoom, mainWindowController);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -174,7 +172,7 @@ public class Client extends Application {
                         RoomFactory.makeCreateRequest(true, ""),
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, userName, responseRoom, mainWindowController);
+                            connectToGame(primaryStage, responseRoom, mainWindowController);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -217,9 +215,7 @@ public class Client extends Application {
                 NetworkManager.getInstance().createLogin(loginObject,
                         (unused) -> {
                                 System.out.println("New user created");
-                                userName = usr;
-                                playerName = scn;
-                                NetworkManager.getInstance().setName(userName, playerName);
+                                NetworkManager.getInstance().setName(usr, scn);
                                 Platform.runLater(() -> mainWindowController.applyScene(primaryStage));
 
                         },
@@ -248,17 +244,15 @@ public class Client extends Application {
                 usr = loginController.getUsernameField();
                 psw = loginController.getPasswordField();
                 scn = loginController.getScreenNameField();
-                userName = usr;
                 LoginInfo loginObject = new LoginInfo(usr, psw, scn);
 
                 NetworkManager.getInstance().userLogin(loginObject,
                         (pnm) -> {
                             System.out.println("Successful Login");
                             // TODO SUCCESS CODE GOES HERE
-                            playerName = pnm;
-                            System.out.println("Username: " + userName);
-                            System.out.println("Screenname: " + playerName);
-                            NetworkManager.getInstance().setName(userName, playerName);
+                            System.out.println("Username: " + usr);
+                            System.out.println("Screenname: " + pnm);
+                            NetworkManager.getInstance().setName(usr, pnm);
                             Platform.runLater(() -> mainWindowController.applyScene(primaryStage));
                         },
                         (reason) -> {
@@ -272,8 +266,7 @@ public class Client extends Application {
             //Logging out of game is done here
             mainWindowController.getLogoutButton().setOnAction(value -> {
 
-                userName = null;
-                playerName = null;
+                NetworkManager.getInstance().setName(null, null);
                 loginController.clearFields();
                 loginController.applyScene(primaryStage);
 
@@ -306,12 +299,11 @@ public class Client extends Application {
      * Connects to the given game. This can be called whether we created the room or
      * are joining someone else's room.
      * @param primaryStage The main JavaFX stage.
-     * @param ourUserID The user's ID.
      * @param room The room to join.
      */
-    private void connectToGame(Stage primaryStage, String ourUserID, RoomInfo room, ISceneController conclusionScene) {
-        gameViewController = new GameViewController(room, ourUserID);
-        NetworkManager.getInstance().joinRoom(ourUserID, room, (board) -> {
+    private void connectToGame(Stage primaryStage, RoomInfo room, ISceneController conclusionScene) {
+        gameViewController = new GameViewController(room, NetworkManager.getInstance().getUserID());
+        NetworkManager.getInstance().joinRoom(NetworkManager.getInstance().getUserID(), room, (board) -> {
             gameViewController.updateBoard(board);
             if(!board.isWinner('X') && !board.isWinner('O') && board.numEmptySpaces() != 0) {
                 gameViewController.toggleTurn();
