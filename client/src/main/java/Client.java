@@ -81,7 +81,7 @@ public class Client extends Application {
 
                 //Network.NetworkManager.forceUUID(nameField.getText());
                 NetworkManager.getInstance().requestNewRoom(
-                        lobbyController.getName(),
+                        userName,
                         true,
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
@@ -105,7 +105,7 @@ public class Client extends Application {
                 //try { Thread.sleep(5000); } catch(InterruptedException ex) {}
 
                 NetworkManager.getInstance().requestJoinRoom(
-                        lobbyController.getName(),
+                        userName,
                         room,
                         responseRoom -> {
                             System.out.println("Connected (joining): " + responseRoom.toString());

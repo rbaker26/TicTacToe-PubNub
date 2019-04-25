@@ -15,6 +15,7 @@ import javax.swing.event.ChangeListener;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -62,7 +63,12 @@ public final class NetworkManager {
         String myUuid = "";
 
         try {
-            byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+            Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces();
+            NetworkInterface network = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
+            if(network == null) {
+                network = list.nextElement();
+            }
+            byte[] mac = network.getHardwareAddress();
             StringBuilder uuid = new StringBuilder();
             for (int i = 0; i < mac.length; i++) {
                 uuid.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
