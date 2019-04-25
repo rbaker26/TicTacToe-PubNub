@@ -3,7 +3,9 @@ package UI;
 import EngineLib.Board;
 import Messages.RoomInfo;
 import Network.NetworkManager;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 
 import java.util.function.BiConsumer;
@@ -30,8 +32,8 @@ public class GameViewController extends AbstractSceneController {
             myToken = 'O';
             myTurn = false;
         }
-        Label leftLabel = new Label("I'm on\nthe left");
-        Label rightLabel = new Label("I'm on\nthe right");
+        Label leftLabel = new Label(room.getPlayer1Name() + "\nPlayer X");
+        Label rightLabel = new Label(room.getPlayer2Name() + "\nPlayer O");
 
         boardPane = new BoardGUIPane((row, col) -> {
             if(board.getPos(row, col) == ' ' && myTurn) {
@@ -41,7 +43,13 @@ public class GameViewController extends AbstractSceneController {
                 boardPane.drawBoard(board);
             }
         });
-        HBox box = new HBox(leftLabel, boardPane, rightLabel);
+        BorderPane box = new BorderPane();
+        box.setLeft(leftLabel);
+        box.setRight(rightLabel);
+        box.setCenter(boardPane);
+        leftLabel.setPadding(new Insets(5, 5, 5, 5));
+        rightLabel.setPadding(new Insets(5, 5, 5, 5));
+        //HBox box = new HBox(leftLabel, boardPane, rightLabel);
 
         setRoot(box);
     }

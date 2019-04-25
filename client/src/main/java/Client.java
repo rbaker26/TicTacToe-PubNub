@@ -315,6 +315,8 @@ public class Client extends Application {
             checkWin(primaryStage, board, room);
         });
         gameViewController.applySceneAsync(primaryStage);
+        primaryStage.setWidth(425);
+        primaryStage.setHeight(425);
     }
 
     private void checkWin(Stage primaryStage, Board board, RoomInfo room) {

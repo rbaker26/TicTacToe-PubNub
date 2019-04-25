@@ -77,6 +77,7 @@ abstract public class AbstractSceneController implements ISceneController {
             newScene = oldScene;
             newScene.setRoot(root);
         }
+
         targetStage.setScene(newScene);
 
         //targetStage.setWidth(targetWidth);
