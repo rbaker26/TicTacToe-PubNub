@@ -26,14 +26,13 @@ public class AuthorizationListener extends SubscribeCallback {
                 if(message.getChannel().equals(authChannel)) {
                     if (Db_Manager.GetInstance().ValidateUser(loginRequest.getUsername(), loginRequest.getPassword())) {
                         System.out.println("Login Valid");
+                        String screenName = Db_Manager.GetInstance().GetPlayerName(loginRequest.getUsername());
                         pb.publish()
-                                .message(new LoginResponse(loginRequest, true, null))
+                                .message(new LoginResponse(new LoginInfo(loginRequest.getUsername(), null, screenName), true, null))
                                 .channel(Channels.privateChannelSet + message.getPublisher())
                                 .async(new PNCallback<PNPublishResult>() {
                                     @Override
                                     public void onResponse(PNPublishResult result, PNStatus status) {
-                                        // handle publish result, status always present, result if successful
-                                        // status.isError() to see if error happened
                                         if (!status.isError()) {
                                         }
                                     }
@@ -72,7 +71,19 @@ public class AuthorizationListener extends SubscribeCallback {
                                 });
                     }
                     else {
-
+                        Db_Manager.GetInstance().AddUser(loginRequest.getUsername(), loginRequest.getScreenName(), loginRequest.getPassword());
+                        pb.publish()
+                                .message(new LoginResponse(loginRequest, true, null))
+                                .channel(Channels.privateChannelSet + message.getPublisher())
+                                .async(new PNCallback<PNPublishResult>() {
+                                    @Override
+                                    public void onResponse(PNPublishResult result, PNStatus status) {
+                                        // handle publish result, status always present, result if successful
+                                        // status.isError() to see if error happened
+                                        if (!status.isError()) {
+                                        }
+                                    }
+                                });
                     }
                 }
             }

@@ -26,7 +26,7 @@ public class Db_Manager {
         if(connection == null){
             try {
                 Class.forName("com.mysql.jdbc.Driver");
-                connection =  DriverManager.getConnection("jdbc:mysql://"+IP+":"+PORT +"?" + "user="+USERNAME+"&password="+PASSWORD);
+                connection =  DriverManager.getConnection("jdbc:mysql://"+IP+":"+PORT +"/tictactoe?" + "user="+USERNAME+"&password="+PASSWORD);
             }
             catch (SQLException sqle) {
                 System.out.println("sqle exception");
@@ -43,7 +43,7 @@ public class Db_Manager {
         if(connection == null){
             try {
                 Class.forName("com.mysql.jdbc.Driver");
-                connection =  DriverManager.getConnection("jdbc:mysql://"+IP+":"+PORT +"?" + "user="+USERNAME+"&password="+PASSWORD);
+                connection =  DriverManager.getConnection("jdbc:mysql://"+IP+":"+PORT +"/tictactoe?" + "user="+USERNAME+"&password="+PASSWORD);
             }
             catch (SQLException sqle) {
 
@@ -61,12 +61,12 @@ public class Db_Manager {
     //******************************************************************************************
     boolean UserExistsByName(String playerName) throws SQLException {
         PreparedStatement preparedStatement =  connection
-                .prepareStatement(  "    SELECT CASE WHEN EXISTS ( SELECT *  FROM  tictactoe.players  WHERE user_id = ?  LIMIT  1 )" +
+                .prepareStatement(  "    SELECT CASE WHEN EXISTS ( SELECT *  FROM  players  WHERE username = ?  LIMIT  1 )" +
                                          "    THEN                " +
-                                         "    CAST ( 1 AS BIT)    " +
+                                         "    true    " +
                                          "    ELSE                " +
-                                         "    CAST ( 0 AS BIT)    " +
-                                         "    END  );             ");
+                                         "    false    " +
+                                         "    END  ;             ");
 
         preparedStatement.setString(1,playerName);
 
@@ -75,39 +75,27 @@ public class Db_Manager {
 
         rs.first();
 
-        return rs.getBoolean(0);
+        return rs.getBoolean(1);
 
     }
     //******************************************************************************************
 
+    String GetPlayerName(String userName) throws SQLException {
+        PreparedStatement prepareStatement = connection
+                .prepareStatement("SELECT screen_name FROM tictactoe.players WHERE username = ?;");
+        prepareStatement.setString(1, userName);
 
-    //******************************************************************************************
-    boolean UserExistsByID(int playerID) throws SQLException {
-        PreparedStatement preparedStatement =  connection
-                .prepareStatement(  "    SELECT CASE WHEN EXISTS ( SELECT *  FROM  tictactoe.players  WHERE user_id = ?  LIMIT  1 )" +
-                        "    THEN                " +
-                        "    CAST ( 1 AS BIT)    " +
-                        "    ELSE                " +
-                        "    CAST ( 0 AS BIT)    " +
-                        "    END  );             ");
+        ResultSet rs = prepareStatement.executeQuery();
 
-        preparedStatement.setInt(1,playerID);
+        rs.next();
 
-
-        ResultSet rs =  preparedStatement.executeQuery();
-
-        rs.first();
-
-        return rs.getBoolean(0);
-
+        return rs.getString(1);
     }
-    //******************************************************************************************
-
 
     //******************************************************************************************
     boolean ValidateUser(String playerID, String password ) throws SQLException {
         PreparedStatement preparedStatement =  connection
-                .prepareStatement(  "SELECT CASE WHEN EXISTS ( SELECT *  FROM  tictactoe.players  WHERE player_id = ? AND password = ? LIMIT  1 ) " +
+                .prepareStatement(  "SELECT CASE WHEN EXISTS ( SELECT *  FROM  tictactoe.players  WHERE username = ? AND password = ? LIMIT  1 ) " +
                         "THEN               " +
                         "true " +
                         "ELSE               " +
@@ -117,12 +105,11 @@ public class Db_Manager {
         preparedStatement.setString(1,playerID);
         preparedStatement.setString(2,password);
 
-
         ResultSet rs =  preparedStatement.executeQuery();
 
-        rs.first();
+        rs.next();
 
-        return rs.getBoolean(0);
+        return rs.getBoolean(1);
     }
     //******************************************************************************************
 
@@ -132,12 +119,12 @@ public class Db_Manager {
     //******************************************************************************************
     void AddUser(String playerID, String username, String password) throws SQLException {
         PreparedStatement preparedStatement =  connection
-                .prepareStatement("insert into  tictactoe.players (player_id, player_name, password) values (?, ?, ?)");
+                .prepareStatement("insert into  tictactoe.players (username, screen_name, password) values (?, ?, ?)");
 
         preparedStatement.setString(1,playerID);
         preparedStatement.setString(2,username);
         preparedStatement.setString(3,password);
-        preparedStatement.executeUpdate();
+        preparedStatement.execute();
     }
     //******************************************************************************************
 }

@@ -178,8 +178,8 @@ public class Client extends Application {
             });
 
 
-
-            mainWindowController.applyScene(primaryStage);
+            lobbyController.applyScene(primaryStage);
+            //mainWindowController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();
