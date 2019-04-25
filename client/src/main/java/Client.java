@@ -141,7 +141,7 @@ public class Client extends Application {
 
 
             mainWindowController.getEasyAIButton().setOnAction(value -> {
-
+                System.out.println("Easy AI");
                 //waitingController.applyScene(primaryStage);
 
                 NetworkManager.getInstance().listenForRooms(null);
@@ -166,7 +166,7 @@ public class Client extends Application {
             });
 
             mainWindowController.getHardAIButton().setOnAction(value -> {
-
+                System.out.println("Hard AI");
                 //waitingController.applyScene(primaryStage);
 
                 NetworkManager.getInstance().requestHardAIRoom(
@@ -317,6 +317,8 @@ public class Client extends Application {
             checkWin(primaryStage, board, room, conclusionScene);
         });
         gameViewController.applySceneAsync(primaryStage);
+        primaryStage.setWidth(425);
+        primaryStage.setHeight(425);
     }
 
     private void checkWin(Stage primaryStage, Board board, RoomInfo room, ISceneController conclusionScene) {
@@ -371,6 +373,10 @@ public class Client extends Application {
         alert.showAndWait();
 
         conclusionScene.applyScene(primaryStage);
+        /*
+        primaryStage.setWidth(initWidth);
+        primaryStage.setHeight(initHeight);
+        */
     }
 }
 
