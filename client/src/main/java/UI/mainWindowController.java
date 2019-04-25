@@ -36,6 +36,7 @@ public class mainWindowController extends AbstractSceneController{
     private Button easyAIButton;
     private Button hardAIButton;
     private Button gameHistoryButton;
+    private Button logoutButton;
 
     public mainWindowController() {
 
@@ -50,8 +51,9 @@ public class mainWindowController extends AbstractSceneController{
         easyAIButton = new Button("Against Computer - Easy");
         hardAIButton = new Button("Against Computer - Hard");
         gameHistoryButton = new Button("Game History");
+        logoutButton = new Button("Logout");
 
-        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton, gameHistoryButton);
+        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton, gameHistoryButton, logoutButton);
 
 
         vbox.setAlignment(Pos.CENTER);
@@ -80,11 +82,12 @@ public class mainWindowController extends AbstractSceneController{
     public Button getEasyAIButton() { return easyAIButton; }
     public Button getHardAIButton() { return hardAIButton; }
     public Button getGameHistoryButton() { return gameHistoryButton; }
+    public Button getLogoutButton() { return logoutButton; }
 
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton(), getGameHistoryButton());
+        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton(), getGameHistoryButton(), getLogoutButton());
     }
 
     @Override
@@ -94,6 +97,7 @@ public class mainWindowController extends AbstractSceneController{
                 "easyAIButton = " + easyAIButton +
                 "hardAIButton = " + hardAIButton +
                 "gameHistoryButton = " + gameHistoryButton +
+                "logoutButton = " + logoutButton +
                 '}';
     }
 

@@ -244,7 +244,8 @@ public class Client extends Application {
             });
 
 
-           // mainWindowController.applyScene(primaryStage);
+            //mainWindowController.applyScene(primaryStage);
+            //gameScoreController.applyScene(primaryStage);
             loginController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
