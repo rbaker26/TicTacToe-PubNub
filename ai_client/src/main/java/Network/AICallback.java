@@ -1,12 +1,12 @@
 package Network;
 
 import AI.NPCBehaviour;
-import Messages.Converter;
-import Messages.MoveRequest;
-import Messages.PlayerInfo;
+import Messages.*;
 import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.enums.PNStatusCategory;
+import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
@@ -14,7 +14,7 @@ import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 public class AICallback extends SubscribeCallback {
 
     private PlayerInfo player;
-    private String incomingChannelSet;
+    private String incomingChannel;
     private String outgoingChannel;
 
     private NPCBehaviour behaviour;
@@ -29,7 +29,7 @@ public class AICallback extends SubscribeCallback {
     public AICallback(PlayerInfo player, NPCBehaviour behaviour, String outgoingChannel) {
         this.player = player;
         this.behaviour = behaviour;
-        this.incomingChannelSet = player.getChannel();
+        this.incomingChannel = player.getChannel();
         this.outgoingChannel = outgoingChannel;
     }
 
@@ -65,7 +65,7 @@ public class AICallback extends SubscribeCallback {
                 : message.getSubscription()
         );
 
-        if(sourceChannel.startsWith(incomingChannelSet)) {
+        if(sourceChannel.equals(incomingChannel)) {
             MoveRequest request = Converter.fromJson(message.getMessage(), MoveRequest.class);
 
             //System.out.println(request);
@@ -74,7 +74,23 @@ public class AICallback extends SubscribeCallback {
 
             if(currentPlayerID != null && currentPlayerID.equals(player.getId()))
             {
-                System.out.println("It's for us!");
+                //System.out.println("It's for us!");
+                MoveInfo move = behaviour.getMove(request.getBoard(), request.getRoomInfo().getPlayer2Token().charAt(0));
+                move.setRoomID(request.getRoomInfo().getRoomID());
+                move.setPlayerID(player.getId());
+
+                pubnub.publish()
+                        .message(move)
+                        .channel(outgoingChannel)
+                        .async(new PNCallback<PNPublishResult>() {
+                            @Override
+                            public void onResponse(PNPublishResult result, PNStatus status) {
+                                // handle publish result, status always present, result if successful
+                                // status.isError() to see if error happened
+                                if (!status.isError()) {
+                                }
+                            }
+                        });
             }
         }
     }
