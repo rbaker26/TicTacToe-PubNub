@@ -132,8 +132,8 @@ public class NPCHard implements NPCBehaviour {
         //SubjectController.triggerUpdate(this, new NPCBehaviour.MoveInfo(i, j));
         System.out.println(b);
         MoveInfo move = new MoveInfo();
-        move.setCol(i);
-        move.setRow(j);
+        move.setCol(j);
+        move.setRow(i);
         return move;
 
     }

@@ -371,6 +371,8 @@ public class Client extends Application {
         alert.showAndWait();
 
         lobbyController.applyScene(primaryStage);
+        primaryStage.setWidth(initWidth);
+        primaryStage.setHeight(initHeight);
     }
 }
 
