@@ -193,11 +193,6 @@ public class Client extends Application {
 
             });
 
-            mainWindowController.getGameHistoryButton().setOnAction(value -> {
-
-                gameScoreController.applyScene(primaryStage);
-
-            });
 
             gameScoreController.getBackButton().setOnAction(value -> {
 
@@ -269,6 +264,19 @@ public class Client extends Application {
                 System.out.println("Welcome player");
 
             });
+
+            //Logging out of game is done here
+            mainWindowController.getLogoutButton().setOnAction(value -> {
+
+                userName = null;
+                playerName = null;
+               // loginController.setPasswordField().set;
+               // loginController.
+               // loginController.setUsernameField(null);
+                loginController.applyScene(primaryStage);
+
+            });
+
             loginController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);

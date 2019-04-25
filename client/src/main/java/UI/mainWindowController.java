@@ -35,7 +35,6 @@ public class mainWindowController extends AbstractSceneController{
     private Button multiPlayerButton;
     private Button easyAIButton;
     private Button hardAIButton;
-    private Button gameHistoryButton;
     private Button logoutButton;
 
     public mainWindowController() {
@@ -50,10 +49,9 @@ public class mainWindowController extends AbstractSceneController{
         multiPlayerButton = new Button("Multiplayer");
         easyAIButton = new Button("Against Computer - Easy");
         hardAIButton = new Button("Against Computer - Hard");
-        gameHistoryButton = new Button("Game History");
         logoutButton = new Button("Logout");
 
-        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton, gameHistoryButton, logoutButton);
+        vbox.getChildren().addAll(multiPlayerButton, easyAIButton, hardAIButton, logoutButton);
 
 
         vbox.setAlignment(Pos.CENTER);
@@ -67,7 +65,7 @@ public class mainWindowController extends AbstractSceneController{
         multiPlayerButton.setStyle("-fx-text-fill: #ff6600 ; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
         easyAIButton.setStyle("-fx-text-fill: #0066ff; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
         hardAIButton.setStyle("-fx-text-fill: #cc3300; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
-        gameHistoryButton.setStyle("-fx-text-fill: #0099ff; -fx-font: bold 'impact'; -fx-font: normal bold 15px 'impact'");
+
 
 
         setRoot(vbox);
@@ -81,13 +79,12 @@ public class mainWindowController extends AbstractSceneController{
     }
     public Button getEasyAIButton() { return easyAIButton; }
     public Button getHardAIButton() { return hardAIButton; }
-    public Button getGameHistoryButton() { return gameHistoryButton; }
     public Button getLogoutButton() { return logoutButton; }
 
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton(), getGameHistoryButton(), getLogoutButton());
+        return Objects.hash(super.hashCode(), getMultiPlayerButton(), getEasyAIButton(), getHardAIButton(), getLogoutButton());
     }
 
     @Override
@@ -96,7 +93,6 @@ public class mainWindowController extends AbstractSceneController{
                 "multiPlayerButton = " + multiPlayerButton +
                 "easyAIButton = " + easyAIButton +
                 "hardAIButton = " + hardAIButton +
-                "gameHistoryButton = " + gameHistoryButton +
                 "logoutButton = " + logoutButton +
                 '}';
     }
