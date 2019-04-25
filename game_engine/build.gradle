@@ -1,4 +1,3 @@
-
 plugins {
     id 'java'
     id 'application'
@@ -24,7 +23,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     compile group: 'com.pubnub', name: 'pubnub-gson', version: '4.22.0-beta'
-
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
     compile group: 'org.slf4j', name:'slf4j-api', version: '1.7.2'
     compile group: 'ch.qos.logback', name:'logback-classic', version: '1.0.9'
     compile group: 'ch.qos.logback', name:'logback-core', version: '1.0.9'
@@ -32,4 +31,13 @@ dependencies {
     compile project(':library')
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'Engine'
+    }
+
+    from {
+        compileJava.classpath.collect {it.isDirectory() ? it : zipTree(it)}
+    }
+}
 mainClassName = 'Engine'
