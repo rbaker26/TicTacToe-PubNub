@@ -205,8 +205,8 @@ public class Client extends Application {
             });
 
 
-
-            mainWindowController.applyScene(primaryStage);
+            lobbyController.applyScene(primaryStage);
+            //mainWindowController.applyScene(primaryStage);
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();
@@ -241,7 +241,9 @@ public class Client extends Application {
 
         NetworkManager.getInstance().joinRoom(ourUserID, room, (board) -> {
             gameViewController.updateBoard(board);
-            gameViewController.toggleTurn();
+            if(!board.isWinner('X') && !board.isWinner('O') && board.numEmptySpaces() != 0) {
+                gameViewController.toggleTurn();
+            }
         });
         gameViewController.applySceneAsync(primaryStage);
     }

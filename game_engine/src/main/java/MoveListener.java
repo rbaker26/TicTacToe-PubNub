@@ -57,23 +57,25 @@ public class MoveListener extends SubscribeCallback {
 
     @Override
     public void message(PubNub pb, PNMessageResult message) {
-        if(message.getChannel().equals(myChannel)) {
+        if (message.getChannel().equals(myChannel)) {
             MoveInfo move = Converter.fromJson(message.getMessage(), MoveInfo.class);
             System.out.println("Received move: " + move);
             int roomID = move.getRoomID();
-            if(moveIsValid(move)) {
+            if (moveIsValid(move)) {
                 // Code to make moves on the board and check fun stuff
                 Lobby lobby = lobbyList.get(roomID);
                 char token;
                 System.out.println("Valid move received");
-                if(move.getPlayerID().equals(lobby.getRoomInfo().getPlayer1Name()))
+                if (move.getPlayerID().equals(lobby.getRoomInfo().getPlayer1Name()))
                     token = 'X';
                 else
                     token = 'O';
                 lobby.getBoard().setPos(move.getRow(), move.getCol(), token);
                 System.out.println("Room " + roomID + "'s board:\n " + lobby.getBoard());
-                if(playerWon(lobby.getBoard(), token)) {
-                    pb.publish() // Let both ends know that a player won.
+
+                if (playerWon(lobby.getBoard(), token) || lobby.getBoard().numEmptySpaces() == 0) {
+                    System.out.println("Game over");
+                    pb.publish() // Sending move request to next player
                             .message(new MoveRequest(lobby.getBoard(), lobby.getRoomInfo(), null))
                             .channel(lobby.getRoomInfo().getRoomChannel())
                             .async(new PNCallback<PNPublishResult>() {
@@ -86,8 +88,7 @@ public class MoveListener extends SubscribeCallback {
                                 }
                             });
                     lobby.endGame();
-                }
-                else {
+                } else {
                     lobby.toggleCurrentPlayer();
                     // will need to publish the next move request at the end of this
                     System.out.printf("Sending move request to: %s%n Current Board: %s%n", lobby.getCurrentPlayer(), lobby.getBoard());
