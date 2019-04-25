@@ -21,23 +21,30 @@ javafx {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testImplementation 'junit:junit:4.12'
-
     compile group: 'com.pubnub', name: 'pubnub-gson', version: '4.22.0-beta'
-    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
+    compile project(':library')
+
     compile group: 'org.slf4j', name:'slf4j-api', version: '1.7.2'
     compile group: 'ch.qos.logback', name:'logback-classic', version: '1.0.9'
     compile group: 'ch.qos.logback', name:'logback-core', version: '1.0.9'
+}
 
-    compile project(':library')
+mainClassName = 'AI_Client'
+
+run{
+    //standardInput = System.in
+
+    if (project.hasProperty('args')) {
+        args project.args.split(',')
+    }
 }
 
 jar {
     manifest {
-        attributes 'Main-Class': 'Engine'
+        attributes 'Main-Class': 'AI_Client'
     }
 
     from {
-        compileJava.classpath.collect {it.isDirectory() ? it : zipTree(it)}
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
-mainClassName = 'Engine'

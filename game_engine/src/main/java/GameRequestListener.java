@@ -48,81 +48,42 @@ public class GameRequestListener extends SubscribeCallback {
 
     public void createRoom(PubNub pb, RoomInfo roomMsg) {
         System.out.println("Create room request received: " + roomMsg);
+
         final int roomID = Engine.getNewRoomID();
         roomMsg.setRoomID(roomID);
         roomMsg.setRoomChannel(Channels.roomChannelSet + roomID);
-        roomInfoList.add(roomMsg);
-        lobbyList.put(roomID, new Lobby(roomMsg));
-        publishUpdatedRoomList(pb);
 
-        PlayerInfo player = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
-        hbCallback.setExpireCallback(
-                player.getUuid(),
-                value -> hideRoom(pb, roomID)
-        );
+        // Put the room into the set of rooms.
+        // Note that, even if the room is full and we can start up immediately,
+        // we still need to add the room to both lists and then send this off.
+        lobbyList.put(roomID, new Lobby(roomMsg));
+        roomInfoList.add(roomMsg);
+
+        // Check if the room they sent us is full. If it isn't, they probably are trying to play
+        // against the AI.
+        if(roomMsg.isOpen()) {
+
+            publishUpdatedRoomList(pb);
+
+            // We'll need to track if the player goes offline. If we do, then we kick them.
+            PlayerInfo player = (roomMsg.hasPlayer1() ? roomMsg.getPlayer1() : roomMsg.getPlayer2());
+            hbCallback.setExpireCallback(
+                    player.getUuid(),
+                    value -> deleteRoom(pb, player)
+            );
+        }
+        else {
+            // The room is somehow full? This must mean that they want to play with AI or something.
+            startGame(pb, roomMsg);
+        }
     }
 
-    public void joinRoom(PubNub pb, RoomInfo roomMsg) {
-
-        int roomID = roomMsg.getRoomID();
+    private void joinRoom(PubNub pb, RoomInfo roomMsg) {
 
         System.out.println("Join room request received: " + roomMsg);
 
         if (roomIsValid(roomMsg)) {
-
-            RoomInfo room = lobbyList.get(roomID).getRoomInfo();
-            System.out.println(room);
-
-            if(!room.hasPlayer1()) {
-                room.setPlayer1(roomMsg.getPlayer1());
-            }
-            else {
-                room.setPlayer2(roomMsg.getPlayer2());
-            }
-
-            hideRoom(pb, roomID);
-            System.out.println("Sending out this room: " + room.toString());
-            pb.publish() // Notifying player 1 that game has started
-                    .message(room)
-                    .channel(room.getPlayer1().getChannel())
-                    .async(new PNCallback<PNPublishResult>() {
-                        @Override
-                        public void onResponse(PNPublishResult result, PNStatus status) {
-                            // handle publish result, status always present, result if successful
-                            // status.isError() to see if error happened
-                            if (!status.isError()) {
-                            }
-                        }
-                    });
-            pb.publish() // Notifying player 2 that game has started
-                    .message(room)
-                    .channel(room.getPlayer2().getChannel())
-                    .async(new PNCallback<PNPublishResult>() {
-                        @Override
-                        public void onResponse(PNPublishResult result, PNStatus status) {
-                            // handle publish result, status always present, result if successful
-                            // status.isError() to see if error happened
-                            if (!status.isError()) {
-                            }
-                        }
-                    });
-            // TODO This should probably not happen until both have joined the room.
-            pb.publish() // Sending initial move request
-                    .message(new MoveRequest(lobbyList.get(roomID).getBoard(),
-                            room,
-                            room.getPlayer1Name()))
-                    .channel(Channels.roomChannelSet + room.getRoomID())
-                    .async(new PNCallback<PNPublishResult>() {
-                        @Override
-                        public void onResponse(PNPublishResult result, PNStatus status) {
-                            // handle publish result, status always present, result if successful
-                            // status.isError() to see if error happened
-                            if (!status.isError()) {
-                            }
-                        }
-                    });
-            lobbyList.get(roomID).toggleCurrentPlayer();
-            System.out.println("Game started for room " + roomID);
+            startGame(pb, roomMsg);
         }
         else {
             System.out.println("Rejecting; room full or unavailable");
@@ -131,7 +92,7 @@ public class GameRequestListener extends SubscribeCallback {
             PlayerInfo requester = roomMsg.getPlayer2();
 
             pb.publish()
-                    .message(RoomInfo.makeDeniedRoom())
+                    .message(RoomFactory.makeDeniedRoom())
                     .channel(requester.getChannel())
                     .async(new PNCallback<PNPublishResult>() {
                         @Override
@@ -145,12 +106,72 @@ public class GameRequestListener extends SubscribeCallback {
         }
     }
 
+    private void startGame(PubNub pb, RoomInfo roomMsg) {
+        int roomID = roomMsg.getRoomID();
+
+        RoomInfo room = lobbyList.get(roomID).getRoomInfo();
+        System.out.println(room);
+
+        // TODO This should probably get a refactor
+        if(!room.hasPlayer1()) {
+            room.setPlayer1(roomMsg.getPlayer1());
+        }
+        else {
+            room.setPlayer2(roomMsg.getPlayer2());
+        }
+
+        hideRoom(pb, roomID);
+        System.out.println("Sending out this room: " + room.toString());
+        pb.publish() // Notifying player 1 that game has started
+                .message(room)
+                .channel(room.getPlayer1().getChannel())
+                .async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        // handle publish result, status always present, result if successful
+                        // status.isError() to see if error happened
+                        if (!status.isError()) {
+                        }
+                    }
+                });
+        pb.publish() // Notifying player 2 that game has started
+                .message(room)
+                .channel(room.getPlayer2().getChannel())
+                .async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        // handle publish result, status always present, result if successful
+                        // status.isError() to see if error happened
+                        if (!status.isError()) {
+                        }
+                    }
+                });
+        // TODO This should probably not happen until both have joined the room.
+        pb.publish() // Sending initial move request
+                .message(new MoveRequest(lobbyList.get(roomID).getBoard(),
+                        room,
+                        room.getPlayer1Name()))
+                .channel(room.getRoomChannel())
+                .async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        // handle publish result, status always present, result if successful
+                        // status.isError() to see if error happened
+                        if (!status.isError()) {
+                        }
+                    }
+                });
+        lobbyList.get(roomID).toggleCurrentPlayer();
+        System.out.println("Game started for room " + roomID);
+    }
+
     /**
      * Hides the given room, causing it to no longer show up when the room list is published.
      * @param pb Used to send out the message with the updated room list.
      * @param roomID ID of room to hide.
      */
     private void hideRoom(PubNub pb, int roomID) {
+        System.out.println("Hiding room ID " + roomID);
         if(roomInfoList.removeIf(room -> room.getRoomID() == roomID)) {
             publishUpdatedRoomList(pb);
         }
@@ -163,6 +184,7 @@ public class GameRequestListener extends SubscribeCallback {
      * @param creator Creator of the room.
      */
     private void deleteRoom(PubNub pb, PlayerInfo creator) {
+        System.out.println("Deleting room by " + creator.getId());
         if(roomInfoList.removeIf(room -> room.hasPlayer(creator))) {
             lobbyList.values().removeIf(lobby -> lobby.getRoomInfo().hasPlayer(creator));
             publishUpdatedRoomList(pb);

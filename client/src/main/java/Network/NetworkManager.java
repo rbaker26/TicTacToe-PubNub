@@ -78,6 +78,7 @@ public final class NetworkManager {
         }
         catch(Exception ex) {
             System.out.println("Cannot get local host... Creating default UUID");
+            System.out.println(ex);
         }
 
 
@@ -176,6 +177,8 @@ public final class NetworkManager {
         }
 
         if(currentCallback != null) {
+            // Before we remove the old listener, we need to check if they have anything they want to do when
+            // they get interrupted.
             if(currentCallback instanceof InterruptibleListener) {
                 ((InterruptibleListener) currentCallback).interrupt(pn);
             }
@@ -251,18 +254,42 @@ public final class NetworkManager {
      * @param onUpdateCallback Gets fired whenever there is a new room list.
      */
     public void listenForRooms(Consumer<List<RoomInfo>> onUpdateCallback) {
-
         changeListener(new RoomListCallback(onUpdateCallback), Arrays.asList(Channels.roomListChannel));
+    }
+
+    public boolean isListeningForRooms() {
+        return (currentCallback instanceof RoomListCallback);
+    }
+
+    /**
+     * Ask for an easy AI room.
+     * @param userID
+     * @param room
+     * @param successResponse
+     * @param failureResponse
+     */
+    public void requestEasyAIRoom(String userID, RoomInfo room,
+                                  Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+        room.setPlayer2(PlayerInfo.easyAI());
+
+        requestNewRoom(userID, room, successResponse, failureResponse);
+    }
+
+    public void requestHardAIRoom(String userID, RoomInfo room,
+                                  Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
+        room.setPlayer2(PlayerInfo.hardAI());
+
+        requestNewRoom(userID, room, successResponse, failureResponse);
     }
 
     /**
      * Asks the engine for a new room.
      * @param userID Our ID.
-     * @param goingFirst If true, we'll be going first.
+     * @param room Info on room we're requesting.
      * @param successResponse Is called upon successfully getting a room. If null, the listeners will be cleared.
      * @param failureResponse Is called upon unsuccessfully getting a room. If null, the listeners will be cleared.
      */
-    public void requestNewRoom(String userID, boolean goingFirst,
+    public void requestNewRoom(String userID, RoomInfo room,
                                Consumer<RoomInfo> successResponse, Consumer<RoomInfo> failureResponse) {
 
         //clearCurrentListener();
@@ -271,21 +298,14 @@ public final class NetworkManager {
         //String outgoingChannel = Channels.privateChannelSet + userID;
         String outgoingChannel = Channels.roomRequestChannel;
 
-        RoomInfo room = new RoomInfo();
+        //RoomInfo room = new RoomInfo();
         //roomInfo.setPlayer(userID, incomingChannel, goingFirst);
         PlayerInfo player = getPlayerInfo(userID, incomingChannel);
-
-        if(goingFirst) {
-            room.setPlayer1(player);
-        }
-        else {
-            room.setPlayer2(player);
-        }
-
+        room.setPlayer1(player);    // Set the creator
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo
-                userID, outgoingChannel, incomingChannel, room
+                userID, outgoingChannel, incomingChannel, room, player
         );
 
 
@@ -323,11 +343,11 @@ public final class NetworkManager {
         // If player2 is already around, then we'll be going first.
         // Otherwise, we'll go second.
         PlayerInfo player = getPlayerInfo(ourUserID, incomingChannel);
-        roomInfo.addPlayer(player);
+        roomInfo.addPlayer(player); // TODO We should just do setPlayer2
 
         RoomRequesterCallback callback = new RoomRequesterCallback(
                 //userID, incomingChannel, incomingChannel, roomInfo
-                ourUserID, outgoingChannel, incomingChannel, roomInfo
+                ourUserID, outgoingChannel, incomingChannel, roomInfo, player
         );
 
 

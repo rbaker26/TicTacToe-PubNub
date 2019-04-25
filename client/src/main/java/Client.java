@@ -2,6 +2,7 @@ import EngineLib.Board;
 import Messages.Channels;
 import Messages.LoginInfo;
 import Messages.MoveRequest;
+import Messages.RoomFactory;
 import Messages.RoomInfo;
 import Network.LoginRequestCallback;
 import Network.NetworkManager;
@@ -74,9 +75,8 @@ public class Client extends Application {
             mainWindowController = new mainWindowController();
 
 
-
-            lobbyController.setOpenHandler(() -> {
-                System.out.println("Opening");
+            lobbyController.setOpenHandler(requestInfo -> {
+                System.out.println("Opening " + requestInfo);
 
                 waitingController.applyScene(primaryStage);
 
@@ -140,26 +140,53 @@ public class Client extends Application {
 
             });
 
-            /**
-             * Both the easyAI and hardAI buttons will switch to the board ui
-             */
+
             mainWindowController.getEasyAIButton().setOnAction(value -> {
 
-                //TAKE TO BOARD UI
-                System.out.println("Easy AI Button works!");
+                //waitingController.applyScene(primaryStage);
 
-                gameViewController.applyScene(primaryStage);
+                NetworkManager.getInstance().requestEasyAIRoom(
+                        lobbyController.getName(),
+                        RoomFactory.makeCreateRequest(true, ""),
+                        responseRoom -> {
+                            System.out.println("Connected (creating): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                        },
+                        responseRoom -> {
+                            Platform.runLater(() -> {
+                                respondToFailedConnection(
+                                        primaryStage,
+                                        "Failed to create room"
+                                );
+                            });
+                        }
+                );
 
             });
 
             mainWindowController.getHardAIButton().setOnAction(value -> {
 
-                //TAKE TO BOARD UI
-                System.out.println("Hard AI Button works!");
+                //waitingController.applyScene(primaryStage);
 
-                gameViewController.applyScene(primaryStage);
+                NetworkManager.getInstance().requestHardAIRoom(
+                        lobbyController.getName(),
+                        RoomFactory.makeCreateRequest(true, ""),
+                        responseRoom -> {
+                            System.out.println("Connected (creating): " + responseRoom.toString());
+                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                        },
+                        responseRoom -> {
+                            Platform.runLater(() -> {
+                                respondToFailedConnection(
+                                        primaryStage,
+                                        "Failed to create room"
+                                );
+                            });
+                        }
+                );
 
             });
+
 
             lobbyController.getBackButton().setOnAction(value -> {
 
@@ -243,10 +270,7 @@ public class Client extends Application {
                 System.out.println("Welcome player");
 
             });
-
-
             loginController.applyScene(primaryStage);
-
             primaryStage.setWidth(initWidth);
             primaryStage.setHeight(initHeight);
             primaryStage.show();
@@ -280,7 +304,9 @@ public class Client extends Application {
         gameViewController = new GameViewController(room, ourUserID);
         NetworkManager.getInstance().joinRoom(ourUserID, room, (board) -> {
             gameViewController.updateBoard(board);
-            gameViewController.toggleTurn();
+            if(!board.isWinner('X') && !board.isWinner('O') && board.numEmptySpaces() != 0) {
+                gameViewController.toggleTurn();
+            }
             checkWin(primaryStage, board, room);
         });
         gameViewController.applySceneAsync(primaryStage);

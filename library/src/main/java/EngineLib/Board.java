@@ -4,13 +4,12 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Board {
-    private static final long serialVersionUID = 6529685098267757999L;
     //***************************************************************************
     // Data
     //***************************************************************************
-    final int ROW_COUNT = 3;
-    final int COL_COUNT = 3;
-    final char DEFAULT_VALUE = ' ';
+    public final int ROW_COUNT = 3;
+    public final int COL_COUNT = 3;
+    public final char DEFAULT_VALUE = ' ';
     private char[][] boardArray = new char[ROW_COUNT][COL_COUNT];
     //***************************************************************************
 

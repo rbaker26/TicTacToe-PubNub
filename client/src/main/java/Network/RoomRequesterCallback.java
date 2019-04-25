@@ -1,6 +1,8 @@
 package Network;
 
 import Messages.Converter;
+import Messages.PlayerInfo;
+import Messages.RoomFactory;
 import Messages.RoomInfo;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
@@ -24,13 +26,15 @@ public class RoomRequesterCallback extends SubscribeCallback implements Interrup
     private String outgoingChannel;
     private String incomingChannel;
     private RoomInfo request;
+    private PlayerInfo ourPlayer;
     private Consumer<RoomInfo> successCallback;
     private Consumer<RoomInfo> failureCallback;
 
-    public RoomRequesterCallback(String ourUserID, String outgoingChannel, String incomingChannel, RoomInfo roomInfo) {
+    public RoomRequesterCallback(String ourUserID, String outgoingChannel, String incomingChannel, RoomInfo roomInfo, PlayerInfo ourPlayer) {
         this.ourUserID = ourUserID;
         this.outgoingChannel = outgoingChannel;
         this.incomingChannel = incomingChannel;
+        this.ourPlayer = ourPlayer;
 
         this.request = roomInfo;
     }
@@ -60,8 +64,9 @@ public class RoomRequesterCallback extends SubscribeCallback implements Interrup
      * @param pubnub Used for sending the message.
      */
     public void interrupt(PubNub pubnub) {
-        request.setRequestMode(RoomInfo.RequestType.DISCONNECT);
-        pubnub.publish().channel(outgoingChannel).message(request).async(new PNCallback<PNPublishResult>() {
+        //request.setRequestMode(RoomInfo.RequestType.DISCONNECT);
+        RoomInfo deleteRequest = RoomFactory.makeDisconnectRoom(ourPlayer);
+        pubnub.publish().channel(outgoingChannel).message(deleteRequest).async(new PNCallback<PNPublishResult>() {
             @Override
             public void onResponse(PNPublishResult result, PNStatus status) { }
         });
