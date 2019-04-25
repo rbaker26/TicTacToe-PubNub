@@ -159,9 +159,9 @@ public class LobbySceneController extends AbstractSceneController {
     }
 
     //region Getters
-    public String getName() {
-        return nameField.getText();
-    }
+//    public String getName() {
+//        return nameField.getText();
+//    }
 
     /**
      * @deprecated This should NOT be used for serious code. Instead, the

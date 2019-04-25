@@ -85,7 +85,7 @@ public class Client extends Application {
                         true,
                         responseRoom -> {
                             System.out.println("Connected (creating): " + responseRoom.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                            connectToGame(primaryStage, userName, responseRoom);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
@@ -109,7 +109,7 @@ public class Client extends Application {
                         room,
                         responseRoom -> {
                             System.out.println("Connected (joining): " + responseRoom.toString());
-                            connectToGame(primaryStage, lobbyController.getName(), responseRoom);
+                            connectToGame(primaryStage, userName, responseRoom);
                         },
                         responseRoom -> {
                             Platform.runLater(() -> {
