@@ -1,3 +1,4 @@
+import Heartbeat.HeartbeatListener;
 
 import Messages.Channels;
 import Messages.Keys;
@@ -5,10 +6,6 @@ import Messages.RoomInfo;
 import EngineLib.Lobby;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
-import com.pubnub.api.callbacks.SubscribeCallback;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -25,13 +22,20 @@ public class Engine {
     private RoomsListListener rml;
     private GameRequestListener grl;
     private MoveListener ml;
+    private AuthorizationListener al;
+    private HeartbeatListener heartbeatListener;
 
     public Engine() {
         pnConfiguration.setSubscribeKey(Keys.subKey);
         pnConfiguration.setPublishKey(Keys.pubKey);
 
         try {
-            byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+            InetAddress local = InetAddress.getLocalHost();
+            NetworkInterface network = NetworkInterface.getByInetAddress(local);
+            if(network == null) {
+                network = NetworkInterface.getNetworkInterfaces().nextElement();
+            }
+            byte[] mac = network.getHardwareAddress();
             StringBuilder uuid = new StringBuilder();
             for (int i = 0; i < mac.length; i++) {
                 uuid.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
@@ -42,14 +46,25 @@ public class Engine {
 
         }
         catch(Exception ex) {
+            System.out.println(ex);
             System.out.println("Cannot get local host... Creating default UUID");
-            myUuid = pnConfiguration.getUuid();
+            pnConfiguration.setUuid(pnConfiguration.getUuid() + "engine");
+            myUuid = pnConfiguration.getUuid() + "engine";
         }
 
+        try {
+            System.out.println("Last ID: " + Db_Manager.GetInstance().GetLastGameID());
+            newRoomID = Db_Manager.GetInstance().GetLastGameID() + 1;
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        heartbeatListener = new HeartbeatListener(Channels.clientHeartbeatChannel, true);
         pb = new PubNub(pnConfiguration);
         rml = new RoomsListListener(RoomList, myUuid);
-        grl = new GameRequestListener(RoomList, Lobbies, myUuid);
+        grl = new GameRequestListener(RoomList, Lobbies, myUuid, heartbeatListener);
         ml = new MoveListener(Lobbies);
+        al = new AuthorizationListener();
         Subscribe();
     }
 
@@ -58,10 +73,15 @@ public class Engine {
                 channels(Arrays.asList(
                         Channels.roomListChannel,
                         Channels.roomRequestChannel,
-                        Channels.roomMoveChannel)).execute();
+                        Channels.roomMoveChannel,
+                        Channels.clientHeartbeatChannel,
+                        Channels.authCheckChannel,
+                        Channels.authCreateChannel)).execute();
         pb.addListener(rml);
         pb.addListener(grl);
         pb.addListener(ml);
+        pb.addListener(heartbeatListener);
+        pb.addListener(al);
 
     }
 

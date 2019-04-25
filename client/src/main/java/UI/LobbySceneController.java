@@ -1,149 +1,279 @@
 package UI;
 
-import UI.*;
+import Messages.RoomInfo;
 import Network.NetworkManager;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Scene;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.StageStyle;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public class LobbySceneController extends AbstractSceneController {
+    public static class OpenRequest {
 
-    private TextField nameField;
-    private TextField roomField;
+        private String password;
+        private boolean goingFirst;
+
+        public OpenRequest(String password, boolean goingFirst) {
+            this.password = password;
+            this.goingFirst = goingFirst;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public boolean isGoingFirst() {
+            return goingFirst;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            OpenRequest that = (OpenRequest) o;
+            return isGoingFirst() == that.isGoingFirst() &&
+                    Objects.equals(getPassword(), that.getPassword());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getPassword(), isGoingFirst());
+        }
+
+        @Override
+        public String toString() {
+            return "OpenRequest{" +
+                    "password='" + password + '\'' +
+                    ", goingFirst=" + goingFirst +
+                    '}';
+        }
+    }
+
     private Button openButton;
-    private Button joinButton;
+    private Button backButton;
 
 
-    private ISceneController boardGUI;
-    private ISceneController mainWindow;
+    private Consumer<RoomInfo> joinHandler;
+    private Consumer<OpenRequest> openHandler;
+    private Runnable sceneApplyHandler;
 
 
     TableView<RoomInfo> lobbyTable;
+    List<RoomInfo> latestRoomList;
 
     public LobbySceneController() {
-        Label nameLabel = new Label("Name");
-        nameField = new TextField();
-
-        Label roomLabel = new Label("Room");
-        roomField = new TextField();
-
         openButton = new Button("Open");
-        joinButton = new Button("Join");
+        openButton.setOnAction(event -> { CreateRoomDialog(); });
+
+        backButton = new Button("Back");
 
         //region Table config
-        // TODO Using setCellValueFactory and PropertyValueFactory can be mildly problematic.
-        //      It requires reflection, which must be specifically included for the final build.
-        //      We are left with two options:
-        //       1) Don't use them.
-        //       2) Look into building with this feature.
-        //      We need to do one or the other.
-
         TableColumn<RoomInfo, String> idColumn = new TableColumn<>("ID");
-        idColumn.setMinWidth(100);
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
+        idColumn.setMinWidth(150);
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("roomID"));
 
-        TableColumn<RoomInfo, String> lobbyStatColumn = new TableColumn<>("Lobby Status");
-        lobbyStatColumn.setMinWidth(200);
-        lobbyStatColumn.setCellValueFactory(new PropertyValueFactory<>("lobbyStatus"));
+        TableColumn<RoomInfo, String> lobbyStatColumn = new TableColumn<>("Room Status");
+        lobbyStatColumn.setMinWidth(150);
+        lobbyStatColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 
         TableColumn<RoomInfo, String> player1Column = new TableColumn<>("Player1");
-        player1Column.setMinWidth(100);
-        player1Column.setCellValueFactory(new PropertyValueFactory<>("player1"));
+        player1Column.setMinWidth(150);
+        player1Column.setCellValueFactory(new PropertyValueFactory<>("player1Name"));
 
         TableColumn<RoomInfo, String> player2Column = new TableColumn<>("Player2");
-        player2Column.setMinWidth(100);
-        player2Column.setCellValueFactory(new PropertyValueFactory<>("player2"));
+        player2Column.setMinWidth(150);
+        player2Column.setCellValueFactory(new PropertyValueFactory<>("player2Name"));
 
         TableColumn<RoomInfo, String> player1TokenColumn = new TableColumn<>("Player1 Token");
-        player1TokenColumn.setMinWidth(100);
-        player1TokenColumn.setCellValueFactory(new PropertyValueFactory<>("Player1Token"));
+        player1TokenColumn.setMinWidth(150);
+        player1TokenColumn.setCellValueFactory(new PropertyValueFactory<>("player1Token"));
 
         TableColumn<RoomInfo, String> player2TokenColumn = new TableColumn<>("Player2 Token");
-        player2TokenColumn.setMinWidth(100);
-        player2TokenColumn.setCellValueFactory(new PropertyValueFactory<>("Player2Token"));
+        player2TokenColumn.setMinWidth(150);
+        player2TokenColumn.setCellValueFactory(new PropertyValueFactory<>("player2Token"));
+
+        TableColumn<RoomInfo, Boolean> hasPasswordColumn = new TableColumn<>("Password?");
+        hasPasswordColumn.setMinWidth(50);
+        hasPasswordColumn.setCellValueFactory(cellData -> new SimpleBooleanProperty(cellData.getValue().hasPassword()));
+        hasPasswordColumn.setCellFactory(col -> new TableCell<RoomInfo, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : (item ? "Yes" : "No") );
+            }
+        });
 
 
         lobbyTable = new TableView<>();
         lobbyTable.getColumns().addAll(idColumn, lobbyStatColumn, player1Column, player2Column,
-                player1TokenColumn, player2TokenColumn);
+                player1TokenColumn, player2TokenColumn, hasPasswordColumn);
 
-        lobbyTable.setItems(getRoomInfo());
-        //endregion
-
-
-        VBox vbox = new VBox(lobbyTable, nameLabel, nameField, roomLabel, roomField, openButton, joinButton);
-
-        //setMasterScene(new Scene(vbox, 200, 200));
-        setRoot(vbox);
-
-    }
-
-    /**ABOUT THIS FUNCTION - THIS IS JUST A TESTING FUNCTION FOR TABLEVIEW CONTENTS
-     *  Needs to be modified in order to become flexible.
-     *  TableView populating option: we can change this function so that it
-     *  can be passed in values instead of hard coding values.
-     *  Player's name and token need to be taken from TextField and ToggleButton**/
-
-    public ObservableList<RoomInfo> getRoomInfo() {
-        ObservableList<RoomInfo> information = FXCollections.observableArrayList();
-        information.add(new RoomInfo("34562", "Closed - Game in Play", "Bobby", "Keane", "X", "O"));
-        information.add(new RoomInfo("67895", "Closed - Game in Play", "Daniel", "Naomi", "O", "X"));
-
-        testing();
-
-        return information;
-    }
-
-
-    public void testing() {
-
-        /*** ABOUT THIS FUNCTION - TESTING LISTENER FUNCTION
-         * Selection of row is implemented by this function. Right now, I am just able to determine
-         * if a row is selected, which will help lead us to starting up a game
-         * I want this to connect to board UI.
-         */
-        Stage getStage = new Stage();
-
+        /*
         lobbyTable.getSelectionModel().selectedIndexProperty().addListener(new InvalidationListener() {
             @Override
             public void invalidated(Observable observable) {
 
-                BoardGUIPane boardObject = new BoardGUIPane();
+                ObservableList<RoomInfo> selection = lobbyTable.getSelectionModel().getSelectedItems();
 
-                mainWindowController mainObject = new mainWindowController();
-
-                //SO WITHIN HERE WE MUST TAKE VALUES OF THE COLUMNS AND PASS THEM INTO BOARD FUNCTIONALITY
-                //THAT ALLOWS A GAME TO START GIVEN PLAYER INFORMATION AS WELL AS ROOM ID.
-
-                System.out.println("Selected indices: " + lobbyTable.getSelectionModel().getSelectedItems());
-
-                System.out.println("Selected items: " + lobbyTable.getSelectionModel().getSelectedItems());
-
-                // boardGUI = boardObject; //CANNOT SWITCH TO BOARD UI
-
-                //THIS IS JUST FOR TESTING: I WANT TO SWITCH OVER TO THE MAINwINDOW CONTROLLER IF I SELECT A ROW
-
-                mainWindow = mainObject;
-
-                mainObject.applyScene(getStage);
-
-
+                if(selection.size() > 0) {
+                    //joinHandler.accept( selection.get(0) );
+                    OnSelectedRoom(selection.get(0));
+                }
             }
-
         });
+         */
 
+        lobbyTable.setOnMouseClicked((MouseEvent event) -> {
+            if(event.getButton().equals(MouseButton.PRIMARY) && !lobbyTable.getSelectionModel().isEmpty()) {
+                //System.out.println(lobbyTable.getSelectionModel().getSelectedItem());
+                OnSelectedRoom(lobbyTable.getSelectionModel().getSelectedItem());
+            }
+        });
+        //endregion
+
+        VBox vbox = new VBox(lobbyTable, openButton, backButton);
+        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #66ccff, #ff9966)");
+
+
+        //setMasterScene(new Scene(vbox, 200, 200));
+        setRoot(vbox);
     }
 
+    private void OnSelectedRoom(RoomInfo room) {
+        System.out.println("Picked this room: " + room);
+        System.out.println(room.hasPassword());
+
+        if(room.hasPassword()) {
+            PasswordDialog( room );
+        }
+        else {
+            joinHandler.accept(room);
+        }
+    }
+
+    private void CreateRoomDialog() {
+        // See "Custom Login Dialog" in https://code.makery.ch/blog/javafx-dialogs-official/
+
+        // Create the custom dialog.
+        Dialog<OpenRequest> dialog = new Dialog<>();
+        dialog.setTitle("Room Configuration");
+        //dialog.setHeaderText("");
+        dialog.initStyle(StageStyle.UTILITY);
+
+        // Set the button types.
+        ButtonType loginButtonType = new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+        // Create the username and password labels and fields.
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        PasswordField password = new PasswordField();
+        password.setPromptText("Password");
+
+        final ToggleGroup turnOrderGroup = new ToggleGroup();
+        RadioButton firstButton = new RadioButton("First");
+        RadioButton secondButton = new RadioButton("Second");
+        firstButton.setSelected(true);
+        firstButton.setToggleGroup(turnOrderGroup);
+        secondButton.setToggleGroup(turnOrderGroup);
+
+        grid.add(new Label("Password:"), 0, 0);
+        grid.add(password, 1, 0);
+        grid.add(firstButton, 0, 1);
+        grid.add(secondButton, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Convert the result to a username-password-pair when the login button is clicked.
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == loginButtonType) {
+                return new OpenRequest(password.getText(), firstButton.isSelected());
+            }
+            return null;
+        });
+
+        Optional<OpenRequest> result = dialog.showAndWait();
+
+        result.ifPresent(requestInfo -> {
+            //System.out.println("Username=" + usernamePassword.getKey() + ", Password=" + usernamePassword.getValue());
+            //System.out.println(result);
+            if(openHandler != null) {
+                openHandler.accept(requestInfo);
+            }
+        });
+    }
+
+    private void PasswordDialog(RoomInfo room) {
+        // See "Custom Login Dialog" in https://code.makery.ch/blog/javafx-dialogs-official/
+
+        // Create the custom dialog.
+        Dialog<Boolean> dialog = new Dialog<>();
+        dialog.setTitle("Enter password");
+        dialog.initStyle(StageStyle.UTILITY);
+
+        // Set the button types.
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Create the password field
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        PasswordField password = new PasswordField();
+        password.setPromptText("Password");
+
+        grid.add(new Label("Password:"), 0, 0);
+        grid.add(password, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if(dialogButton == ButtonType.OK) {
+                return room.passwordMatches(password.getText());
+            }
+            else {
+                return null;
+            }
+        });
+
+        Optional<Boolean> result = dialog.showAndWait();
+
+        result.ifPresent(isCorrect -> {
+            if(isCorrect) {
+                if (joinHandler != null) {
+                    joinHandler.accept(room);
+                }
+            }
+            else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Incorrect password");
+                alert.setHeaderText("That password was not correct.");
+                alert.setContentText("Do you have caps-lock on?");
+
+                alert.showAndWait();
+            }
+        });
+    }
 
     /**
      * This is a proxy function to call setRoomInfo asynchronously. This means that the
@@ -167,117 +297,34 @@ public class LobbySceneController extends AbstractSceneController {
      */
     public void setRoomInfo(List<Messages.RoomInfo> rooms) {
 
-        // TODO If possible, it's probably more convenient to make a 1-1 coupling, having
-        //      the table be able to take Messages.RoomInfo so we don't have to convert things.
-        //      However, if we stick with this reflection-based approach, it's probably better
-        //      to keep it as a separate UI object.
-
         // This code is just going to convert the Messages.RoomInfo objects into UI.RoomInfo objects.
-        ObservableList<RoomInfo> information = FXCollections.observableArrayList();
-        for(Messages.RoomInfo room : rooms) {
-            information.add(new RoomInfo(
-                    Integer.toString(room.getRoomID()),
-                    "Unknown",
-                    room.getPlayer1ID(),
-                    room.getPlayer2ID(),
-                    "X",
-                    "O"
-            ));
-        }
-
+        ObservableList<RoomInfo> information = FXCollections.observableArrayList(rooms);
         lobbyTable.setItems(information);
 
-        // TODO If we are selecting available rooms, we will need to check to make sure that the new
-        //      list of rooms has not invalidated our selection. We should probably track the RoomID of the
-        //      selected room, and then scan through the new list. If the RoomID is gone, we need to
-        //      deselect it.
     }
 
     @Override
     public void applyScene(Stage targetStage) {
         super.applyScene(targetStage);
 
+
+        // TODO This needs to be passed in as a lambda
         // This causes us to automatically launch into the listening state when opening this scene.
         // It passes the setRoomInfoAsync function, which will get called whenever we get an
         // updated list of rooms.
-        NetworkManager.getInstance().listenForRooms( this::setRoomInfoAsync );
+        if(!NetworkManager.getInstance().isListeningForRooms()) {
+            NetworkManager.getInstance().listenForRooms(this::setRoomInfoAsync);
+        }
     }
 
-    //region Getters
-    /*
-    public TextField getNameField() {
-        return nameField;
+    public Button getBackButton() {
+        return backButton;
     }
-
-    public TextField getRoomField() {
-        return roomField;
+  
+    public void setOpenHandler(Consumer<OpenRequest> handler) {
+        openHandler = handler;
     }
-
-    public String getName() {
-        return nameField.getText();
+    public void setJoinHandler(Consumer<RoomInfo> handler) {
+        joinHandler = handler;
     }
-*/
-    /**
-     * @deprecated This should NOT be used for serious code. Instead, the
-     *             user will be choosing rooms to join.
-     * @return
-     */
-    @Deprecated
-    public int getRoomID() {
-        return Integer.parseInt(roomField.getText());
-    }
-
-    public TextField getNameField() {
-        return nameField;
-    }
-
-    /**
-     * @deprecated This is deprecated because we should NOT be using the
-     *             room field. This will eventually go away and be replaced
-     * by a full listing.
-     * @return
-     */
-    @Deprecated
-    public TextField getRoomField() {
-        return roomField;
-    }
-
-    public Button getOpenButton() {
-        return openButton;
-    }
-
-    public Button getJoinButton() {
-        return joinButton;
-    }
-    //endregion
-
-    //region Object overrides
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        LobbySceneController that = (LobbySceneController) o;
-        return Objects.equals(getNameField(), that.getNameField()) &&
-                Objects.equals(getRoomField(), that.getRoomField()) &&
-                Objects.equals(getOpenButton(), that.getOpenButton()) &&
-                Objects.equals(getJoinButton(), that.getJoinButton());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), getNameField(), getRoomField(), getOpenButton(), getJoinButton());
-    }
-
-    @Override
-    public String toString() {
-        return "LobbySceneController{" +
-                "nameField=" + nameField +
-                ", roomField=" + roomField +
-                ", openButton=" + openButton +
-                ", joinButton=" + joinButton +
-                '}';
-    }
-    //endregion
-
 }

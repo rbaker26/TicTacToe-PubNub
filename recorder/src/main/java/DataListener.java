@@ -70,8 +70,8 @@ public class DataListener extends SubscribeCallback{
             MoveRequest mr = Converter.fromJson(message.getMessage(), MoveRequest.class);
             if(mr.getCurrentPlayer() == null ) {// check for null)
                 try {
-                    String username1 = mr.getRoomInfo().getPlayer1ID();
-                    String username2 = mr.getRoomInfo().getPlayer2ID();
+                    String username1 = mr.getRoomInfo().getPlayer1().getId();
+                    String username2 = mr.getRoomInfo().getPlayer2().getId();
                     String winner;
                     if(mr.getBoard().isWinner('X')) {
                         winner = username1;
