@@ -144,6 +144,7 @@ public class Client extends Application {
                 System.out.println("Easy AI");
                 //waitingController.applyScene(primaryStage);
 
+                // TODO This is a bit of a hack to make stuff work. Need to figure out why this is needed
                 NetworkManager.getInstance().listenForRooms(null);
 
                 NetworkManager.getInstance().requestEasyAIRoom(
@@ -168,6 +169,9 @@ public class Client extends Application {
             mainWindowController.getHardAIButton().setOnAction(value -> {
                 System.out.println("Hard AI");
                 //waitingController.applyScene(primaryStage);
+
+                // TODO This is a bit of a hack to make stuff work. Need to figure out why this is needed
+                NetworkManager.getInstance().listenForRooms(null);
 
                 NetworkManager.getInstance().requestHardAIRoom(
                         userName,
@@ -373,10 +377,8 @@ public class Client extends Application {
         alert.showAndWait();
 
         conclusionScene.applyScene(primaryStage);
-        /*
         primaryStage.setWidth(initWidth);
         primaryStage.setHeight(initHeight);
-        */
     }
 }
 
